@@ -97,7 +97,6 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--imagenet_root", default='./data', type=str, tunable=False)
         self.opt_list("--arch", default='vit_b32', type=str, tunable=False)
         self.opt_list("--method", default='null_patch', type=str, options=['null_patch'], tunable=False)
-        self.opt_list("--name", default='', type=str, tunable=False)
         self.opt_list("--prompt_size", default=30, type=int, tunable=False)
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
         # dataset
