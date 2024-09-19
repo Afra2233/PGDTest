@@ -118,7 +118,7 @@ def SlurmRun(trialconfig):
     else:
 
         sub_commands.extend(['#SBATCH -p gpu-medium',
-                             'export CONDADIR=/storage/hpc/46/manders3/conda4/open-ce',                                                     #<-----CHANGE ME
+                             'export CONDADIR=/usr/shared_apps/packages/miniconda-202306/envs/opence-1.10.0',                                                     #<-----CHANGE ME
                              'export NCCL_SOCKET_IFNAME=enp0s31f6',])
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
