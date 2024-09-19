@@ -119,6 +119,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--noimginprop", action='store_true', tunable=False)
         self.opt_list("--autoattack", action='store_true', tunable=False)
         self.opt_list("--num_trials", default=0, type=int, tunable=False)
+        self.opt_list("--name", default="TestRun",options=["hecDeployment"], type=str, tunable=False)
         self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size"]
         #self.opt_range('--neurons', default=50, type=int, tunable=True, low=100, high=800, nb_samples=8, log_base=None)
         

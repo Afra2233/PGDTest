@@ -56,3 +56,16 @@ This is your reminder that this is GOOD progress in your research.
 - You have managed those around you to aid you in developing fast proof of concept and prototype code to show that this is possible and test your hypothesis. (this repo)
 - you have built and developed a template code to run your future experiment and have some interesting research questions to build on. 
 
+## To run on HEC
+
+Step 1:
+module add git
+module add opence
+(if its your first time...)
+    git clone <repo>
+    pip install -r requirements.txt
+(otherwise do)
+git pull
+
+step 2:
+python Launch.py --num_trials <>
