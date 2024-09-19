@@ -122,6 +122,8 @@ class myLightningModule(LightningModule):
             output = multiGPU_CLIP(self.model, prompted_images, text_tokens, prompt_token)
             loss = self.criterion(output, target)
             loss.backward()
+
+            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -139,6 +141,8 @@ class myLightningModule(LightningModule):
             output= multiGPU_CLIP_NP( self.model, _images, text_tokens)
             loss = self.criterion(output, target)
             loss.backward()
+            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
+
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -165,6 +169,8 @@ class myLightningModule(LightningModule):
             # loss = criterion(output, target)
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
             loss.backward()
+            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
+
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -187,6 +193,8 @@ class myLightningModule(LightningModule):
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
             # loss = criterion(output, target)
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
+            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
+
             loss.backward()
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
@@ -240,7 +248,16 @@ class myLightningModule(LightningModule):
         loss_between_dirty_and_clean_images_on_training_model = self.criterion_kl(F.log_softmax(output_of_training_model_with_dirty_images, dim=1), F.softmax(output_of_training_model_with_clean_images, dim=1))
         
         #the final criterion is the loss of the model on the dirty images, towards the target.
-        loss = self.criterion(output_of_training_model_with_dirty_images, target) + loss_between_dirty_and_clean_images_on_training_model + loss_between_our_training_model_and_pretrained_on_dirty_images
+
+        '''
+        Dear Afra, something for you to try here, 
+
+        I wonder whether balancing the losses using a scaling factor might help preserve overall performance
+          (something to try by adding arguments to the demoparse.py file, then setting in the lightning module init.)
+        
+        '''
+        loss_on_training_model_with_dirty_images = self.criterion(output_of_training_model_with_dirty_images, target)
+        loss=loss_on_training_model_with_dirty_images + loss_between_dirty_and_clean_images_on_training_model + loss_between_our_training_model_and_pretrained_on_dirty_images
         
         self.model.module.logit_scale.data = torch.clamp(self.model.module.logit_scale.data, 0, 4.6052)
 
