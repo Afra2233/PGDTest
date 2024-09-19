@@ -2,6 +2,7 @@
 
 This repository investigates the use of Projected Gradient Descent (PGD) to attack CLIP embeddings. Additionally, we explore methods to generate clean images from these attacked embeddings.
 
+this is research code and subject to random violent changes
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
