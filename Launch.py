@@ -38,7 +38,7 @@ def train(config={
     if isinstance(p,str):
         p=16 if p=="bf16" else int(p)  ##needed for BEDE
     print("Launching with precision",p)
-
+    #hi
     #workaround for NCCL issues on windows
     if sys.platform == "win32":
         os.environ["PL_TORCH_DISTRIBUTED_BACKEND"]='gloo'
