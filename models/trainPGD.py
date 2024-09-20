@@ -21,7 +21,7 @@ def multiGPU_CLIP(model, images, text_tokens):
     scale_text_embed=model.encode_text(text_tokens)
     img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
     scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-    logits_per_image = img_embed_norm @ scale_text_embed_norm.t()
+    logits_per_image = img_embed_norm @ scale_text_embed_norm.t() #cosine similarity
     #logits_per_text = scale_text_embed_norm @ img_embed_norm.t()
     return logits_per_image#, logits_per_text, img_embed, scale_text_embed
 
