@@ -77,7 +77,7 @@ class baseparser(HyperOptArgumentParser):
    
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
-        self.opt_list("--batch_size", default=256, options=[64,128], type=int, tunable=False)
+        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=False)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
         self.opt_list("--epochs", default=10, type=int, tunable=False)
         self.opt_list("--learning_rate", default=5e-5, type=float, tunable=False)
@@ -101,7 +101,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
         # dataset
         self.opt_list("--root", default='./data', type=str, tunable=False)
-        self.opt_list("--dataset", default='cifar100', type=str, tunable=False)
+        self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
         self.opt_list("--seed", default=0, type=int, tunable=False)
