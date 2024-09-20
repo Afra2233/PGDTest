@@ -65,7 +65,7 @@ class myLightningModule(LightningModule):
         '''
 
         self.criterion = torch.nn.CrossEntropyLoss()
-        self.criterion_kl = nn.KLDivLoss(reduction="sum")
+        self.criterion_kl = nn.KLDivLoss(reduction="sum")3 # mean？why sum?
 
 
         '''
