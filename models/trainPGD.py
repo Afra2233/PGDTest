@@ -158,7 +158,7 @@ class myLightningModule(LightningModule):
             '''
             d=self.clamp(d,alpha,g,epsilon)
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
-            delta.data[:, :, :, :] = d
+            delta.data[:, :, :, :] = d #计算后的扰动d赋值回delta的数据部分
             delta.grad.zero_() #梯度清零
         return delta
     
