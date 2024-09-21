@@ -336,6 +336,9 @@ class myLightningModule(LightningModule):
         这行代码计算两个模型的 L2 范数之差的绝对值，然后除以原始模型的 L2 范数，得到一个相对差异比率。这个比率显示了训练模型相对于原始模型参数变化的程度。
         '''
         ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
+        '''
+        这行简单计算两个模型的 L2 范数之差的绝对值，提供了另一种衡量参数变化的方式。
+        '''
         abs_l2 = abs(l2_norm_ori - l2_norm_obj)
         self.log('l2_norm_obj', l2_norm_obj, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('l2_norm_ori', l2_norm_ori, on_step=False, on_epoch=True, prog_bar=True, logger=True)
