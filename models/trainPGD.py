@@ -192,7 +192,7 @@ class myLightningModule(LightningModule):
             prompted_images = self.prompter(normalize(X + delta))
             prompt_token = self.add_prompter()
             output= multiGPU_CLIP(self.model, prompted_images, text_tokens)#, prompt_token)
-            label_mask = one_hot_embedding(torch.arange(X.shape(0),device=X.device), output.size(1))
+            label_mask = one_hot_embedding(torch.arange(X.shape(0),device=X.device), output.size(1)) #每个整数标签都被转换为一个全为0且只有一个位置为1的向量
             correct_logit = torch.sum(label_mask * output, dim=1)
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
             # loss = criterion(output, target)
