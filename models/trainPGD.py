@@ -142,7 +142,13 @@ class myLightningModule(LightningModule):
             loss.backward()
 
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-            grad = delta.grad.detach()
+            grad = delta.grad.detach()#这里从delta中提取梯度，并使用.detach()将其从当前计算图中分离出
+
+            '''
+            下面的代码是这些行通过直接索引来复制张量数据，
+            虽然这种写法在Python中通常不是必需的，
+            因为d, g, x和delta, grad, X已经是指向同一数据的不同名称。
+            '''
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
             x = X[:, :, :, :]
