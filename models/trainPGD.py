@@ -136,7 +136,9 @@ class myLightningModule(LightningModule):
             
             #prompt_token = self.add_prompter()
             output = multiGPU_CLIP(self.model, prompted_images, text_tokens)#, prompt_token)
-            loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))#range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
+            loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))
+            #range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
+            #交叉熵损失有助于将模型输出（例如，从CLIP等模型获得的相似性得分）解释为概率。通过应用Softmax函数（或Log-Softmax），相似性得分被转换为一个概率分布，这个分布反映了每个类别（或标签）被预测为正确的相对概率。这种概率框架有助于进行更稳健的决策和更细致的性能评估。
             loss.backward()
 
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
