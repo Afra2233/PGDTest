@@ -152,6 +152,10 @@ class myLightningModule(LightningModule):
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
             x = X[:, :, :, :]
+            
+            '''
+            此函数可能基于梯度g和其他参数（如学习率alpha和允许的最大扰动epsilon）计算新的扰动值。
+            '''
             d=self.clamp(d,alpha,g,epsilon)
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
