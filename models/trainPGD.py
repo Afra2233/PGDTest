@@ -159,7 +159,7 @@ class myLightningModule(LightningModule):
             d=self.clamp(d,alpha,g,epsilon)
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
-            delta.grad.zero_()
+            delta.grad.zero_() #梯度清零
         return delta
     
     @torch.enable_grad()
