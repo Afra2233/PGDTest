@@ -326,7 +326,9 @@ class myLightningModule(LightningModule):
             self.Iclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
         self.Iclassifier.fit(imfeatures, labels)
         self.log( "ImProbe",self.Iclassifier.score(imfeatures, labels))
-        '''
+        
+        .parameters() 方法非常适合进行模型参数的遍历、优化器的配置或进行参数的统计分析
+         '''
         l2_norm_obj = sum(p.norm(2) for p in self.model.module.visual.parameters())
         l2_norm_ori = sum(p.norm(2) for p in self.model_ori.module.visual.parameters())
         ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
