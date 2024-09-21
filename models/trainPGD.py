@@ -136,7 +136,7 @@ class myLightningModule(LightningModule):
             
             #prompt_token = self.add_prompter()
             output = multiGPU_CLIP(self.model, prompted_images, text_tokens)#, prompt_token)
-            loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))
+            loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))#range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
             loss.backward()
 
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
