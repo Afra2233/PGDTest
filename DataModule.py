@@ -17,7 +17,6 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader,default_collate
 #import the collate function from pytorch 
 # from torch.utils.data.dataloader import default_collate
-
 from utils import load_imagenet_folder2name
 import os
 import torch
@@ -27,8 +26,6 @@ from torchvision.datasets.folder import default_loader
 from PIL import Image
 from typing import List
 from utils import to_rgb,refine_classname,load_imagenet_label2folder
-
-
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
 

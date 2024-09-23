@@ -1,6 +1,10 @@
 
 import os,sys
-
+import pytorch_lightning
+from pytorch_lightning.callbacks import TQDMProgressBar,EarlyStopping
+import datetime
+from pytorch_lightning.plugins.environments import SLURMEnvironment
+from models.trainPGD import myLightningModule
 
 #### This is our launch function, which builds the dataset, and then runs the model on it.
 
@@ -10,13 +14,6 @@ def train(config={
          "codeversion":"-1",
     },dir=None,devices=None,accelerator=None,Dataset=None,logtool=None):
 
-    import pytorch_lightning
-    from pytorch_lightning.callbacks import TQDMProgressBar,EarlyStopping
-    import datetime
-    from pytorch_lightning.plugins.environments import SLURMEnvironment
-
-    #### EDIT HERE FOR DIFFERENT VERSIONS OF A MODEL
-    from models.trainPGD import myLightningModule
 
     model=myLightningModule(**config)
     if dir is None:
@@ -118,7 +115,13 @@ def SlurmRun(trialconfig):
     else:
 
         sub_commands.extend(['#SBATCH -p gpu-medium',
+<<<<<<< HEAD
                              'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     #<-----CHANGE ME
+=======
+                             #add command to request more memory
+                             '#SBATCH --mem=64G',
+                             'export CONDADIR=/storage/hpc/46/manders3/conda4/open-ce',                                                     #<-----CHANGE ME
+>>>>>>> upstream/main
                              'export NCCL_SOCKET_IFNAME=enp0s31f6',])
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
@@ -127,7 +130,7 @@ def SlurmRun(trialconfig):
         'source /etc/profile',
         'module add opence',
         'conda activate $CONDADIR',
-        'pip install -r requirements.txt',                                                   # ...and activate the conda environment
+        #'pip install -r requirements.txt',                                                   # ...and activate the conda environment
     ])
     script_name= os.path.realpath(sys.argv[0]) #Find this scripts name...
     trialArgs=__get_hopt_params(trialconfig)
