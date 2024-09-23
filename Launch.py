@@ -63,8 +63,8 @@ def train(config={
             # ),
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
-            fast_dev_run=False,
-            precision=p
+            precision=p,
+            fast_dev_run=config.get("debug",False),
     )
     if config["batch_size"] !=1:
 
@@ -79,15 +79,15 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
-        logtool= pytorch_lightning.loggers.WandbLogger( project="TestDeploy",entity="st7ma784", save_dir=dir)                               #<-----CHANGE ME
+        logtool= pytorch_lightning.loggers.WandbLogger( project="AllDataPGN",entity="st7ma784", save_dir=dir)                               #<-----CHANGE ME
         print(config)
 
     else:
         #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
         import wandb
         print("Would recommend changing projectname according to config flags if major version swithching happens")
-        run=wandb.init(project="TestDeploy",entity="st7ma784",name="TestDeploy",config=config)                                           #<-----CHANGE ME        
-        logtool= pytorch_lightning.loggers.WandbLogger( project="TestDeploy",entity="st7ma784",experiment=run, save_dir=dir)                 #<-----CHANGE ME
+        run=wandb.init(project="TestDeploy",entity="st7ma784",name="AllDataPGN",config=config)                                           #<-----CHANGE ME        
+        logtool= pytorch_lightning.loggers.WandbLogger( project="AllDataPGN",entity="st7ma784",experiment=run, save_dir=dir)                 #<-----CHANGE ME
         config=run.config.as_dict()
 
     train(config,dir,devices,accelerator,Dataset,logtool)

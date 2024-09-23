@@ -80,7 +80,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=False)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
         self.opt_list("--epochs", default=10, type=int, tunable=False)
-        self.opt_list("--learning_rate", default=5e-5, type=float, tunable=False)
+        self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-4], type=float, tunable=False) #originally 5e-5
         self.opt_list("--weight_decay", default=0, type=float, tunable=False)
         self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=False)
         self.opt_list("--momentum", default=0.9, type=float, tunable=False)
@@ -99,6 +99,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--method", default='null_patch', type=str, options=['null_patch'], tunable=False)
         self.opt_list("--prompt_size", default=30, type=int, tunable=False)
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
+        self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=False)
         # dataset
         self.opt_list("--root", default='./data', type=str, tunable=False)
         self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=False)
@@ -118,6 +119,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--noimginprop", action='store_true', tunable=False)
         self.opt_list("--autoattack", action='store_true', tunable=False)
         self.opt_list("--num_trials", default=0, type=int, tunable=False)
+        #debug mode - We want to just run in debug mode...
         self.opt_list("--name", default="TestRun",options=["hecDeployment"], type=str, tunable=False)
         self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size"]
         #self.opt_range('--neurons', default=50, type=int, tunable=True, low=100, high=800, nb_samples=8, log_base=None)

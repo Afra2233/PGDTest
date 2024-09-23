@@ -140,8 +140,28 @@ class CustomImageNetDataset(Dataset):
             image = self.transform(image)
 
         return image, label
+import random
+
+def CustomCOCODatasetWithClasses(CocoCaptions):
+    def __init__(self, root, annFile, transform=None):
+        super(CocoCaptions, self).__init__(root, annFile, transform=transform)
+        self.transform = transform
+
+    def lookup_classes(self, idx):
+        ann_id = self.ids[idx]
+        target = self.coco.anns[ann_id]['category_id']
+        return target
+    def __getitem__(self, idx):
+        img, target = super(CocoCaptions, self).__getitem__(idx)
+        classes=self.lookup_classes(idx)      
+        captions=random.choice(target)
+        captions=clip.tokenize(captions)
+        
 
 
+        if self.transform:
+            img = self.transform(img)
+        return img, captions, classes
 import clip
 
 class CustomtorchVisionDataset2(Dataset):
@@ -162,15 +182,6 @@ class CustomtorchVisionDataset2(Dataset):
 
         return image, label, text 
 
-
-
-'''
-Add COCO captions here ...
-
-
-
-
-'''
 class MyDataModule(pl.LightningDataModule):
     def __init__(self,Cache_dir, dataset: str,batch_size: int,imagenet_root: str="none", tinyimagenet_root: str="none",  val_dataset_names: List[str]=None,**kwargs):
         super().__init__()

@@ -12,28 +12,26 @@ from clip import clip
 from models.prompters import TokenPrompter, NullPrompter
 from torchattacks import AutoAttack
 from utils import clip_img_preprocessing
+from sklearn.linear_model import LogisticRegression
+import numpy as np
 
 
 def multiGPU_CLIP(model, images, text_tokens):
-    # prompt_token = prompt_token.repeat(images.size(0), 1, 1)
-    #print images without shape
+   
+    #images shape is (batch, 3, 224, 224)
+    #text_tokens shape is (batch, 77)
+    #the old shape was (C,77)
+    #this is why we dont use labels, and use arange instead. 
+
+
     img_embed=model.encode_image(images)
     scale_text_embed=model.encode_text(text_tokens)
     img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
     scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-    logits_per_image = img_embed_norm @ scale_text_embed_norm.t() #cosine similarity
-    #logits_per_text = scale_text_embed_norm @ img_embed_norm.t()#图像嵌入和文本嵌入之间的相似度得分矩阵
-    return logits_per_image#, logits_per_text, img_embed, scale_text_embed
+    logits_per_image = img_embed_norm @ scale_text_embed_norm.t()
+    #logits_per_text = scale_text_embed_norm @ img_embed_norm.t()
+    return logits_per_image#, logits_per_text, img_embed, scale_text_embed # the shape of output WAS (C,B) but now is (B,B) as we want.
 
-
-
-# def multiGPU_CLIP_NP(model, images, text_tokens):
-#     img_embed, scale_text_embed = model(images, text_tokens, None)
-#     img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
-#     scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-#     logits_per_image = img_embed_norm @ scale_text_embed_norm.t()
-#     #logits_per_text = scale_text_embed_norm @ img_embed_norm.t()
-#     return logits_per_image#, logits_per_text, img_embed, scale_text_embed
 
 ImageNet_MEAN = (0.485, 0.456, 0.406)
 ImageNet_STD = (0.229, 0.224, 0.225)
@@ -64,8 +62,8 @@ class myLightningModule(LightningModule):
         (Note, they have several different prompters in the model.prompters.py file, you can use them as a reference)
         '''
 
-        self.criterion = torch.nn.CrossEntropyLoss()
-        self.criterion_kl = nn.KLDivLoss(reduction="sum") # mean？why sum?
+        self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
+        self.criterion_kl = nn.KLDivLoss(reduction="sum")
 
 
         '''
@@ -120,11 +118,74 @@ class myLightningModule(LightningModule):
         d = (d + scaled_g * alpha).view(d.size(0), -1).renorm(p=2, dim=0, maxnorm=eps).view_as(d)
         return d
     
-    
+    @torch.enable_grad()
+    def attack_text_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
+        delta=self.init_delta(text_tokens,epsilon)
+        self.insert_text_model_hook()
+        self.model.encode_text(text_tokens) #do this with hooks 
+        clean_features=self.text_features
+        for _ in range(attack_iters):
+
+            #step 1: modify text tokens
+            #step 2: pass through CLIP model module that saves features,
+            #step 3: Loss= cosine similarity of clean features to dirty features. 
+            #step 4: now consider loss. 
+            text_tokens+=delta
+            
+
+
+            img_embed=self.model.encode_image(X)
+            #ensure self.model has text hooks 
+            self.insert_text_model_hook()
+            scale_text_embed=self.model.encode_text(text_tokens)
+            features=self.text_features
+            #do Loss between each layer
+            text_loss=torch.zeros((X.shape[0],X.shape[0]),device=self.device)
+            for layer in features.keys():
+                itemA=features[layer]
+                itemB=clean_features[layer]
+                itemA=itemA/itemA.norm(dim=-1, keepdim=True)
+                itemB=itemB/itemB.norm(dim=-1, keepdim=True)
+                similarities= itemA@itemB.T  # should be B,B in shape, 
+                text_loss+=self.CETextLoss(similarities)
+            self.log("text_loss",text_loss)
+
+            #step 5: backpropagate, making noise closer to clean features
+            text_loss.backward()
+            #step 6: remove hooks and zero grad
+            self.remove_text_model_hook()
+            delta.grad.zero_()
+
+
+            #step 7: now do attack as normal
+            d = delta
+
+            #I want to find a way to maximize the loss while minimizing text loss
+
+            img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+            scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+            logits_per_image = img_embed_norm @ scale_text_embed_norm.t()
+            logits_per_text = scale_text_embed_norm @ img_embed_norm.t()
+            # logits_per_text, img_embed, scale_text_embed
+
+
+            loss = self.criterion(logits_per_text, torch.arange(prompted_images.size(0), device=self.device))
+            loss.backward()
+            self.log("attack_loss",loss)
+            grad = delta.grad.detach()
+            d = delta[:, :, :, :]
+            g = grad[:, :, :, :]
+            x = X[:, :, :, :]
+            d=self.clamp(d,alpha,g,epsilon)
+            d = clamp(d, self.lower_limit - x, self.upper_limit - x)
+            delta.data[:, :, :, :] = d
+            delta.grad.zero_()
+        return delta
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
     def attack_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         delta=self.init_delta(X,epsilon)
+        losses=[]
         for _ in range(attack_iters):
             # output = model(normalize(X ))
             #prompted_images = self.prompter(normalize(delta + X ))
@@ -140,7 +201,7 @@ class myLightningModule(LightningModule):
             #range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
             #交叉熵损失有助于将模型输出（例如，从CLIP等模型获得的相似性得分）解释为概率。通过应用Softmax函数（或Log-Softmax），相似性得分被转换为一个概率分布，这个分布反映了每个类别（或标签）被预测为正确的相对概率。这种概率框架有助于进行更稳健的决策和更细致的性能评估。
             loss.backward()
-
+            losses.append(loss)
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
             grad = delta.grad.detach()#这里从delta中提取梯度，并使用.detach()将其从当前计算图中分离出
 
@@ -158,8 +219,11 @@ class myLightningModule(LightningModule):
             '''
             d=self.clamp(d,alpha,g,epsilon)
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
-            delta.data[:, :, :, :] = d #计算后的扰动d赋值回delta的数据部分
-            delta.grad.zero_() #梯度清零
+            delta.data[:, :, :, :] = d
+            delta.grad.zero_()
+        self.log("mean_attack_losses",sum(losses)/len(losses))
+        self.log("max_attack_loss",max(losses))
+        self.log("min_attack_loss",min(losses))
         return delta
     
     @torch.enable_grad()
@@ -171,7 +235,7 @@ class myLightningModule(LightningModule):
             loss = self.criterion(output,  torch.arange(_images.size(0), device=self.device)) #edited from original paper to remove fixed target classes
             loss.backward()
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-
+            self.log("attack_loss",loss)
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -200,9 +264,10 @@ class myLightningModule(LightningModule):
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
             # loss = criterion(output, target)
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
+
             loss.backward()
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-
+            self.log("attack_loss",loss)
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -217,6 +282,7 @@ class myLightningModule(LightningModule):
     @torch.enable_grad()
     def attack_CW_noprompt(self, X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         delta=self.init_delta(X,epsilon)
+        loss=[]
         for _ in range(attack_iters):
             # output = model(normalize(X ))
             _images = normalize(X + delta)
@@ -228,7 +294,7 @@ class myLightningModule(LightningModule):
             # loss = criterion(output, target)
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
             #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-
+            self.log("attack_loss",loss)
             loss.backward()
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
@@ -261,7 +327,7 @@ class myLightningModule(LightningModule):
         images, target,text = batch #label shouldnt be used here! 
         text=text.squeeze(1)
 
-        prompted_clean_images = self.prompter(images) #does nothing - its a null prompter
+        images = self.prompter(images) #does nothing - its a null prompter
         Dirtyimages=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1))
         '''
         Here's where you run the dirty image through your model... first through an encoder, then through a decoder.
@@ -271,16 +337,16 @@ class myLightningModule(LightningModule):
         loss2 = self.YourCriterion(rebuilt_images, images)
         #and add your loss into the total loss. 
         '''
-
-        prompted_Dirtyimages = self.prompter(normalize(Dirtyimages)) #does nothing - its a null prompter
-        output_of_training_model_with_dirty_images= multiGPU_CLIP( self.model, prompted_Dirtyimages, text)
-        output_of_pretrained_model_with_dirty_images= multiGPU_CLIP( self.model_ori, prompted_Dirtyimages, text)
+        Dirtyimages = torch.div(torch.sub(Dirtyimages, self.mu_img), self.std_img) #normalize(Dirtyimages) but preserves grad
+        # prompted_Dirtyimages = self.prompter(normalize(Dirtyimages)) #does nothing - its a null prompter
+        output_of_training_model_with_dirty_images= multiGPU_CLIP( self.model, Dirtyimages, text)
+        output_of_pretrained_model_with_dirty_images= multiGPU_CLIP( self.model_ori, Dirtyimages, text)
         '''
         we would assume if the attack is successful, the model would be more confident in the wrong class, so we can do the following check:
         Loss_to_see_attack_success = self.CrossEntropy_loss(output_of_training_model_with_dirty_images, torch.arange(images.size(0), device=self.device))
 
         '''
-        output_of_training_model_with_clean_images = multiGPU_CLIP( self.model, prompted_clean_images, text)
+        output_of_training_model_with_clean_images = multiGPU_CLIP( self.model, images, text)
         #This loss stops the divergence of the model from the pretrained model.
         loss_between_our_training_model_and_pretrained_on_dirty_images = self.criterion_kl(F.log_softmax(output_of_training_model_with_dirty_images, dim=1), F.softmax(output_of_pretrained_model_with_dirty_images, dim=1))
         
@@ -297,8 +363,13 @@ class myLightningModule(LightningModule):
         
         '''
 
-        loss_on_training_model_with_dirty_images = self.criterion(output_of_training_model_with_dirty_images, torch.arange(images.size(0), device=self.device)) # 
-        loss=loss_on_training_model_with_dirty_images + loss_between_dirty_and_clean_images_on_training_model + loss_between_our_training_model_and_pretrained_on_dirty_images
+        loss_on_training_model_with_dirty_images = self.criterion(output_of_training_model_with_dirty_images, torch.arange(images.size(0), device=self.device)) # the output of this is huge compared to others. 
+
+        self.log("loss_on_training_model_with_dirty_images",loss_on_training_model_with_dirty_images)
+        self.log("loss_between_dirty_and_clean_images_on_training_model",loss_between_dirty_and_clean_images_on_training_model  *200)
+        self.log("loss_between_our_training_model_and_pretrained_on_dirty_images",loss_between_our_training_model_and_pretrained_on_dirty_images*200 )
+
+        loss=loss_on_training_model_with_dirty_images + loss_between_dirty_and_clean_images_on_training_model*200 + loss_between_our_training_model_and_pretrained_on_dirty_images*200
         
         #self.model.logit_scale.data = torch.clamp(self.model.logit_scale.data, 0, 4.6052)
 
@@ -335,6 +406,9 @@ class myLightningModule(LightningModule):
         '''
         这行代码计算两个模型的 L2 范数之差的绝对值，然后除以原始模型的 L2 范数，得到一个相对差异比率。这个比率显示了训练模型相对于原始模型参数变化的程度。
         '''
+
+        l2_norm_obj = sum(p.norm(2) for p in self.model.visual.parameters())
+        l2_norm_ori = sum(p.norm(2) for p in self.model_ori.visual.parameters())
         ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
         '''
         这行简单计算两个模型的 L2 范数之差的绝对值，提供了另一种衡量参数变化的方式。
@@ -348,27 +422,25 @@ class myLightningModule(LightningModule):
     def on_validation_epoch_start(self):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
+        self.cleanresults=[]
+        self.attackedresults=[]
+        self.data_loader_count = len(self.trainer.datamodule.val_dataloader())
+
     def validation_step(self, batch, batch_idx, *args, **kwargs):
         images, target,text = batch
         #a is the image, b is the target
         #get the datamodule text list to lookup the text embeddings.s
-     
+
         prompt_token = None
-        print("images shape",images.shape)
-        text=text.squeeze(1)
-        print("text shape",text.shape)
-
-        print("target shape",target.shape)
-
+        text=text.squeeze(1)      
         output_prompt= multiGPU_CLIP(self.model, self.prompter(images), text)
-
+        self.cleanresults.append({"logits":output_prompt, "labels":torch.arange(images.size(0), device=self.device)})
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device))
 
         # measure accuracy and record loss
-        acc1 = accuracy(output_prompt, target, topk=(1,))
-        print("acc1",acc1)
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log('val_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
+        self.log('val_clean_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_clean_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         if self.args.get("CW",False):
             delta_prompt = self.attack_CW(
@@ -393,17 +465,50 @@ class myLightningModule(LightningModule):
                                                     text) #prommpt token is not used here.maybe should be?
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
-
+        self.attackedresults.append({"logits":output_prompt_adv, "labels":torch.arange(images.size(0), device=self.device)})
         # bl attack
         # torch.cuda.empty_cache()
 
         # measure accuracy and record loss
         acc1 = accuracy(output_prompt_adv, torch.arange(images.size(0),device=images.device), topk=(1,))
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log('val_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_dirty_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('val_dirty_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         
 
         return loss
+    def on_validation_epoch_end(self):
+
+        #make linear probes here, and log the results.
+        
+        GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults],dim=0)).cpu().numpy()
+        GoodLabels=torch.cat([val["labels"] for val in self.cleanresults],dim=0).cpu().numpy()
+        BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults],dim=0)).cpu().numpy()
+        BadLabels=torch.cat([val["labels"] for val in self.attackedresults],dim=0).cpu().numpy()
+
+        if not hasattr(self,"Cleanclassifier"):
+            self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
+        if not hasattr(self,"Dirtyclassifier"):
+            self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
+        if not hasattr(self,"general classifier"):
+            self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
+        self.Dirtyclassifier.fit(BadLogits, BadLabels)
+        self.Cleanclassifier.fit(GoodLogits, GoodLabels)
+
+        self.log( "Clean Classifier on Dirty Features",self.Cleanclassifier.score(BadLogits, BadLabels))
+        self.log( "Dirty Classifier on Clean Features",self.Dirtyclassifier.score(GoodLogits, GoodLabels))
+        self.log( "Clean Classifier on Clean Features",self.Cleanclassifier.score(GoodLogits, GoodLabels))
+        self.log( "Dirty Classifier on Dirty Features",self.Dirtyclassifier.score(BadLogits, BadLabels))
+        
+        self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+        self.log( "General Classifier on Dirty Features",self.generalclassifier.score(BadLogits, BadLabels))
+        self.log( "General Classifier on Clean Features",self.generalclassifier.score(GoodLogits, GoodLabels))
+        self.log( "General Classifier on All Features",self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+
+        #this should give us PLENTY of data to write about! 
+        
+        #delete the results to save memory
+        del self.cleanresults
+        del self.attackedresults
 
          #You could log here the val_loss, or just print something. 
         
@@ -412,14 +517,24 @@ class myLightningModule(LightningModule):
         # https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW
         # https://pytorch-lightning.readthedocs.io/en/latest/common/optimizers.html
 
-        optimizer = torch.optim.SGD(list(self.model.visual.parameters()),
+        if self.args.get("optimizer","sgd") == "adamw":
+            optimizer_fn=torch.optim.AdamW
+        elif self.args.get("optimizer","sgd") == "sgd":
+            optimizer_fn=torch.optim.SGD
+        elif self.args.get("optimizer","sgd") == "adam":
+            optimizer_fn=torch.optim.Adam
+        else:
+            raise ValueError
+
+
+        optimizer = optimizer_fn(list(self.model.visual.parameters()),
                                         lr=self.args.get("learning_rate",1e-5),
                                         momentum=self.args.get("momentum",0.99),
                                         weight_decay=self.args.get("weight_decay",0))
         
 
         if self.args.get("last_num_ft",-1) != -1:
-            optimizer = torch.optim.SGD(self.model.visual.parameters()[-self.args.last_num_ft:], # remember to add the parameters of your model decoder into this line!! 
+            optimizer = optimizer_fn(self.model.visual.parameters()[-self.args.last_num_ft:], # remember to add the parameters of your model decoder into this line!! 
                                         lr=self.args.get("learning_rate",1e-5),
                                         momentum=self.args.get("momentum",0.99),
                                         weight_decay=self.args.get("weight_decay",0))
