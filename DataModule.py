@@ -43,8 +43,6 @@ import pytorch_lightning as pl
 ImageNet_MEAN = (0.485, 0.456, 0.406)
 ImageNet_STD = (0.229, 0.224, 0.225)
 
-mu_img = torch.tensor(ImageNet_MEAN).view(3, 1, 1).cuda()
-std_img = torch.tensor(ImageNet_STD).view(3, 1, 1).cuda()
 
 
 preprocess = transforms.Compose([
