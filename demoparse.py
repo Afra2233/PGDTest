@@ -1,5 +1,5 @@
 from test_tube import HyperOptArgumentParser
-
+import os
 class baseparser(HyperOptArgumentParser):
     def __init__(self,*args,strategy="random_search",**kwargs):
 
@@ -95,14 +95,14 @@ class baseparser(HyperOptArgumentParser):
         # model
         self.opt_list("--freeze_text",default=True,options=[True,False],type=bool,tunable=False)
         self.opt_list("--model", default='clip', type=str, tunable=False)
-        self.opt_list("--imagenet_root", default='./data', type=str, tunable=False)
+        self.opt_list("--imagenet_root", default='./data',options=[os.getenv("global_storage","/data")] type=str, tunable=False)
         self.opt_list("--arch", default='vit_b32', type=str, tunable=False)
         self.opt_list("--method", default='null_patch', type=str, options=['null_patch'], tunable=False)
         self.opt_list("--prompt_size", default=30, type=int, tunable=False)
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
         self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=False)
         # dataset
-        self.opt_list("--root", default='./data', type=str, tunable=False)
+        self.opt_list("--root", default='./data', options=[os.getenv("global_storage","/data")], type=str, tunable=False)
         self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
@@ -122,7 +122,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--num_trials", default=0, type=int, tunable=False)
         #debug mode - We want to just run in debug mode...
         self.opt_list("--name", default="TestRun",options=["hecDeployment"], type=str, tunable=False)
-        self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size"]
+        self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size","optimizer", "freeze_text"]
         #self.opt_range('--neurons', default=50, type=int, tunable=True, low=100, high=800, nb_samples=8, log_base=None)
         
         #This is important when passing arguments as **config in launcher
