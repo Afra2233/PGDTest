@@ -169,7 +169,7 @@ class myLightningModule(LightningModule):
             # logits_per_text, img_embed, scale_text_embed
 
 
-            loss = self.criterion(logits_per_text, torch.arange(prompted_images.size(0), device=self.device))
+            loss = self.criterion(logits_per_text, torch.arange(X.size(0), device=self.device))
             loss.backward()
             self.log("attack_loss",loss)
             grad = delta.grad.detach()

@@ -101,7 +101,7 @@ def SlurmRun(trialconfig):
         '#SBATCH --gres=gpu:1',  #{}'.format(per_experiment_nb_gpus),
         f'#SBATCH --signal=USR1@{5 * 60}',
         '#SBATCH --mail-type={}'.format(','.join(['END','FAIL'])),
-        '#SBATCH --mail-user={}'.format('YOURMAIL@gmail.com'),                                                                                   #<-----CHANGE ME
+        '#SBATCH --mail-user={}'.format('st7ma784@gmail.com'),                                                                                   #<-----CHANGE ME
     ]
     comm="python"
     slurm_commands={}
@@ -117,7 +117,8 @@ def SlurmRun(trialconfig):
         sub_commands.extend(['#SBATCH -p gpu-medium',
                              #add command to request more memory
                              '#SBATCH --mem=128G',
-                             'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     #<-----CHANGE ME
+                             '#SBATCH --cpus-per-task=8',
+                             'export CONDADIR=/storage/hpc/46/manders3/conda4/open-ce',                                                     #<-----CHANGE ME
                              'export NCCL_SOCKET_IFNAME=enp0s31f6',])
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([

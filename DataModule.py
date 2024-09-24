@@ -156,10 +156,10 @@ class CustomtorchVisionDataset2(Dataset):
         except:
             print("Error in getting text")
             print("label:",label)
-            print("texts:",self.texts)
+            print("texts:",self.tokenized_text)
             print("idx:",idx)
             print("len of dataset:",len(self.dataset))
-            print("len of texts:",len(self.texts))
+            print("len of texts:",len(self.tokenized_text))
             # text="A picture of something"
         # text = self.tokenizer(text) #should be 77 long
         #i keep getting an error saying it's resizing non-resizable storage. This is caused because the image is not in RGB format. ? 
@@ -185,11 +185,11 @@ class MyDataModule(pl.LightningDataModule):
         self.tinyimagenet_root = tinyimagenet_root
         self.datasetname = dataset    #not used any more! 
         self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'SUN397', 'Food101',
-                                'oxfordpet', 'flowers102', 'dtd', 'fgvc_aircraft',
-                                'Caltech256', 'PCAM'] #StanfordCars --url; no longer valid. 'EuroSAT' --ssl error 'Caltech101'- md5? 'tinyImageNet', 'ImageNet', 
+                                 'flowers102', 'dtd', 'fgvc_aircraft',
+                                'Caltech256', 'PCAM'] #StanfordCars --url; no longer valid. 'EuroSAT' --ssl error 'Caltech101'- md5? 'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'SUN397', 'Food101',
-                                'oxfordpet', 'flowers102', 'dtd', 'fgvc_aircraft',
-                                 'PCAM']   #'tinyImageNet', 'ImageNet',
+                                'flowers102', 'dtd', 'fgvc_aircraft',
+                                 'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         self.batch_size = batch_size
         if kwargs.get("debug",False):
             print("Debugging")
