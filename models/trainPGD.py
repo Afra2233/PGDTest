@@ -411,8 +411,8 @@ class myLightningModule(LightningModule):
         .parameters() 方法非常适合进行模型参数的遍历、优化器的配置或进行参数的统计分析
         p.norm(2) 计算每个参数的 L2 范数（即欧几里得范数），并将这些范数求和。这提供了一个量化模型权重总体大小的指标。
          '''
-        l2_norm_obj = sum(p.norm(2) for p in self.model.module.visual.parameters())
-        l2_norm_ori = sum(p.norm(2) for p in self.model_ori.module.visual.parameters())
+        l2_norm_obj = sum(p.norm(2) for p in self.model.visual.parameters())
+        l2_norm_ori = sum(p.norm(2) for p in self.model_ori.visual.parameters())
         '''
         这行代码计算两个模型的 L2 范数之差的绝对值，然后除以原始模型的 L2 范数，得到一个相对差异比率。这个比率显示了训练模型相对于原始模型参数变化的程度。
         '''
