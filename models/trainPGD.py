@@ -14,7 +14,8 @@ from torchattacks import AutoAttack
 from utils import clip_img_preprocessing
 from sklearn.linear_model import LogisticRegression
 import numpy as np
-
+#get default dict for logging
+from collections import defaultdict
 
 def multiGPU_CLIP(model, images, text_tokens):
    
@@ -186,8 +187,7 @@ class myLightningModule(LightningModule):
     def attack_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         delta=self.init_delta(X,epsilon)
         losses=[]
-        scale_text_embed=self.model.encode_text(text_tokens)
-        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+        
         for _ in range(attack_iters):
             # output = model(normalize(X ))
             #prompted_images = self.prompter(normalize(delta + X ))
@@ -196,12 +196,14 @@ class myLightningModule(LightningModule):
             prompted_images = torch.div(torch.sub(new_images, self.mu_img), self.std_img) #normalize(new_images) but preserves grad
             img_embed=self.model.encode_image(prompted_images)
             img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
-            output = img_embed_norm @ scale_text_embed_norm.t()
+            scale_text_embed=self.model.encode_text(text_tokens)
+            scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+            output = img_embed_norm @ scale_text_embed.t()
             loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))
             #range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
             #交叉熵损失有助于将模型输出（例如，从CLIP等模型获得的相似性得分）解释为概率。通过应用Softmax函数（或Log-Softmax），相似性得分被转换为一个概率分布，这个分布反映了每个类别（或标签）被预测为正确的相对概率。这种概率框架有助于进行更稳健的决策和更细致的性能评估。
             loss.backward()
-            losses.append(loss.detach())
+            losses.append(loss)
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
@@ -214,6 +216,8 @@ class myLightningModule(LightningModule):
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
             delta.grad.zero_()
+             
+                        
         self.log("mean_attack_losses",sum(losses)/len(losses))
         self.log("max_attack_loss",max(losses))
         self.log("min_attack_loss",min(losses))
@@ -318,7 +322,8 @@ class myLightningModule(LightningModule):
         #The batch is collated for you, so just seperate it here and calculate loss. 
         #By default, PTL handles optimization and scheduling and logging steps. so All you have to focus on is functionality. Here's an example...
         images, target,text = batch #label shouldnt be used here! 
-        # text=text.squeeze(1)
+        #print(text.shape)
+        text=text.squeeze(1)
         text_embed=self.model.encode_text(text)
         # ori_text_embed=self.model_ori.encode_text(text)
         text_embed= text_embed/ text_embed.norm(dim=-1, keepdim=True)
@@ -427,17 +432,17 @@ class myLightningModule(LightningModule):
     def on_validation_epoch_start(self):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
-        self.cleanresults=[]
-        self.attackedresults=[]
+        self.cleanresults=defaultdict(list)
+        self.attackedresults=defaultdict(list)
         self.data_loader_count = len(self.trainer.datamodule.val_dataloader())
 
-    def validation_step(self, batch, batch_idx, *args, **kwargs):
+    def validation_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
         #a is the image, b is the target
         #get the datamodule text list to lookup the text embeddings.s
-
+        #print(text.shape)
         prompt_token = None
-        # text=text.squeeze(1)      
+        text=text.squeeze(1)      
 
         
         img_embed=self.model.encode_image(images)
@@ -453,7 +458,7 @@ class myLightningModule(LightningModule):
 
 
 
-        self.cleanresults.append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
+        self.cleanresults[dataloader_idx].append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device))
 
         # measure accuracy and record loss
@@ -488,7 +493,7 @@ class myLightningModule(LightningModule):
 
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
-        self.attackedresults.append({"logits":img_embed, "textlabels":target})
+        self.attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target})
         # bl attack
         # torch.cuda.empty_cache()
 
@@ -503,31 +508,29 @@ class myLightningModule(LightningModule):
 
         #make linear probes here, and log the results.
         
-        GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults],dim=0)).cpu().numpy()
-        GoodLabels=torch.cat([val["textlabels"] for val in self.cleanresults],dim=0).cpu().numpy()
-        BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults],dim=0)).cpu().numpy()
-        BadLabels=torch.cat([val["textlabels"] for val in self.attackedresults],dim=0).cpu().numpy()
-
-
 
         if not hasattr(self,"Cleanclassifier"):
-            self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
+            self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
         if not hasattr(self,"Dirtyclassifier"):
-            self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
+            self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
         if not hasattr(self,"generalclassifier"):
-            self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
-        self.Dirtyclassifier.fit(BadLogits, BadLabels)
-        self.Cleanclassifier.fit(GoodLogits, GoodLabels)
-
-        self.log( "Clean Classifier on Dirty Features",self.Cleanclassifier.score(BadLogits, BadLabels))
-        self.log( "Dirty Classifier on Clean Features",self.Dirtyclassifier.score(GoodLogits, GoodLabels))
-        self.log( "Clean Classifier on Clean Features",self.Cleanclassifier.score(GoodLogits, GoodLabels))
-        self.log( "Dirty Classifier on Dirty Features",self.Dirtyclassifier.score(BadLogits, BadLabels))
-        
-        self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-        self.log( "General Classifier on Dirty Features",self.generalclassifier.score(BadLogits, BadLabels))
-        self.log( "General Classifier on Clean Features",self.generalclassifier.score(GoodLogits, GoodLabels))
-        self.log( "General Classifier on All Features",self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+            self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+            #we've selected 100 based on where it plateaus in the first few runs. 
+        for dataset_idx in range(self.data_loader_count):
+            GoodLabels=torch.cat([val["textlabels"] for val in self.cleanresults[dataset_idx]],dim=0).cpu().numpy()
+            GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults[dataset_idx]],dim=0)).cpu().numpy()
+            BadLabels=torch.cat([val["textlabels"] for val in self.attackedresults[dataset_idx]],dim=0).cpu().numpy()
+            BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults[dataset_idx]],dim=0)).cpu().numpy()
+            self.Dirtyclassifier.fit(BadLogits, BadLabels)
+            self.Cleanclassifier.fit(GoodLogits, GoodLabels)
+            self.log( "Clean Classifier on Dirty Features on dataset {dataset_idx}",self.Cleanclassifier.score(BadLogits, BadLabels))
+            self.log( "Dirty Classifier on Clean Features on dataset {dataset_idx}",self.Dirtyclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Clean Classifier on Clean Features on dataset {dataset_idx}",self.Cleanclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Dirty Classifier on Dirty Features on dataset {dataset_idx}",self.Dirtyclassifier.score(BadLogits, BadLabels))
+            self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+            self.log( "General Classifier on Dirty Features on dataset {dataset_idx}",self.generalclassifier.score(BadLogits, BadLabels))
+            self.log( "General Classifier on Clean Features on dataset {dataset_idx}",self.generalclassifier.score(GoodLogits, GoodLabels))
+            self.log( "General Classifier on All Features on dataset {dataset_idx}",self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
 
         #this should give us PLENTY of data to write about! 
         

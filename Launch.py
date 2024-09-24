@@ -72,18 +72,33 @@ def train(config={
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
 
+    USER=os.getenv("USER","zhangafra818") 
+    PROJECT="AllDataPGN"
+    NAME="TestDeploy"
     import pytorch_lightning
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
-        logtool= pytorch_lightning.loggers.WandbLogger( project="AllDataPGN",entity="zhangafra818", save_dir=dir)                               #<-----CHANGE ME
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER, save_dir=dir)                               #<-----CHANGE ME
         print(config)
 
     else:
         #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
         import wandb
-        run=wandb.init(project="TestDeploy",entity="zhangafra818",name="AllDataPGN",config=config)                                           #<-----CHANGE ME        
-        logtool= pytorch_lightning.loggers.WandbLogger( project="AllDataPGN",entity="zhangafra818",experiment=run, save_dir=dir)                 #<-----CHANGE ME
+        print("Would recommend changing projectname according to config flags if major version swithching happens")
+        try:
+            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+            #check if api key exists in os.environ
+        except:
+            if "WANDB_API_KEY" not in os.environ:
+                if "wandb" in os.environ:
+                    os.environ["WANDB_API_KEY"]=os.environ["wandb"]
+                else:
+                    print("No API key found, please set WANDB_API_KEY in environment variables")
+            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+
+        #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER,experiment=run, save_dir=dir)                 #<-----CHANGE ME
         config=run.config.as_dict()
 
     train(config,dir,devices,accelerator,Dataset,logtool)
