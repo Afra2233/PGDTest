@@ -115,9 +115,6 @@ def SlurmRun(trialconfig):
     else:
 
         sub_commands.extend(['#SBATCH -p gpu-medium',
-
-                             'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     #<-----CHANGE ME
-
                              #add command to request more memory
                              '#SBATCH --mem=128G',
                              'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     #<-----CHANGE ME
