@@ -124,7 +124,8 @@ def SlurmRun(trialconfig):
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
-        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                                                                               #<-----CHANGE ME                                         
+        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                      
+        'export ISHEC=True'                                                                                                                   #<-----CHANGE ME                                         
         'source /etc/profile',
         'module add opence',
         'conda activate $CONDADIR',

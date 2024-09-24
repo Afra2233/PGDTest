@@ -24,7 +24,7 @@ std_img = torch.tensor(ImageNet_STD).view(3, 1, 1)
 
 
 def normalize(X):
-    return (X - mu_img) / std_img
+    return (X - mu_img.to(X.device,non_blocking=True)) / std_img.to(X.device,non_blocking=True)
 
 
 def refine_classname(class_names):

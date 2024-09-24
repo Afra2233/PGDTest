@@ -52,8 +52,8 @@ class myLightningModule(LightningModule):
         self.args = args
         add_prompt_len = 0 if args.get("add_prompt","none") == 'none' else 1
         self.upper_limit, self.lower_limit = 1, 0
-        self.model, _ = clip.load('ViT-B/32', device=self.device, jit=False)
-        self.model_ori, _ = clip.load('ViT-B/32', device=self.device, jit=False)
+        self.model, _ = clip.load('ViT-B/32', device=self.device, jit=False,download_root=self.args.get("imagenet_root","./data"))
+        self.model_ori, _ = clip.load('ViT-B/32', device=self.device, jit=False,download_root=self.args.get("imagenet_root","./data"))
         self.model_text, _= None, None
         self.prompter = NullPrompter()
         self.add_prompter = TokenPrompter(add_prompt_len)
@@ -254,7 +254,7 @@ class myLightningModule(LightningModule):
         for _ in range(attack_iters):
             # output = model(normalize(X ))
             prompted_images = self.prompter(normalize(X + delta))
-            prompt_token = self.add_prompter()
+            # prompt_token = self.add_prompter()
             output= multiGPU_CLIP(self.model, prompted_images, text_tokens)#, prompt_token)
             '''
             X.shape[0] 获取这个张量第一个维度的大小。在处理图像数据时，这个维度通常是批次大小（batch size），即批次中包含的图像数量。
@@ -326,8 +326,11 @@ class myLightningModule(LightningModule):
         #By default, PTL handles optimization and scheduling and logging steps. so All you have to focus on is functionality. Here's an example...
         images, target,text = batch #label shouldnt be used here! 
         text=text.squeeze(1)
-
-        images = self.prompter(images) #does nothing - its a null prompter
+        text_embed=self.model.encode_text(text)
+        # ori_text_embed=self.model_ori.encode_text(text)
+        text_embed= text_embed/ text_embed.norm(dim=-1, keepdim=True)
+        # ori_text_embed= ori_text_embed/ ori_text_embed.norm(dim=-1, keepdim=True)
+        # images = self.prompter(images) #does nothing - its a null prompter
         Dirtyimages=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1))
         '''
         Here's where you run the dirty image through your model... first through an encoder, then through a decoder.
@@ -339,14 +342,17 @@ class myLightningModule(LightningModule):
         '''
         Dirtyimages = torch.div(torch.sub(Dirtyimages, self.mu_img), self.std_img) #normalize(Dirtyimages) but preserves grad
         # prompted_Dirtyimages = self.prompter(normalize(Dirtyimages)) #does nothing - its a null prompter
-        output_of_training_model_with_dirty_images= multiGPU_CLIP( self.model, Dirtyimages, text)
-        output_of_pretrained_model_with_dirty_images= multiGPU_CLIP( self.model_ori, Dirtyimages, text)
+        output_of_training_model_with_dirty_images= self.model.encode_image(Dirtyimages) 
+        output_of_training_model_with_dirty_images= output_of_training_model_with_dirty_images/ output_of_training_model_with_dirty_images.norm(dim=-1, keepdim=True)
+        output_of_training_model_with_clean_images= self.model.encode_image(images)
+        output_of_training_model_with_clean_images= output_of_training_model_with_clean_images/ output_of_training_model_with_clean_images.norm(dim=-1, keepdim=True)
+        output_of_pretrained_model_with_dirty_images= self.model_ori.encode_image(Dirtyimages)
+        output_of_pretrained_model_with_dirty_images= output_of_pretrained_model_with_dirty_images/ output_of_pretrained_model_with_dirty_images.norm(dim=-1, keepdim=True)
         '''
         we would assume if the attack is successful, the model would be more confident in the wrong class, so we can do the following check:
         Loss_to_see_attack_success = self.CrossEntropy_loss(output_of_training_model_with_dirty_images, torch.arange(images.size(0), device=self.device))
 
         '''
-        output_of_training_model_with_clean_images = multiGPU_CLIP( self.model, images, text)
         #This loss stops the divergence of the model from the pretrained model.
         loss_between_our_training_model_and_pretrained_on_dirty_images = self.criterion_kl(F.log_softmax(output_of_training_model_with_dirty_images, dim=1), F.softmax(output_of_pretrained_model_with_dirty_images, dim=1))
         
@@ -362,14 +368,16 @@ class myLightningModule(LightningModule):
           (something to try by adding arguments to the demoparse.py file, then setting in the lightning module init.)
         
         '''
+        logits_of_training_model_with_clean_images = output_of_training_model_with_clean_images @ text_embed.T
 
-        loss_on_training_model_with_dirty_images = self.criterion(output_of_training_model_with_dirty_images, torch.arange(images.size(0), device=self.device)) # the output of this is huge compared to others. 
-
+        logits_per_dirty_image = output_of_training_model_with_dirty_images @ text_embed.T
+        loss_on_training_model_with_dirty_images = self.criterion(logits_per_dirty_image, torch.arange(images.size(0), device=self.device)) # the output of this is huge compared to others. 
+        self.log("loss_on_training_model_clean_images",self.criterion(logits_of_training_model_with_clean_images, torch.arange(images.size(0), device=self.device)))
         self.log("loss_on_training_model_with_dirty_images",loss_on_training_model_with_dirty_images)
-        self.log("loss_between_dirty_and_clean_images_on_training_model",loss_between_dirty_and_clean_images_on_training_model  *200)
-        self.log("loss_between_our_training_model_and_pretrained_on_dirty_images",loss_between_our_training_model_and_pretrained_on_dirty_images*200 )
+        self.log("loss_between_dirty_and_clean_images_on_training_model",loss_between_dirty_and_clean_images_on_training_model )
+        self.log("loss_between_our_training_model_and_pretrained_on_dirty_images",loss_between_our_training_model_and_pretrained_on_dirty_images )
 
-        loss=loss_on_training_model_with_dirty_images + loss_between_dirty_and_clean_images_on_training_model*200 + loss_between_our_training_model_and_pretrained_on_dirty_images*200
+        loss=loss_on_training_model_with_dirty_images + loss_between_dirty_and_clean_images_on_training_model + loss_between_our_training_model_and_pretrained_on_dirty_images
         
         #self.model.logit_scale.data = torch.clamp(self.model.logit_scale.data, 0, 4.6052)
 
@@ -433,8 +441,22 @@ class myLightningModule(LightningModule):
 
         prompt_token = None
         text=text.squeeze(1)      
-        output_prompt= multiGPU_CLIP(self.model, self.prompter(images), text)
-        self.cleanresults.append({"logits":output_prompt, "labels":torch.arange(images.size(0), device=self.device)})
+
+        
+        img_embed=self.model.encode_image(images)
+        scale_text_embed=self.model.encode_text(text)
+        img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+        output_prompt = img_embed_norm @ scale_text_embed_norm.t()
+        # if batch_idx == 0:
+        #     #save the first batch of images to disk
+        #     #OR project into 2d using PCA and save that to disk
+        #     #plot on graph. 
+        #     #labels points by class 
+
+
+
+        self.cleanresults.append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device))
 
         # measure accuracy and record loss
@@ -458,14 +480,18 @@ class myLightningModule(LightningModule):
         else:
             delta_prompt = self.attack_pgd(images, target, text,self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
 
-        prompt_token = self.add_prompter()
         # output_prompt_adv, _ = model(prompter(clip_img_preprocessing(images + delta_prompt)), text_tokens, prompt_token)
-        output_prompt_adv = multiGPU_CLIP( self.model,
-                                                    self.prompter(clip_img_preprocessing(images + delta_prompt)),
-                                                    text) #prommpt token is not used here.maybe should be?
+
+
+        img_embed=self.model.encode_image(clip_img_preprocessing(images + delta_prompt))
+        scale_text_embed=self.model.encode_text(text)
+        img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+        output_prompt_adv = img_embed_norm @ scale_text_embed_norm.t()
+
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
-        self.attackedresults.append({"logits":output_prompt_adv, "labels":torch.arange(images.size(0), device=self.device)})
+        self.attackedresults.append({"logits":img_embed, "textlabels":target})
         # bl attack
         # torch.cuda.empty_cache()
 
@@ -481,9 +507,11 @@ class myLightningModule(LightningModule):
         #make linear probes here, and log the results.
         
         GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults],dim=0)).cpu().numpy()
-        GoodLabels=torch.cat([val["labels"] for val in self.cleanresults],dim=0).cpu().numpy()
+        GoodLabels=torch.cat([val["textlabels"] for val in self.cleanresults],dim=0).cpu().numpy()
         BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults],dim=0)).cpu().numpy()
-        BadLabels=torch.cat([val["labels"] for val in self.attackedresults],dim=0).cpu().numpy()
+        BadLabels=torch.cat([val["textlabels"] for val in self.attackedresults],dim=0).cpu().numpy()
+
+
 
         if not hasattr(self,"Cleanclassifier"):
             self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
@@ -516,27 +544,33 @@ class myLightningModule(LightningModule):
         # pretty sure we probably want to use the same optimizer as the original paper: the adamw optimizer
         # https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW
         # https://pytorch-lightning.readthedocs.io/en/latest/common/optimizers.html
-
+        args={"lr":self.args.get("learning_rate",1e-5)}
         if self.args.get("optimizer","sgd") == "adamw":
             optimizer_fn=torch.optim.AdamW
+            args.update({"betas":(0.9, 0.999),
+                  "eps":1e-08,
+                  "weight_decay":self.args.get("weight_decay",0.0001)})
         elif self.args.get("optimizer","sgd") == "sgd":
             optimizer_fn=torch.optim.SGD
+            args.update({"momentum":self.args.get("momentum",0.9),
+                  "weight_decay":self.args.get("weight_decay",0.0001)})
+
         elif self.args.get("optimizer","sgd") == "adam":
             optimizer_fn=torch.optim.Adam
+            args.update({"betas":(0.9, 0.999),
+                  "eps":1e-08,
+                  "weight_decay":self.args.get("weight_decay",0.0001)})
         else:
             raise ValueError
 
-
-        optimizer = optimizer_fn(list(self.model.visual.parameters()),
-                                        lr=self.args.get("learning_rate",1e-5),
-                                        momentum=self.args.get("momentum",0.99),
-                                        weight_decay=self.args.get("weight_decay",0))
+        #note we've adjusted this to allow the text module to move too! 
+        parameters = list(self.model.visual.parameters()) if self.args.get("freeze_text",True) else list(self.model.parameters())
+        optimizer = optimizer_fn(parameters,
+                                        **args)
         
 
         if self.args.get("last_num_ft",-1) != -1:
-            optimizer = optimizer_fn(self.model.visual.parameters()[-self.args.last_num_ft:], # remember to add the parameters of your model decoder into this line!! 
-                                        lr=self.args.get("learning_rate",1e-5),
-                                        momentum=self.args.get("momentum",0.99),
-                                        weight_decay=self.args.get("weight_decay",0))
+            optimizer = optimizer_fn(parameters[-self.args.last_num_ft:], # remember to add the parameters of your model decoder into this line!! 
+                                        **args)
         #scheduler = cosine_lr(optimizer, self.args.get("learning_rate",1e-5), self.args.get("warmup",1000), self.args.get("total_steps",100000))
         return optimizer#([optimizer],[scheduler])

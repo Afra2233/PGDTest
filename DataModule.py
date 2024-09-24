@@ -149,7 +149,18 @@ class CustomtorchVisionDataset2(Dataset):
 
     def __getitem__(self, idx):
         image, label = self.dataset[idx]
-        text = self.texts[label] #A picture of {label}
+        text="a picture of something"
+        try:
+
+            text = self.texts[label] #A picture of {label}
+        except:
+            print("Error in getting text")
+            print("label:",label)
+            print("texts:",self.texts)
+            print("idx:",idx)
+            print("len of dataset:",len(self.dataset))
+            print("len of texts:",len(self.texts))
+            # text="A picture of something"
         text = self.tokenizer(text) #should be 77 long
         #i keep getting an error saying it's resizing non-resizable storage. This is caused because the image is not in RGB format. ? 
 
@@ -189,6 +200,7 @@ class MyDataModule(pl.LightningDataModule):
 
         self.template = 'This is a photo of a {}'
         self.preprocess = preprocess224_interpolate
+        self.ISHEC=os.getenv("ISHEC",False)
         
     def prepare_data(self):
         # No preparation needed
@@ -396,13 +408,13 @@ class MyDataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 ,pin_memory=True,prefetch_factor=4,drop_last=True)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 ifnot self.ISHEC else 2 ,pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True)
 
     def val_dataloader(self):
-        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16, pin_memory=True,prefetch_factor=4,drop_last=True) for dataset in self.val_datasets]
+        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True) for dataset in self.val_datasets]
 
     def test_dataloader(self):
-        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16, pin_memory=True,prefetch_factor=4,drop_last=True) for dataset in self.val_datasets]
+        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True) for dataset in self.val_datasets]
 
 
 

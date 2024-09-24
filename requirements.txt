@@ -15,6 +15,7 @@ pandas
 Pillow
 pycountry
 scipy
+scikit-learn
 tqdm
 torchvision
 gdown
