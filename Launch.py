@@ -137,7 +137,9 @@ def SlurmRun(trialconfig):
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
-        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                      
+        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',        
+        'export WANDB_API_KEY=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                      
+              
         'export ISHEC=True'                                                                                                                   #<-----CHANGE ME                                         
         'source /etc/profile',
         'module add opence',
