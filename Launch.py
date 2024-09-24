@@ -96,7 +96,7 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
             if "WANDB_API_KEY" not in os.environ:
                 if "wandb" in os.environ:
                     os.environ["WANDB_API_KEY"]=os.environ["wandb"]
-                    wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc")) #<-----CHANGE ME
+                    wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) #<-----CHANGE ME
                 else:
                     print("No API key found, please set WANDB_API_KEY in environment variables")
             wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
