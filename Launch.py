@@ -5,7 +5,7 @@ from pytorch_lightning.callbacks import TQDMProgressBar,EarlyStopping
 import datetime
 from pytorch_lightning.plugins.environments import SLURMEnvironment
 from models.trainPGD import myLightningModule
-
+import wandb
 #### This is our launch function, which builds the dataset, and then runs the model on it.
 
 
