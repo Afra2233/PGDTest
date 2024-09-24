@@ -83,8 +83,9 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
-        wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
-        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER, save_dir=dir)                               #<-----CHANGE ME
+        wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) 
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR","."))                               #<-----CHANGE ME
+        print(config)
 
     else:
         #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
@@ -104,7 +105,7 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
             run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
 
         #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
-        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER,experiment=run, save_dir=dir)                 #<-----CHANGE ME
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER,experiment=run, save_dir=os.getenv("WANDB_CACHE_DIR","."))                 #<-----CHANGE ME
         config=run.config.as_dict()
 
     train(config,dir,devices,accelerator,Dataset,logtool)
@@ -130,6 +131,7 @@ def SlurmRun(trialconfig):
         sub_commands.extend([
                 '#SBATCH --account MYACOCUNT',
                 'export CONDADIR=/nobackup/projects/<BEDEPROJECT>/$USER/miniconda',                                                         #<-----CHANGE ME                                                    
+                'export WANDB_CACHE_DIR=/nobackup/projects/<BEDEPROJECT>/$USER/',
                 'export NCCL_SOCKET_IFNAME=ib0'])
         comm="python3"
     else:
