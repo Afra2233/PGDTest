@@ -186,30 +186,23 @@ class myLightningModule(LightningModule):
     def attack_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         delta=self.init_delta(X,epsilon)
         losses=[]
+        scale_text_embed=self.model.encode_text(text_tokens)
+        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
         for _ in range(attack_iters):
             # output = model(normalize(X ))
             #prompted_images = self.prompter(normalize(delta + X ))
             #check prompted images has grad
             new_images = delta+X
-          
             prompted_images = torch.div(torch.sub(new_images, self.mu_img), self.std_img) #normalize(new_images) but preserves grad
-            assert prompted_images.requires_grad
-            
-            #prompt_token = self.add_prompter()
-            output = multiGPU_CLIP(self.model, prompted_images, text_tokens)#, prompt_token)
+            img_embed=self.model.encode_image(prompted_images)
+            img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+            output = img_embed_norm @ scale_text_embed_norm.t()
             loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))
             #range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
             #交叉熵损失有助于将模型输出（例如，从CLIP等模型获得的相似性得分）解释为概率。通过应用Softmax函数（或Log-Softmax），相似性得分被转换为一个概率分布，这个分布反映了每个类别（或标签）被预测为正确的相对概率。这种概率框架有助于进行更稳健的决策和更细致的性能评估。
             loss.backward()
-            losses.append(loss)
-            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-            grad = delta.grad.detach()#这里从delta中提取梯度，并使用.detach()将其从当前计算图中分离出
-
-            '''
-            下面的代码是这些行通过直接索引来复制张量数据，
-            虽然这种写法在Python中通常不是必需的，
-            因为d, g, x和delta, grad, X已经是指向同一数据的不同名称。
-            '''
+            losses.append(loss.detach())
+            grad = delta.grad.detach()
             d = delta[:, :, :, :]
             g = grad[:, :, :, :]
             x = X[:, :, :, :]
