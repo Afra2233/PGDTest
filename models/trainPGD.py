@@ -521,6 +521,11 @@ class myLightningModule(LightningModule):
             GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults[dataset_idx]],dim=0)).cpu().numpy()
             BadLabels=torch.cat([val["textlabels"] for val in self.attackedresults[dataset_idx]],dim=0).cpu().numpy()
             BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults[dataset_idx]],dim=0)).cpu().numpy()
+            #check at least 2 classes are present in the dataset
+            if len(np.unique(GoodLabels)) < 2 or len(np.unique(BadLabels)) < 2:
+                print("Not enough classes to run linear probes on dataset {dataset_idx}")
+                #skip this dataset
+                continue
             self.Dirtyclassifier.fit(BadLogits, BadLabels)
             self.Cleanclassifier.fit(GoodLogits, GoodLabels)
             self.log( "Clean Classifier on Dirty Features on dataset {dataset_idx}",self.Cleanclassifier.score(BadLogits, BadLabels))

@@ -178,11 +178,11 @@ Add COCO captions here ...
 
 '''
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self,Cache_dir, dataset: str,batch_size: int,imagenet_root: str="./data", tinyimagenet_root: str="./data",  val_dataset_names: List[str]=None,**kwargs):
+    def __init__(self,Cache_dir, dataset: str,batch_size: int,imagenet_root: str="./data", tinyimagenet_root: str=None,  val_dataset_names: List[str]=None,**kwargs):
         super().__init__()
         self.cache_dir = Cache_dir
         self.imagenet_root = imagenet_root
-        self.tinyimagenet_root = tinyimagenet_root
+        self.tinyimagenet_root = tinyimagenet_root if tinyimagenet_root is not None else self.imagenet_root
         self.datasetname = dataset    #not used any more! 
         self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'SUN397', 'Food101',
                                  'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet'
@@ -375,7 +375,7 @@ class MyDataModule(pl.LightningDataModule):
 
                 class_names = new_class_names
                 class_names=self.refine_classname(class_names)
-                self.train_text_names_dict.update({'tinyImageNet':[self.template.format(label) for label in class_names]})
+                self.train_text_names_dict.update({'tinyImageNet':class_names})
 
             self.train_datasets = [CustomtorchVisionDataset2(dataset, class_names,self.default) for dataset, class_names in [(self.train_dataset_dict[k], self.train_text_names_dict[k]) for k in self.train_dataset_dict.keys()]]
             self.train_dataset = torch.utils.data.ConcatDataset(self.train_datasets)
@@ -495,7 +495,27 @@ class MyDataModule(pl.LightningDataModule):
                             else:
                                 print("Unknown file type")
                             #load the dataset
-                    val_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root, 'val'), transform=preprocess224)})
+                        #step one: open the val folder at tiny-imagenet-200/val, which is a list of file names and their classes in a text file
+                        #step two: make a list of files, and their classes
+                        #step three, make a set of folders with the class names, and move the files to the folders
+                        #step four: load the dataset
+
+                        #step one
+                        with open(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val","val_annotations.txt"),'r') as f:
+                            lines=f.readlines()
+                        #step two
+                        val_files=[line.split()[0] for line in lines]
+                        val_classes=[line.split()[1] for line in lines]
+                        #step three
+                        for val_file, val_class in zip(val_files,val_classes):
+                            if not os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class)):
+                                os.makedirs(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class),exist_ok=True)
+                            shutil.move(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images',val_file),os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class))
+
+                        #step four - remove the images folder
+                        shutil.rmtree(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images'))
+                        
+                    val_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'val'), transform=preprocess224)})
 
 
                     # val_dataset_list.append(ImageFolder(
