@@ -77,15 +77,15 @@ class baseparser(HyperOptArgumentParser):
    
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
-        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=False)
+        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=True)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
         self.opt_list("--epochs", default=10, type=int, tunable=False)
-        self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-4], type=float, tunable=False) #originally 5e-5
+        self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-4], type=float, tunable=True) #originally 5e-5
         self.opt_list("--weight_decay", default=0, type=float, tunable=False)
-        self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=False)
+        self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=True)
         self.opt_list("--momentum", default=0.9, type=float, tunable=False)
-        self.opt_list("--train_eps", default=2, options=[1,2,3], type=float, tunable=False)
-        self.opt_list("--train_numsteps", default=5, options=[2,5,10], type=int, tunable=False)
+        self.opt_list("--train_eps", default=2, options=[1,2,3], type=float, tunable=True)
+        self.opt_list("--train_numsteps", default=5, options=[2,5,10], type=int, tunable=True)
         self.opt_list("--train_stepsize", default=1, type=int, tunable=False)
         self.opt_list("--test_eps", default=1, type=float, tunable=False)
         self.opt_list("--test_numsteps", default=10, type=int, tunable=False)
@@ -93,17 +93,17 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--earlystop", default=1000, type=int, tunable=False)
         self.opt_list("--precision", default=32, type=int, tunable=False)
         # model
-        self.opt_list("--freeze_text",default=True,options=[True,False],type=bool,tunable=False)
+        self.opt_list("--freeze_text",default=True,options=[True,False],type=bool,tunable=True)
         self.opt_list("--model", default='clip', type=str, tunable=False)
-        self.opt_list("--imagenet_root", default='./data',options=[os.getenv("global_storage","/data")], type=str, tunable=False)
+        self.opt_list("--imagenet_root", default=os.getenv("global_storage","./data"),options=[os.getenv("global_storage","./data")], type=str, tunable=False)
         self.opt_list("--arch", default='vit_b32', type=str, tunable=False)
         self.opt_list("--method", default='null_patch', type=str, options=['null_patch'], tunable=False)
         self.opt_list("--prompt_size", default=30, type=int, tunable=False)
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
-        self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=False)
+        self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=True)
         # dataset
-        self.opt_list("--root", default='./data', options=[os.getenv("global_storage","/data")], type=str, tunable=False)
-        self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=False)
+        self.opt_list("--root", default=os.getenv("$PWD","./data"), options=[os.getenv("$PWD","/data")], type=str, tunable=False)
+        self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=True)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
         self.opt_list("--seed", default=0, type=int, tunable=False)
@@ -181,6 +181,8 @@ if __name__== "__main__":
     myparser=parser()
     hyperparams = myparser.parse_args()
     print(hyperparams.__dict__)
-    for trial in hyperparams.generate_trials(10):
+
+    for trial in hyperparams.generate_trials(hyperparams.num_trials):
+        print("next trial")
         print(trial)
         
