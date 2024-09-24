@@ -94,8 +94,11 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
             if "WANDB_API_KEY" not in os.environ:
                 if "wandb" in os.environ:
                     os.environ["WANDB_API_KEY"]=os.environ["wandb"]
+
                 else:
                     print("No API key found, please set WANDB_API_KEY in environment variables")
+            wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
+
             run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
 
         #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
@@ -138,7 +141,8 @@ def SlurmRun(trialconfig):
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
-        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',        
+        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc', 
+        'export WANDB_ENTITY = zhangafra818-lancaster-university'           
         'export WANDB_API_KEY=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                      
               
         'export ISHEC=True'                                                                                                                   #<-----CHANGE ME                                         
