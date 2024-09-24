@@ -281,6 +281,7 @@ class MyDataModule(pl.LightningDataModule):
                 class_names =refine_classname(self.train_dataset_dict['hateful_memes'].classes)
                 self.train_text_names_dict.update({'hateful_memes':[self.template.format(label) for label in class_names]})
             if 'ImageNet' in self.train_dataset_names:
+
                 self.train_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'train'), transform=preprocess224)})
                 class_names = self.train_dataset_dict['ImageNet'].classes
                 class_names = refine_classname(class_names)
@@ -291,7 +292,13 @@ class MyDataModule(pl.LightningDataModule):
 
                 class_names = new_class_names
                 self.train_text_names_dict.update({'ImageNet':[self.template.format(label) for label in class_names]})
+
+
+
+
             if 'tinyImageNet' in self.train_dataset_names:
+                
+                
                 self.train_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root, 'train'), transform=preprocess224)})
                 class_names = self.train_dataset_dict['tinyImageNet'].classes
                 class_names = refine_classname(class_names)
@@ -365,8 +372,63 @@ class MyDataModule(pl.LightningDataModule):
                 val_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
                                                             transform=self.preprocess,download=download)})
             if 'ImageNet' in self.val_dataset_names:
-                    val_dataset_list.append(ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224))
+                    #download imagenet
+                    #get imagenet files and download them
+                    URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    for url in URLS:
+                        print("Downloading",url)
+                        #use pysmartdl to download the files
+                        from smartdl import SmartDL
+                        obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=False)
+                        obj.start()
+                        if obj.isSuccessful():
+                            print("Downloaded: %s" % obj.get_dest())
+                        else:
+                            print("There were errors")
+                            print(obj.get_errors())
+                        #extract the files
+                        if url.endswith(".tar"):
+                            import tarfile
+                            with tarfile.open(obj.get_dest(), 'r') as tar_ref:
+                                tar_ref.extractall(self.imagenet_root)
+                        elif url.endswith(".tar.gz"):
+                            import tarfile
+                            with tarfile.open(obj.get_dest(), 'r:gz') as tar_ref:
+                                tar_ref.extractall(self.imagenet_root)
+                        else:
+                            print("Unknown file type")
+                        #load the dataset
+                        val_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
+                        val_dataset_list.append(ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224))
             if 'tinyImageNet' in self.val_dataset_names:
+                    #download tinyimagenet
+                    #get tinyimagenet files and download them
+                    URLS=['http://cs231n.stanford.edu/tiny-imagenet-200.zip']
+                    for url in URLS:
+                        print("Downloading",url)
+                        #use pysmartdl to download the files
+                        from smartdl import SmartDL
+                        obj=SmartDL(url,os.path.join(self.tinyimagenet_root,url.split('/')[-1]),progress_bar=False)
+                        obj.start()
+                        if obj.isSuccessful():
+                            print("Downloaded: %s" % obj.get_dest())
+                        else:
+                            print("There were errors")
+                            print(obj.get_errors())
+                        #extract the files
+                        if url.endswith(".zip"):
+                            import zipfile
+                            with zipfile.ZipFile(obj.get_dest(), 'r') as zip_ref:
+                                zip_ref.extractall(self.tinyimagenet_root)
+                        else:
+                            print("Unknown file type")
+                        #load the dataset
+                    val_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root, 'val'), transform=preprocess224)})
+
+
                     val_dataset_list.append(ImageFolder(
                         os.path.join(self.tinyimagenet_root, 'val'),
                         transform=preprocess224))
@@ -408,7 +470,7 @@ class MyDataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 ifnot self.ISHEC else 2 ,pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 if not self.ISHEC else 2 ,pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True)
 
     def val_dataloader(self):
         return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 1,drop_last=True) for dataset in self.val_datasets]
