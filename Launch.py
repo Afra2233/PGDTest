@@ -21,6 +21,9 @@ def train(config={
     if Dataset is None:
         from DataModule import MyDataModule
         Dataset=MyDataModule(Cache_dir=dir,**config)
+    elif config.get("dataset",None)== 'coco':
+        from COCODataModule import MyDataModule
+        Dataset=MyDataModule(Cache_dir=dir,**config)
     if devices is None:
         devices=config.get("devices","auto")
     if accelerator is None:

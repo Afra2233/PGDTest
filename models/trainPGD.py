@@ -102,6 +102,7 @@ class myLightningModule(LightningModule):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
         
+
     def init_uniform(self, X,eps):
         delta=  torch.zeros_like(X,device=self.device,).uniform_(-eps, eps)
         delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
@@ -351,13 +352,13 @@ class myLightningModule(LightningModule):
         #By default, PTL handles optimization and scheduling and logging steps. so All you have to focus on is functionality. Here's an example...
         images, target,text = batch #label shouldnt be used here! 
         #print(text.shape)
-        text=text.squeeze(1)
-        text_embed=self.model.encode_text(text)
+        text=text.squeeze(1) #B,77
+        text_embed=self.model.encode_text(text) #B,512
         # ori_text_embed=self.model_ori.encode_text(text)
-        text_embed= text_embed/ text_embed.norm(dim=-1, keepdim=True)
+        text_embed= text_embed/ text_embed.norm(dim=-1, keepdim=True) #B,512
         # ori_text_embed= ori_text_embed/ ori_text_embed.norm(dim=-1, keepdim=True)
         # images = self.prompter(images) #does nothing - its a null prompter
-        Dirtyimages,_=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1))
+        Dirtyimages,_=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1)) #B,3,224,224
         '''
         Here's where you run the dirty image through your model... first through an encoder, then through a decoder.
 
@@ -368,7 +369,7 @@ class myLightningModule(LightningModule):
         '''
         Dirtyimages = torch.div(torch.sub(Dirtyimages, self.mu_img), self.std_img) #normalize(Dirtyimages) but preserves grad
         # prompted_Dirtyimages = self.prompter(normalize(Dirtyimages)) #does nothing - its a null prompter
-        output_of_training_model_with_dirty_images= self.model.encode_image(Dirtyimages) 
+        output_of_training_model_with_dirty_images= self.model.encode_image(Dirtyimages) #B,512
         output_of_training_model_with_dirty_images= output_of_training_model_with_dirty_images/ output_of_training_model_with_dirty_images.norm(dim=-1, keepdim=True)
         output_of_training_model_with_clean_images= self.model.encode_image(images)
         output_of_training_model_with_clean_images= output_of_training_model_with_clean_images/ output_of_training_model_with_clean_images.norm(dim=-1, keepdim=True)

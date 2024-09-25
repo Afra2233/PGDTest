@@ -82,16 +82,16 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--epochs", default=10, type=int, tunable=False)
         self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-4], type=float, tunable=True) #originally 5e-5
         self.opt_list("--weight_decay", default=0, type=float, tunable=False)
-        self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=True)
+        self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=False)
         self.opt_list("--momentum", default=0.9, type=float, tunable=False)
         self.opt_list("--train_eps", default=2, options=[1,2,3], type=float, tunable=True)
         self.opt_list("--train_numsteps", default=5, options=[2,5,10], type=int, tunable=True)
-        self.opt_list("--train_stepsize", default=1, type=int, tunable=False)
+        self.opt_list("--train_stepsize", default=1, type=int,options=[1,2,3], tunable=False)
         self.opt_list("--test_eps", default=1, type=float, tunable=False)
         self.opt_list("--test_numsteps", default=10, type=int, tunable=False)
         self.opt_list("--test_stepsize", default=1, type=int, tunable=False)
         self.opt_list("--earlystop", default=1000, type=int, tunable=False)
-        self.opt_list("--precision", default=32, type=int, tunable=False)
+        self.opt_list("--precision", default=32, type=int, options=[32,16], tunable=True)
         # model
         self.opt_list("--freeze_text",default=True,options=[True,False],type=bool,tunable=True)
         self.opt_list("--model", default='clip', type=str, tunable=False)
@@ -103,10 +103,10 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=True)
         # dataset
         self.opt_list("--root", default=os.getenv("$PWD","./data"), options=[os.getenv("$PWD","/data")], type=str, tunable=False)
-        self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=True)
+        self.opt_list("--dataset", default='cifar10', options=["coco","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
-        self.opt_list("--attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False) # set this as tunable to trial different attack types
+        self.opt_list("--attack_type", default="pgd", type=str,options=["pgd","cw","text","autoattack","noAttack"], tunable=False) # set this as tunable to trial different attack types
         self.opt_list("--test_attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False)
         self.opt_list("--seed", default=0, type=int, tunable=False)
         self.opt_list("--model_dir", default='./save/models', type=str, tunable=False)
@@ -127,7 +127,7 @@ class baseparser(HyperOptArgumentParser):
         #self.opt_range('--neurons', default=50, type=int, tunable=True, low=100, high=800, nb_samples=8, log_base=None)
         
         #This is important when passing arguments as **config in launcher
-        self.keys_of_interest=set()
+        self.keys_of_interest=set("learning_rate batch_size train_eps train_numsteps train_eps train_stepsize attack_type prompt_size add_prompt_size optimizer freeze_text".split())
 
 
 import wandb

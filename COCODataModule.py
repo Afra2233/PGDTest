@@ -28,7 +28,7 @@ from PIL import Image
 from typing import List
 from utils import to_rgb,refine_classname,load_imagenet_label2folder
 
-
+from pySmartDL import SmartDL
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
 
@@ -143,7 +143,7 @@ class CustomImageNetDataset(Dataset):
 import random
 
 def CustomCOCODatasetWithClasses(CocoCaptions):
-    def __init__(self, root, annFile, transform=None):
+    def __init__(self, root, annFile, transform=None,**kwargs):
         super(CocoCaptions, self).__init__(root, annFile, transform=transform)
         self.transform = transform
 
