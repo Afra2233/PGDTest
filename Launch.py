@@ -41,7 +41,7 @@ def train(config={
         os.environ["PL_TORCH_DISTRIBUTED_BACKEND"]='gloo'
     trainer=pytorch_lightning.Trainer(
             devices="auto" if devices is None else devices,
-            accelerator="gpu",
+            accelerator="auto",
             max_epochs=200,
             #profiler="advanced",
             #plugins=[SLURMEnvironment()],
@@ -72,7 +72,7 @@ def train(config={
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
 
-    USER="zhangafra818" 
+    USER="PGNTeam" 
     PROJECT="AllDataPGN"
     NAME="TestDeploy"
     import pytorch_lightning
@@ -135,17 +135,16 @@ def SlurmRun(trialconfig):
 
         sub_commands.extend(['#SBATCH -p gpu-medium',
                              #add command to request more memory
-                             '#SBATCH --mem=128G',
+                             '#SBATCH --mem=96G',
                              '#SBATCH --cpus-per-task=8',
                              'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     #<-----CHANGE ME
                              'export NCCL_SOCKET_IFNAME=enp0s31f6',])
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
-        'export wandb=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',        
-        'export WANDB_API_KEY=3321f6f85c4170ccbf47a65d679842d4f3c8a6cc',                      
-        'export WANDB_CACHE_DIR=/storage/hpc/07/zhang303/'
-        'export ISHEC=True'                                                                                                                   #<-----CHANGE ME                                         
+        'export wandb=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
+        'export WANDB_API_KEY=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
+        'export ISHEC=True',                                                                               #<-----CHANGE ME                                         
         'source /etc/profile',
         'module add opence',
         'conda activate $CONDADIR',

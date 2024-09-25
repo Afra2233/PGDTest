@@ -106,6 +106,8 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--dataset", default='cifar10', options=["ImageNet","tinyImageNet"],type=str, tunable=True)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
+        self.opt_list("--attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False) # set this as tunable to trial different attack types
+        self.opt_list("--test_attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False)
         self.opt_list("--seed", default=0, type=int, tunable=False)
         self.opt_list("--model_dir", default='./save/models', type=str, tunable=False)
         self.opt_list("--filename", default=None, type=str, tunable=False)
@@ -113,12 +115,11 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--resume", default=None, type=str, tunable=False)
         self.opt_list("--evaluate", default=False, action="store_true", tunable=False)
         self.opt_list("--debug", action='store_true', tunable=False)
-        self.opt_list("--Noattack", action='store_true', tunable=False)
-        self.opt_list("--CW", action='store_true', tunable=False)
+        # self.opt_list("--CW", action='store_true', tunable=False)
         self.opt_list("--train_class_count", default=90, type=int, tunable=False)
         self.opt_list("--last_num_ft", default=-1, type=int, tunable=False)
         self.opt_list("--noimginprop", action='store_true', tunable=False)
-        self.opt_list("--autoattack", action='store_true', tunable=False)
+        # self.opt_list("--autoattack", action='store_true', tunable=False)
         self.opt_list("--num_trials", default=0, type=int, tunable=False)
         #debug mode - We want to just run in debug mode...
         self.opt_list("--name", default="TestRun",options=["hecDeployment"], type=str, tunable=False)

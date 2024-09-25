@@ -131,3 +131,4 @@ wandb/*
 data/cifar-10-python.tar.gz
 data/*
 none/*
+AllDataPGN/*

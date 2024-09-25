@@ -85,13 +85,22 @@ class myLightningModule(LightningModule):
             self.clamp=self.clamp_2
         else:
             raise ValueError
-        if not args.get("noAttack",True):
+       
+        if self.args.get("attack_type","pgd")=="pgd":
+            self.attack=self.attack_pgd
+        elif self.args.get("attack_type","pgd")=="CW":
+            self.attack= self.attack_CW
+        elif self.args.get("attack_type","pgd")=="text":
+            self.attack= self.attack_text_pgd
+        elif self.args.get("attack_type","pgd")=="autoattack":
+            self.attack=self.autoattack
+        elif self.args.get("attack_type","pgd")=="Noattack":
             self.attack=self.no_attack
-
+        else:
+            raise ValueError 
+    
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
-
-
         
     def init_uniform(self, X,eps):
         delta=  torch.zeros_like(X,device=self.device,).uniform_(-eps, eps)
@@ -181,7 +190,8 @@ class myLightningModule(LightningModule):
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
             delta.grad.zero_()
-        return delta
+        return X,text_tokens+delta
+    
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
     def attack_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
@@ -221,7 +231,7 @@ class myLightningModule(LightningModule):
         self.log("mean_attack_losses",sum(losses)/len(losses))
         self.log("max_attack_loss",max(losses))
         self.log("min_attack_loss",min(losses))
-        return delta
+        return X+delta,text_tokens
     
     @torch.enable_grad()
     def attack_pgd_noprompt(self, X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
@@ -273,9 +283,8 @@ class myLightningModule(LightningModule):
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
             delta.grad.zero_()
-        return delta
+        return X+delta, text_tokens
     
-
     @torch.enable_grad()
     def attack_CW_noprompt(self, X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         delta=self.init_delta(X,epsilon)
@@ -301,22 +310,41 @@ class myLightningModule(LightningModule):
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
             delta.grad.zero_()
-        return delta
-
+        return X+delta, text_tokens
     @torch.enable_grad()
-    def attack(self, images, target, text_tokens, alpha, attack_iters, epsilon=0):
-            delta = self.attack_pgd( images, target, text_tokens, alpha, attack_iters, epsilon=self.args.get("train_eps",1))
-            return images+delta
-    
+    def autoattack(self, images, target, text_tokens,  alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
+        def model_fn(x):
+            output_a = multiGPU_CLIP(self.model, self.prompter(clip_img_preprocessing(x)),text_tokens)
+            return output_a.to(torch.float32)
+
+        adversary = AutoAttack(model_fn, norm='Linf', eps=epsilon, version='standard')
+        adv_samples = adversary.run_standard_evaluation(images, target, bs=100)
+        delta_prompt = adv_samples - images
+        delta_prompt = clamp(delta_prompt, self.lower_limit - images, self.upper_limit - images)
+        return images+delta_prompt, text_tokens
+
     def no_attack(self, images, *args, **kwargs):
             return images
 
     def forward(self,input):
         #This inference steps of a foward pass of the model 
         return self.model(input)
+    
     def on_train_epoch_start(self):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
+        if self.args.get("attack_type","pgd")=="pgd":
+            self.attack=self.attack_pgd
+        elif self.args.get("attack_type","pgd")=="CW":
+            self.attack= self.attack_CW
+        elif self.args.get("attack_type","pgd")=="text":
+            self.attack= self.attack_text_pgd
+        elif self.args.get("attack_type","pgd")=="autoattack":
+            self.attack=self.autoattack
+        elif self.args.get("attack_type","pgd")=="Noattack":
+            self.attack=self.no_attack
+        else:
+            raise ValueError 
     
     def training_step(self, batch, batch_idx):
         #The batch is collated for you, so just seperate it here and calculate loss. 
@@ -329,7 +357,7 @@ class myLightningModule(LightningModule):
         text_embed= text_embed/ text_embed.norm(dim=-1, keepdim=True)
         # ori_text_embed= ori_text_embed/ ori_text_embed.norm(dim=-1, keepdim=True)
         # images = self.prompter(images) #does nothing - its a null prompter
-        Dirtyimages=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1))
+        Dirtyimages,_=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1))
         '''
         Here's where you run the dirty image through your model... first through an encoder, then through a decoder.
 
@@ -388,7 +416,6 @@ class myLightningModule(LightningModule):
         # self.results.append({"imfeatures":self.model(cleanimages), "dirtyfeatures":self.model(attackedImages),"classes":batch[2],"originalmodel":self.orimodel(cleanimages),"dirtyoriginalmodel":self.orimodel(attackedImages)})
         return loss
    
-
     def on_train_epoch_end(self):
         '''
         imfeatures=torch.nan_to_num(torch.cat([val["imfeatures"] for val in self.results],dim=0)).cpu().numpy()
@@ -436,6 +463,19 @@ class myLightningModule(LightningModule):
         self.attackedresults=defaultdict(list)
         self.data_loader_count = len(self.trainer.datamodule.val_dataloader())
 
+        if self.args.get("test_attack_type","pgd")=="pgd":
+            self.testattack=self.attack_pgd
+        elif self.args.get("test_attack_type","pgd")=="CW":
+            self.testattack= self.attack_CW
+        elif self.args.get("test_attack_type","pgd")=="text":
+            self.testattack= self.attack_text_pgd
+        elif self.args.get("test_attack_type","pgd")=="autoattack":
+            self.testattack=self.autoattack
+        elif self.args.get("test_attack_type","pgd")=="Noattack":
+            self.testattack=self.no_attack
+        else:
+            raise ValueError 
+    
     def validation_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
         #a is the image, b is the target
@@ -466,27 +506,27 @@ class myLightningModule(LightningModule):
         self.log('val_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        if self.args.get("CW",False):
-            delta_prompt = self.attack_CW(
-                                    images, target, text,
-                                    self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
-        elif self.args.get("autoattack",False):#autoattack:
-            def model_fn(x):
-                output_a = multiGPU_CLIP(self.model, self.prompter(clip_img_preprocessing(x)),text)
-                return output_a.to(torch.float32)
+        # if self.args.get("CW",False):
+        #     delta_prompt = self.attack_CW(
+        #                             images, target, text,
+        #                             self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
+        # elif self.args.get("autoattack",False):#autoattack:
+        #     def model_fn(x):
+        #         output_a = multiGPU_CLIP(self.model, self.prompter(clip_img_preprocessing(x)),text)
+        #         return output_a.to(torch.float32)
 
-            adversary = AutoAttack(model_fn, norm='Linf', eps=self.args.get("test_eps",1), version='standard')
-            adv_samples = adversary.run_standard_evaluation(images, target, bs=100)   ##is this correct? 
-            delta_prompt = adv_samples - images
-            delta_prompt = clamp(delta_prompt, self.lower_limit - images, self.upper_limit - images)
-        else:
-            delta_prompt = self.attack_pgd(images, target, text,self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
+        #     adversary = AutoAttack(model_fn, norm='Linf', eps=self.args.get("test_eps",1), version='standard')
+        #     adv_samples = adversary.run_standard_evaluation(images, target, bs=100)   ##is this correct? 
+        #     delta_prompt = adv_samples - images
+        #     delta_prompt = clamp(delta_prompt, self.lower_limit - images, self.upper_limit - images)
+        # else:
+        #     delta_prompt = self.attack_pgd(images, target, text,self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
 
         # output_prompt_adv, _ = model(prompter(clip_img_preprocessing(images + delta_prompt)), text_tokens, prompt_token)
+        dirtyImages,dirtyText=self.testattack(images, target, text, self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
 
-
-        img_embed=self.model.encode_image(clip_img_preprocessing(images + delta_prompt))
-        scale_text_embed=self.model.encode_text(text)
+        img_embed=self.model.encode_image(clip_img_preprocessing(dirtyImages))
+        scale_text_embed=self.model.encode_text(dirtyText)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
         output_prompt_adv = img_embed_norm @ scale_text_embed_norm.t()
@@ -494,16 +534,16 @@ class myLightningModule(LightningModule):
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
         self.attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target})
-        # bl attack
-        # torch.cuda.empty_cache()
+        
+        #TODO: add logging for text loss here when we trial the attack
 
-        # measure accuracy and record loss
         acc1 = accuracy(output_prompt_adv, torch.arange(images.size(0),device=images.device), topk=(1,))
         self.log('val_dirty_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_dirty_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         
 
         return loss
+    
     def on_validation_epoch_end(self):
 
         #make linear probes here, and log the results.
@@ -523,19 +563,19 @@ class myLightningModule(LightningModule):
             BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.attackedresults[dataset_idx]],dim=0)).cpu().numpy()
             #check at least 2 classes are present in the dataset
             if len(np.unique(GoodLabels)) < 2 or len(np.unique(BadLabels)) < 2:
-                print("Not enough classes to run linear probes on dataset {dataset_idx}")
+                print("Not enough classes to run linear probes on dataset {}".format(dataset_idx))
                 #skip this dataset
                 continue
             self.Dirtyclassifier.fit(BadLogits, BadLabels)
             self.Cleanclassifier.fit(GoodLogits, GoodLabels)
-            self.log( "Clean Classifier on Dirty Features on dataset {dataset_idx}",self.Cleanclassifier.score(BadLogits, BadLabels))
-            self.log( "Dirty Classifier on Clean Features on dataset {dataset_idx}",self.Dirtyclassifier.score(GoodLogits, GoodLabels))
-            self.log( "Clean Classifier on Clean Features on dataset {dataset_idx}",self.Cleanclassifier.score(GoodLogits, GoodLabels))
-            self.log( "Dirty Classifier on Dirty Features on dataset {dataset_idx}",self.Dirtyclassifier.score(BadLogits, BadLabels))
+            self.log( "Clean Classifier on Dirty Features on dataset {}".format(dataset_idx),self.Cleanclassifier.score(BadLogits, BadLabels))
+            self.log( "Dirty Classifier on Clean Features on dataset {}".format(dataset_idx),self.Dirtyclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Clean Classifier on Clean Features on dataset {}".format(dataset_idx),self.Cleanclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Dirty Classifier on Dirty Features on dataset {}".format(dataset_idx),self.Dirtyclassifier.score(BadLogits, BadLabels))
             self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-            self.log( "General Classifier on Dirty Features on dataset {dataset_idx}",self.generalclassifier.score(BadLogits, BadLabels))
-            self.log( "General Classifier on Clean Features on dataset {dataset_idx}",self.generalclassifier.score(GoodLogits, GoodLabels))
-            self.log( "General Classifier on All Features on dataset {dataset_idx}",self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+            self.log( "General Classifier on Dirty Features on dataset {}".format(dataset_idx),self.generalclassifier.score(BadLogits, BadLabels))
+            self.log( "General Classifier on Clean Features on dataset {}".format(dataset_idx),self.generalclassifier.score(GoodLogits, GoodLabels))
+            self.log( "General Classifier on All Features on dataset {}".format(dataset_idx),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
 
         #this should give us PLENTY of data to write about! 
         
