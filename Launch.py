@@ -77,9 +77,6 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
     NAME="TestDeploy"
     import pytorch_lightning
     import wandb
-
-    import wandb
-
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
