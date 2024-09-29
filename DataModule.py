@@ -499,13 +499,13 @@ class MyDataModule(pl.LightningDataModule):
                         #step two: make a list of files, and their classes
                         #step three, make a set of folders with the class names, and move the files to the folders
                         #step four: load the dataset
-
+                    if os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images')):
                         #step one
                         with open(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val","val_annotations.txt"),'r') as f:
                             lines=f.readlines()
-                        #step two
-                        val_files=[line.split()[0] for line in lines]
-                        val_classes=[line.split()[1] for line in lines]
+                            #step two
+                            val_files=[line.split()[0] for line in lines]
+                            val_classes=[line.split()[1] for line in lines]
                         #step three
                         for val_file, val_class in zip(val_files,val_classes):
                             if not os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class)):

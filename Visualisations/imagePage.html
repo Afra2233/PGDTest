@@ -1,0 +1,188 @@
+<html>
+<head>
+    <title>Similarities</title>
+</head>
+<body>
+<!-- use css -->
+<style>
+
+    /* Tooltip container */
+    .tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 240px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+    }
+    /* buttons bigger */
+    .b {
+        font-size: 20px;
+        padding: 15px 32px;
+        text-align: center;
+        display: inline-block;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 12px;
+    }
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+    visibility: visible;
+    }
+    /* Align controls to top right */
+    #Controls {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    /* set axis to middle of screen */
+    #xAxis {
+        position: absolute;
+        top: 50%;
+        left: 0%;
+        width: 100%;    
+        
+    }
+    #yAxis {
+        position: absolute;
+        top: 0%;
+        left: 50%;
+            border-left: 1px solid black;
+        height: 100%;
+    }
+    .stats {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        }
+</style>
+
+<script src="https://cdn.jsdelivr.net/gh/interactiveJS/interactiveJS@v2.0.1/src/individuals/draggable.min.js"></script>
+<script>
+
+// add functions doUpdate which posts uploaded image to server and displays the png image that is returned
+function doUpdate() {
+    var alpha = document.getElementById("alpha").value;
+    var epsilon = document.getElementById("epsilon").value;
+    var iters = document.getElementById("iters").value;
+    var classes = document.getElementById("classes").value;
+    var img = document.getElementById("fileToUpload").files[0];
+    var form = new FormData();
+    form.append("fileToUpload", img);
+    form.append("alpha", alpha);
+    form.append("epsilon", epsilon);
+    form.append("iters", iters);
+    form.append("classes", classes);
+    fetch("upload.php", {
+        method: "POST",
+        body: form
+    }).then(response => response.blob())
+    .then(blob => {
+        var url = URL.createObjectURL(blob);
+        var img = document.createElement("img");
+        img.src = url;
+        document.getElementById("graph").innerHTML = "";
+        document.getElementById("graph").appendChild(img);
+    });
+    getClass();
+}
+    
+function getClass(){
+    let request = new XMLHttpRequest();
+    request.onreadystatechange = function(){
+        if (request.readyState === 4) {
+                //the reply is a jsonified dict of key value points to print.
+                let _class_index = JSON.parse(request.response);
+                let class_string = "Class: " + _class_index;
+                // show this on the page
+                document.getElementById("class").innerHTML = class_string;
+        }
+    }
+    request.open("GET", "/ImagePage/class", true);
+    request.send();
+}
+
+//add function which calls doUpdate when the number of classes is changed
+function changeClasses() {
+
+    // number of classes to change to 
+    var classes = document.getElementById("classes").value;
+    // send this to the ImagePage/labels endpoint and list the reply.
+    let data=JSON.stringify({'classes':classes});
+    let request = new XMLHttpRequest();
+    request.onreadystatechange = function(){
+        if (request.readyState === 4) {
+                //the reply is a jsonified dict of key value points to print.
+                let class_list = JSON.parse(request.response);
+                let class_string = "Classes: ";
+                for (let i = 0; i < class_list.length; i++) {
+                    class_string += class_list[i] + ", ";
+                }
+                document.getElementById("stats").innerHTML = class_string;
+        }
+    }
+    request.open("POST", "/ImagePage/labels", true);
+    request.setRequestHeader("Content-Type", "application/json");
+    request.send(dataJSON);
+    doUpdate();
+}
+</script>
+<h1>PGD Visualisation</h1>
+<div id="Controls">
+
+
+<!-- add input sliders for alpha, epsilon and iters values -->
+<label for="alpha">Alpha:</label>
+<input type="range" id="alpha" name="alpha" min="0" max="2" step="0.01" value="0.1" onchange="doUpdate()">
+<label for="epsilon">Epsilon:</label>
+<input type="range" id="epsilon" name="epsilon" min="0" max="2" step="0.01" value="0.01" onchange="doUpdate()">
+<label for="iters">Iterations:</label>
+<input type="range" id="iters" name="iters" min="0" max="100" step="1" value="10" onchange="doUpdate()">
+
+<!-- add interface to upload images -->
+<form action="upload.php" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+</form>
+<!-- add slider for number of classes -->
+<label for="classes">Number of classes:</label>
+<input type="range" id="classes" name="classes" min="1" max="100" step="1" value="10" onchange="changeClasses()">
+<!-- add button to generate image -->
+<!-- add button to save image -->
+<button class="b" onclick="saveImage()">Save Image</button>
+
+</div>
+
+
+
+<div class="container" id="graph">
+<!-- create "axis" for the graph -->
+<!-- add horizontal line  -->
+<div id="yAxis"> </div>
+<hr id="xAxis">
+<!-- add vertical line -->
+</div> 
+
+<div id="class">
+
+</div>
+<div id="stats">
+
+</div>
+
+
+<p id="S"></p>
+</html>

@@ -143,8 +143,8 @@ class CustomImageNetDataset(Dataset):
 import random
 
 def CustomCOCODatasetWithClasses(CocoCaptions):
-    def __init__(self, root, annFile, transform=None,**kwargs):
-        super(CocoCaptions, self).__init__(root, annFile, transform=transform)
+    def __init__(self, root, annFile, transform,**kwargs):
+        super().__init__(root, annFile, transform=transform)
         self.transform = transform
 
     def lookup_classes(self, idx):
@@ -268,7 +268,7 @@ class MyDataModule(pl.LightningDataModule):
                 #now load the dataset
                 annFile=os.path.join(self.cache_dir,"annotations","captions_train2017.json")
                 root=os.path.join(self.cache_dir,"train2017")
-                self.train_dataset_dict.update({"coco":CustomCOCODatasetWithClasses(root,annFile,transform=self.preprocess)})
+                self.train_dataset_dict.update({"coco":CustomCOCODatasetWithClasses(root,annFile,self.preprocess)})
                 self.train_text_names_dict.update({"coco":get_text_prompts_train(self, self.train_dataset_dict["coco"])})
             self.train_datasets = [CustomtorchVisionDataset2(dataset, class_names) for dataset, class_names in [(self.train_dataset_dict[k], self.train_text_names_dict[k]) for k in self.train_dataset_dict.keys()]]
             self.train_dataset = torch.utils.data.ConcatDataset(self.train_datasets)

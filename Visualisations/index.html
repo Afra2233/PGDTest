@@ -1,0 +1,425 @@
+<html>
+<head>
+    <title>Similarities</title>
+</head>
+<body>
+<!-- use css -->
+<style>
+    .orb {
+        width: 8px;
+        height: 4px;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+        border-radius: 4px;
+        /*bring to front  */
+        z-index: 1;
+        }
+    .baseorb {
+        background-color: red;
+        width: 4px;
+        height: 8px;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+        border-radius: 4px;
+        /*bring to front  */
+        z-index: 1;
+    }
+    /* IF id is 1 */
+    .orb[id="1"] {
+        background-color: blue;
+    }
+    /* IF id is 2 */
+    .orb[id="2"] {
+        background-color: green;
+    }
+    /* IF id is 3 */
+    .orb[id="3"] {
+        background-color: yellow;
+    }
+    /* IF id is 4 */
+    .orb[id="4"] {
+        background-color: purple;
+    }
+    /* IF id is 5 */
+    .orb[id="5"] {
+        background-color: orange;
+    }
+    /* IF id is 6 */
+    .orb[id="6"] {
+        background-color: pink;
+    }
+    /* IF id is 7 */
+    .orb[id="7"] {
+        background-color: brown;
+    }
+    /* IF id is 8 */
+    .orb[id="8"] {
+        background-color: grey;
+    }
+    /* IF id is 9 */
+    .orb[id="9"] {
+        background-color: cyan;
+    }
+    /* IF id is 10 */
+    .orb[id="10"] {
+        background-color: magenta;
+    }
+    /* repeat for baseorb */
+    .baseorb[id="1"] {
+        background-color: blue;
+    }
+    .baseorb[id="2"] {
+        background-color: green;
+    }
+    .baseorb[id="3"] {
+        background-color: yellow;
+    }
+    .baseorb[id="4"] {
+        background-color: purple;
+    }
+    .baseorb[id="5"] {
+        background-color: orange;
+    }
+    .baseorb[id="6"] {
+        background-color: pink;
+    }
+    .baseorb[id="7"] {
+        background-color: brown;
+    }
+
+    .baseorb[id="8"] {
+        background-color: grey;
+    }
+    .baseorb[id="9"] {
+        background-color: cyan;
+    }
+    .baseorb[id="10"] {
+        background-color: magenta;
+    }
+    #S {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    /* Tooltip container */
+    .tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 240px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+    }
+    /* buttons bigger */
+    .b {
+        font-size: 20px;
+        padding: 15px 32px;
+        text-align: center;
+        display: inline-block;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 12px;
+    }
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+    visibility: visible;
+    }
+    /* Align controls to top right */
+    #Controls {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+    /* set axis to middle of screen */
+    #xAxis {
+        position: absolute;
+        top: 50%;
+        left: 0%;
+        width: 100%;    
+        
+    }
+    #yAxis {
+        position: absolute;
+        top: 0%;
+        left: 50%;
+            border-left: 1px solid black;
+        height: 100%;
+    }
+    .stats {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        }
+</style>
+
+<script src="https://cdn.jsdelivr.net/gh/interactiveJS/interactiveJS@v2.0.1/src/individuals/draggable.min.js"></script>
+<script>
+    function getdata(){
+        var orbs = document.getElementsByClassName("baseorb");
+        var x = [];
+        var y = [];      
+        var labels=[];
+        //check if orbs are left on the screen
+        if (orbs.length == 0) {
+            document.getElementById("S").innerHTML = "";
+            return;
+        }
+        for (var i = 0; i < orbs.length; i++) {
+            x.push(orbs[i].style.left);
+            y.push(orbs[i].style.top);
+            labels.push(orbs[i].id);
+        }
+        let isNorm = document.getElementById("norm").checked;
+        let alpha = document.getElementById("alpha").value;
+        let epsilon = document.getElementById("epsilon").value;
+        let iters = document.getElementById("iters").value;
+        return { 'x': x, 'y': y,'labels':labels, "norm":isNorm, "width":  window.innerWidth, "height": window.innerHeight, "alpha": alpha, "epsilon": epsilon, "iters": iters};
+    }
+    function doUpdate(){
+        let dataJSON = JSON.stringify(getdata());
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = function(){
+            if (request.readyState === 4) {
+                //the reply is a jsonified dict of key value points to print.
+                var points = JSON.parse(request.response);
+                // this is a list of the points to print, each point is a dict with x, y, label
+                // we'll draw each point on the screen as a plotted X shape. 
+                var node = document.getElementById('graph');
+                node.innerHTML = "";
+                for (var i = 0; i < points.length; i++) {
+                    var point = points[i];
+                    var orb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    orb.setAttribute("class", "orb");
+                    orb.setAttribute("id", point['label']);
+                    orb.setAttribute("cx", point['x']);
+                    orb.setAttribute("cy", point['y']);
+                    orb.setAttribute("r", 5);
+                    node.appendChild(orb);
+                    node.insertAdjacentHTML('afterend', '<div id="'+point['label']+'" style="left:'+point['x']+'px;top:'+point['y']+'px;position:absolute;" class="orb" draggable="false" ondragend="orblistener(event)"> x:' + point['rx'] + ' <br> y:' + point['ry']+ '</d>');
+                }
+            }
+        };
+        const action = "POST";
+        // get endpoint from the server host environment
+        const endpoint = "http://"+window.location.hostname+":5000/2d/data";
+        //const endpoint = "http://scc-lanfotech.lancs.ac.uk:80/demo/data";
+        
+        //get endpoint from the server
+        // this may vary depending on the server
+        //const endpoint = "http://"+window.location.hostname+":5000/data";
+        request.open(action, endpoint);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.send(dataJSON);
+        }
+
+    function ADDclass(){
+        // this function adds 2 buttons to the screen, one to add an orb and one to remove an orb from class
+        var node = document.getElementById('Controls');
+        //the button will have a number on it, which will label any orbs added to the screen as being in that class
+        var classnum = node.childNodes.length;
+        var button = document.createElement("button");
+        button.setAttribute("type", "button");
+        button.setAttribute("class", "b");
+        button.setAttribute("id", "addorb"+classnum);
+        button.setAttribute("onclick", "ADDORB('"+classnum+"')");
+        button.innerHTML = "Add Orb to Class "+classnum;    
+        node.appendChild(button);
+        var button = document.createElement("button");
+        button.setAttribute("type", "button");
+        button.setAttribute("class", "b");
+        button.setAttribute("id", "removeorb"+classnum);
+        button.setAttribute("onclick", "REMOVEORB('"+classnum+"')");
+        button.innerHTML = "Remove Orb from Class "+classnum;
+        node.appendChild(button);
+    }
+
+        
+    function ReLabelPoints() {
+        // this function will relabel all the orbs on the screen with the class number
+        var nodes = document.getElementById('graph').childNodes;
+        var x=[];
+        var y=[];
+        var labels=[];
+        var orbs=[];
+        let method= document.getElementById("relabelmethod").value;
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].className == "baseorb") {
+                // append x, y and label to the list
+                orbs.push(i);
+                x.push(nodes[i].style.left);
+                y.push(nodes[i].style.top);
+                labels.push(nodes[i].id);
+            }
+        }
+        let data = {'x': x, 'y': y, 'labels': labels, 'method': method};
+        let dataJSON = JSON.stringify(data);
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = function(){
+            if (request.readyState === 4) {
+                //the reply is a jsonified dict of key value points to print.
+                var points = JSON.parse(request.response);
+                // this is a list of the points to print, each point is a dict with x, y, label
+                // we'll draw each point on the screen as a plotted X shape. 
+                for (var i = 0; i < points.length; i++) {
+                    orb=nodes[orbs[i]];
+                    orb.setAttribute("id", point['label']);
+                }
+            }
+        };
+        const action = "POST";
+        // get endpoint from the server host environment /2d/classifyPoints
+        const endpoint = "http://"+window.location.hostname+":5000/2d/classifyPoints";
+        request.open(action, endpoint);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.send(dataJSON);
+
+    }
+    function ReLabelPredictedPoints(){
+        var nodes = document.getElementById('graph').childNodes;
+        var x=[];
+        var y=[];
+        var labels=[];
+        var orbs=[];
+        let method= document.getElementById("relabelmethod").value;
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].className == "orb") {
+                // append x, y and label to the list
+                orbs.push(i);
+                x.push(nodes[i].style.left);
+                y.push(nodes[i].style.top);
+                labels.push(nodes[i].id);
+            }
+        }
+        let data = {'x': x, 'y': y, 'labels': labels, 'method': method};
+        let dataJSON = JSON.stringify(data);
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = function(){
+            if (request.readyState === 4) {
+                //the reply is a jsonified dict of key value points to print.
+                var points = JSON.parse(request.response);
+                // this is a list of the points to print, each point is a dict with x, y, label
+                // we'll draw each point on the screen as a plotted X shape. 
+                for (var i = 0; i < points.length; i++) {
+                    orb=nodes[orbs[i]];
+                    orb.setAttribute("id", point['label']);
+                }
+            }
+        };
+        const action = "POST";
+        // get endpoint from the server host environment /2d/classifyPoints
+        const endpoint = "http://"+window.location.hostname+":5000/2d/classifyPoints";
+        request.open(action, endpoint);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.send(dataJSON);
+    }
+    
+    function ADDORB(id){
+        // Remove the last row from the table
+        var orb = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        node = document.getElementById('graph');
+        node.appendChild(orb);
+        // count the number of children in the graph
+        nodes = document.getElementById('graph').childNodes;
+        orb.setAttribute("class", "baseorb");
+        orb.setAttribute("id", id);
+        var x = Math.floor(Math.random() *  window.innerWidth);
+        var y = Math.floor(Math.random() * window.innerHeight);
+        var [rx, ry] = convertxytorelxy(x,y);
+        node.insertAdjacentHTML('afterend', '<div id="orb'+nodes.length+'" style="left:'+x+'px;top:'+y+'px;position:absolute;" class="orb" draggable="true" ondragend="orblistener(event)"> x:' + rx + ' <br> y:' + ry+ '</d>');
+        node.appendChild(orb);
+        node.innerHTML = node.innerHTML;
+        doUpdate();
+    }
+    function convertxytorelxy(x,y) {
+        var relx = x- window.innerWidth/2;
+        var rely = y - window.innerHeight/2;
+        return [relx,rely];
+    }
+    function orblistener(event) {
+        var x = event.clientX;
+        var y = event.clientY;
+        var orb = event.target;
+        orb.style.left = x + 'px';
+        orb.style.top = y + 'px';
+        orb.style.position = 'absolute';
+        var [rx,ry] = convertxytorelxy(x,y);
+        orb.innerHTML = "x: " + rx + " <br> y: " +ry + "<br>";
+        doUpdate();
+        }
+    function REMOVEORB(id) {
+        
+        let nodes = document.getElementById('graph').childNodes;
+        // find the first orb with the id
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id == id) {
+                nodes[i].remove();
+                break;
+            }
+        }      
+        doUpdate();
+    }
+
+    
+</script>
+<h1>PGD Visualisation</h1>
+<div id="Controls">
+
+<button type="button" class="b" id="add_classes" onclick="ADDclass()">Add Classes</button>
+
+<!-- checkbox for using normed or not... when changed do update -->
+<label for="norm">Use Normed functions</label>
+<input type="checkbox" id="norm" name="useNormed" onchange="doUpdate()">
+
+<!-- add input sliders for alpha, epsilon and iters values -->
+<label for="alpha">Alpha:</label>
+<input type="range" id="alpha" name="alpha" min="0" max="2" step="0.01" value="0.1" onchange="doUpdate()">
+<label for="epsilon">Epsilon:</label>
+<input type="range" id="epsilon" name="epsilon" min="0" max="2" step="0.01" value="0.01" onchange="doUpdate()">
+<label for="iters">Iterations:</label>
+<input type="range" id="iters" name="iters" min="0" max="100" step="1" value="10" onchange="doUpdate()">
+
+<!-- add some other controls -->
+ <!-- a button to relabel user points -->
+<label for="relabelbase">Relabel User Points</label>
+<button type="button" class="b" id="relabelbase" onclick="ReLabelPoints()">Relabel</button>
+<label for="relabelpred">Relabel Predicted Points</label>
+<button type="button" class="b" id="relabelpred" onclick="ReLabelPredictedPoints()">Relabel</button>
+<label for="relabelmethodDropdown">Method Selection</label>
+<!-- dropdown menu -->
+<dropdown id="relabelmethodDropdown">
+    <select id="relabelmethod" name="relabelmethod">
+        <option value="kmeans">KMeans</option>
+        <option value="linearFitandPredict">Linear</option>
+    </select>
+
+</div>
+
+
+
+<div class="container" id="graph">
+<!-- create "axis" for the graph -->
+<!-- add horizontal line  -->
+<div id="yAxis"> </div>
+<hr id="xAxis">
+<!-- add vertical line -->
+</div> 
+<div id="stats">
+
+</div>
+
+
+<p id="S"></p>
+</html>
