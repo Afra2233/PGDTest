@@ -625,3 +625,109 @@ class myLightningModule(LightningModule):
                                         **args)
         #scheduler = cosine_lr(optimizer, self.args.get("learning_rate",1e-5), self.args.get("warmup",1000), self.args.get("total_steps",100000))
         return optimizer#([optimizer],[scheduler])
+
+##########加入一个test epoch
+    def on_test_epoch_start(self):
+        self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
+        self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
+        self.test_cleanresults=defaultdict(list)
+        self.test_attackedresults=defaultdict(list)
+        self.test_data_loader_count = len(self.trainer.datamodule.val_dataloader())
+
+        if self.args.get("test_attack_type","pgd")=="pgd":
+            self.testattack=self.attack_pgd
+        elif self.args.get("test_attack_type","pgd")=="CW":
+            self.testattack= self.attack_CW
+        elif self.args.get("test_attack_type","pgd")=="text":
+            self.testattack= self.attack_text_pgd
+        elif self.args.get("test_attack_type","pgd")=="autoattack":
+            self.testattack=self.autoattack
+        elif self.args.get("test_attack_type","pgd")=="Noattack":
+            self.testattack=self.no_attack
+        else:
+            raise ValueError 
+    def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
+        images, target,text = batch
+       
+        alphas = [1/255, 2/255, 4/255]  
+        epsilons = [1/255, 2/255, 4/255]  
+        test_numsteps = [5,10]
+        img_embed=self.model.encode_image(images)
+        scale_text_embed=self.model.encode_text(text)
+        img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+        output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
+
+        self.test_cleanresults[dataloader_idx].append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
+        loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device))
+
+        # measure accuracy and record loss
+        acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
+        self.log('test_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+
+        for alpha in alphas:
+            for epsilon in epsilons:
+                for step in test_numsteps:
+                    attacked_images, attacked_text = self.testattack(images, target, text, alpha, step, epsilon=epsilon)
+                    
+                 
+                    img_embed_dirty = self.model.encode_image(attacked_images)
+                    scale_text_embed_dirty = self.model.encode_text(attacked_text)
+                    img_embed_norm_dirty = img_embed_dirty / img_embed_dirty.norm(dim=-1, keepdim=True)
+                    scale_text_embed_norm_dirty = scale_text_embed_dirty / scale_text_embed_dirty.norm(dim=-1, keepdim=True)
+                    output_prompt_adv = img_embed_norm_dirty @ scale_text_embed_norm_dirty.t()
+
+             
+                    
+                    loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
+                    self.test_attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target})
+                    
+                    #TODO: add logging for text loss here when we trial the attack
+
+                    acc1 = accuracy(output_prompt_adv, torch.arange(images.size(0),device=images.device), topk=(1,))
+                    self.log(f'test_dirty_batch_loss_alpha_{alpha}_epsilon_{epsilon}_numsteps_{step}', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                    self.log(f'test_dirty_batch_acc_alpha_{alpha}_epsilon_{epsilon}_numsteps_{step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        
+        return loss
+                    
+    
+    
+    def on_test_epoch_end(self):
+
+        #make linear probes here, and log the results.
+        
+
+        if not hasattr(self,"Cleanclassifier"):
+            self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        if not hasattr(self,"Dirtyclassifier"):
+            self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        if not hasattr(self,"generalclassifier"):
+            self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+            #we've selected 100 based on where it plateaus in the first few runs. 
+        for dataset_idx in range(self.test_data_loader_count):
+            GoodLabels=torch.cat([val["textlabels"] for val in self.test_cleanresults[dataset_idx]],dim=0).cpu().numpy()
+            GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.test_cleanresults[dataset_idx]],dim=0)).cpu().numpy()
+            BadLabels=torch.cat([val["textlabels"] for val in self.test_attackedresults[dataset_idx]],dim=0).cpu().numpy()
+            BadLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.test_attackedresults[dataset_idx]],dim=0)).cpu().numpy()
+            #check at least 2 classes are present in the dataset
+            if len(np.unique(GoodLabels)) < 2 or len(np.unique(BadLabels)) < 2:
+                print("Not enough classes to run linear probes on dataset {}".format(dataset_idx))
+                #skip this dataset
+                continue
+            self.Dirtyclassifier.fit(BadLogits, BadLabels)
+            self.Cleanclassifier.fit(GoodLogits, GoodLabels)
+            self.log( "Test Clean Classifier on Dirty Features on dataset {}".format(dataset_idx),self.Cleanclassifier.score(BadLogits, BadLabels))
+            self.log( "Test Dirty Classifier on Clean Features on dataset {}".format(dataset_idx),self.Dirtyclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Test Clean Classifier on Clean Features on dataset {}".format(dataset_idx),self.Cleanclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Test Dirty Classifier on Dirty Features on dataset {}".format(dataset_idx),self.Dirtyclassifier.score(BadLogits, BadLabels))
+            self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+            self.log( "Test General Classifier on Dirty Features on dataset {}".format(dataset_idx),self.generalclassifier.score(BadLogits, BadLabels))
+            self.log( "Test General Classifier on Clean Features on dataset {}".format(dataset_idx),self.generalclassifier.score(GoodLogits, GoodLabels))
+            self.log( "Test General Classifier on All Features on dataset {}".format(dataset_idx),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+
+        #this should give us PLENTY of data to write about! 
+        
+        #delete the results to save memory
+        del self.test_cleanresults
+        del self.test_attackedresults

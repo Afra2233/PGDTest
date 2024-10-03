@@ -43,6 +43,7 @@ def train(config={
     if sys.platform == "win32":
         os.environ["PL_TORCH_DISTRIBUTED_BACKEND"]='gloo'
     trainer=pytorch_lightning.Trainer(
+            check_val_every_n_epoch= 5,
             devices="auto" if devices is None else devices,
             accelerator="auto",
             max_epochs=200,
@@ -69,6 +70,8 @@ def train(config={
     if config["batch_size"] !=1:
 
         trainer.fit(model,Dataset)
+        trainer.test(model,Dataset)
+
     else:
         return 0 #No need to train if batch size is 1
 
