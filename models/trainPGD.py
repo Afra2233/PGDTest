@@ -646,12 +646,14 @@ class myLightningModule(LightningModule):
             self.testattack=self.no_attack
         else:
             raise ValueError 
+
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
        
-        alphas = [1/255, 2/255, 4/255]  
-        epsilons = [1/255, 2/255, 4/255]  
-        test_numsteps = [5,10]
+        alphas = np.array([1/255, 2/255, 4/255])
+        epsilons = np.array([1/255, 2/255, 4/255])
+        test_numsteps = np.array([5, 10])
+
         img_embed=self.model.encode_image(images)
         scale_text_embed=self.model.encode_text(text)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
@@ -666,10 +668,12 @@ class myLightningModule(LightningModule):
         self.log('test_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        for alpha in alphas:
-            for epsilon in epsilons:
-                for step in test_numsteps:
-                    attacked_images, attacked_text = self.testattack(images, target, text, alpha, step, epsilon=epsilon)
+        
+        param_grid = np.array(np.meshgrid(alphas, epsilons, test_numsteps)).T.reshape(-1, 3)
+        result_data =[]
+        for params in param_grid:
+                    alpha, epsilon, step = params
+                    attacked_images, attacked_text = self.testattack(images, target, text, alpha, step, epsilon)
                     
                  
                     img_embed_dirty = self.model.encode_image(attacked_images)
@@ -678,17 +682,20 @@ class myLightningModule(LightningModule):
                     scale_text_embed_norm_dirty = scale_text_embed_dirty / scale_text_embed_dirty.norm(dim=-1, keepdim=True)
                     output_prompt_adv = img_embed_norm_dirty @ scale_text_embed_norm_dirty.t()
 
-             
+                    
                     
                     loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
-                    self.test_attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target})
+                    result_data.append({"logits": img_embed_dirty.detach(), "textlabels": target, "alpha": alpha, "epsilon": epsilon, "step": step})
+                    
+                    #self.test_attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target, "epsilon":epsilons,"alpha":alpha,"test_numsteps":step})
                     
                     #TODO: add logging for text loss here when we trial the attack
 
                     acc1 = accuracy(output_prompt_adv, torch.arange(images.size(0),device=images.device), topk=(1,))
                     self.log(f'test_dirty_batch_loss_alpha_{alpha}_epsilon_{epsilon}_numsteps_{step}', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
                     self.log(f'test_dirty_batch_acc_alpha_{alpha}_epsilon_{epsilon}_numsteps_{step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        
+        self.test_attackedresults[dataloader_idx].extend(result_data)
+       
         return loss
                     
     

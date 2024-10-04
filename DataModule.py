@@ -556,18 +556,9 @@ class MyDataModule(pl.LightningDataModule):
             self.val_texts = texts_list
             self.val_datasets= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.val_datasets, self.val_texts)]
             
-            #for val dataset
-            dataset_size = len(self.val_datasetst)
-            val_size = int(0.2 * dataset_size)  
-            rest_size = dataset_size - val_size   
-            self.val_datasetst, rest_datasetst = torch.utils.data.random_split(self.val_datasetst, [val_size, rest_size])
+      
             
-            #for test dataset
-            rest_size = len(rest_datasetst)
-            test_size = int(0.1 * rest_size)  
-            rest_size_2 = rest_size - test_size   
-            self.test_datasetst, rest_datasetst = torch.utils.data.random_split(self.val_datasetst, [test_size, rest_size_2])
-            
+            self.test_datasets, self.val_datasets=[torch.utils.data.random_split(v,[int(0.95*len(v)),len(v)-int(0.95*len(v))]) for v in self.val_datasets]
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 if not self.ISHEC else 4 ,pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True)
@@ -576,7 +567,7 @@ class MyDataModule(pl.LightningDataModule):
         return [DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 if not self.ISHEC else 4, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in self.val_datasets]
 
     def test_dataloader(self):
-        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in self.test_datasetst]
+        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in  self.test_datasets]
 
 
 
