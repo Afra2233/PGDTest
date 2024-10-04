@@ -560,8 +560,10 @@ class MyDataModule(pl.LightningDataModule):
             
             #self.test_datasets, self.val_datasets=[torch.utils.data.random_split(v,[int(0.95*len(v)),len(v)-int(0.95*len(v))]) for v in self.val_datasets]
             split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
-            self.test_datasets = [split[1] for split in split_datasets]  # 获取10%部分作为测试集
-            self.val_datasets = [split[0] for split in split_datasets]   # 获取90%部分作为验证集
+            self.test_datasets = [split[0] for split in split_datasets]
+            print(len(self.test_datasets))  
+            self.val_datasets = [split[1] for split in split_datasets]   
+            print(len(self.val_datasets))
 
 
     def train_dataloader(self):
