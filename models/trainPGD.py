@@ -70,9 +70,9 @@ class myLightningModule(LightningModule):
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         self.criterion_kl = nn.KLDivLoss(reduction="sum")
-        self.test_alphas = [1/255,2/255,4/255]
-        self.test_epsilons = [1/255,2/255,4/255]
-        self.test_numsteps = [5,10]
+        self.test_alphas = torch.tensor([1/255,2/255,4/255])
+        self.test_epsilons = torch.tensor([1/255,2/255,4/255])
+        self.test_numsteps = torch.tensor([5,10])
 
         '''
         Dear Afra, heres where you put you transformer decoder to build your image! 
