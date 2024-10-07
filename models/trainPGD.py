@@ -669,6 +669,9 @@ class myLightningModule(LightningModule):
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
     def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
+        epsilon = self.test_epsilons
+        alpha = self.test_aphas
+        attack_iters = self.test_numsteps
         delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
         losses=[]
         return_dict={}
@@ -704,9 +707,6 @@ class myLightningModule(LightningModule):
         return return_dict
     
     def on_test_epoch_start(self):
-       self.test_alphas = [1/255,2/255,4/255]
-       self.test_numsteps = [5,10]
-       self.test_epsilons = [1/255,2/255,4/255]
        self.test_cleanresults = defaultdict(list)
        self.test_attackedresults = defaultdict(list)
        self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
