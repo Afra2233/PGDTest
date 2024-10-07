@@ -738,7 +738,7 @@ class myLightningModule(LightningModule):
             #we should reshape it to [alpha, epsilon, B, B]
             output_prompt_adv = output_prompt_adv.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
             img_embed_dirty = img_embed_dirty.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
-              
+            print(output_prompt_adv.shape)
             loss = self.criterion(output_prompt_adv.permute(-2,-1,0,1), torch.arange(images.size(0),device=images.device).unsqueeze(-1,-1).repeat(1,self.test_alphas.size(0),self.test_epsilons.size(0))) #shoudl be torch arange(images.size(0), device=self.device)
             for alpha in range(self.test_alphas.size(0)):
                 for epsilon in range(self.test_epsilons.size(0)):
