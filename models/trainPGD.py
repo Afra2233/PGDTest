@@ -680,6 +680,7 @@ class myLightningModule(LightningModule):
             output = img_embed_norm @ scale_text_embed.t()
             #unflatten the output into alpha,epsilon,B
             output = output.view(alpha.size(0),epsilon.size(0),X.size(0),-1)
+            print(output.shape)
             loss = self.criterion(output.permute(-2,-1,0,1), torch.arange(prompted_images.size(0), device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1,alpha.size(0),epsilon.size(0)))
             loss.backward()
             losses.append(loss)
