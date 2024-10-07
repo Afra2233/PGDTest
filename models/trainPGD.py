@@ -708,12 +708,18 @@ class myLightningModule(LightningModule):
         # alphas = np.array([1/255, 2/255, 4/255])
         # epsilons = np.array([1/255, 2/255, 4/255])
         # test_numsteps = np.array([5, 10])
-
+        print(images.shape,1)
         img_embed=self.model.encode_image(images)
+        print(img_embed.shape,2)
         scale_text_embed=self.model.encode_text(text)
+        print(scale_text_embed.shape,3)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+        print(img_embed_norm.shape,4)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-        output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
+        print(scale_text_embed_norm.shape,5)
+        output_prompt = img_embed_norm @ scale_text_embed_norm.t()   
+        print(output_prompt.shape,6)
+
 
         self.test_cleanresults[dataloader_idx].append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device))
