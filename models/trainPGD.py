@@ -705,6 +705,18 @@ class myLightningModule(LightningModule):
        self.test_cleanresults = defaultdict(list)
        self.test_attackedresults = defaultdict(list)
        self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
+       if self.args.get("test_attack_type","pgd")=="pgd":
+            self.testattack=self.attack_batch_pgd
+       elif self.args.get("test_attack_type","pgd")=="CW":
+            self.testattack= self.attack_CW
+       elif self.args.get("test_attack_type","pgd")=="text":
+            self.testattack= self.attack_text_pgd
+       elif self.args.get("test_attack_type","pgd")=="autoattack":
+            self.testattack=self.autoattack
+       elif self.args.get("test_attack_type","pgd")=="Noattack":
+            self.testattack=self.no_attack
+       else:
+            raise ValueError 
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
        
