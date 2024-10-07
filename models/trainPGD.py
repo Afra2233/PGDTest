@@ -702,6 +702,9 @@ class myLightningModule(LightningModule):
         return return_dict
     
     def on_test_epoch_start(self):
+       self.test_alphas = [1/255,2/255,4/255]
+       self.test_numsteps = [5,10]
+       self.test_epsilons = [1/255,2/255,4/255]
        self.test_cleanresults = defaultdict(list)
        self.test_attackedresults = defaultdict(list)
        self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
