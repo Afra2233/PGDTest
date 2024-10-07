@@ -701,18 +701,21 @@ class myLightningModule(LightningModule):
         #self.log("min_attack_loss",min(losses))
         return return_dict
     
-
+    def on_test_epoch_start(self):
+       self.test_cleanresults = defaultdict(list)
+       self.test_attackedresults = defaultdict(list)
+       self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
        
         # alphas = np.array([1/255, 2/255, 4/255])
         # epsilons = np.array([1/255, 2/255, 4/255])
         # test_numsteps = np.array([5, 10])
-        print(images.shape,1)
+        
         img_embed=self.model.encode_image(images)
-        print(img_embed.shape,2)
+        text =text.squeeze(1)
         scale_text_embed=self.model.encode_text(text)
-        print(scale_text_embed.shape,3)
+        
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         print(img_embed_norm.shape,4)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
