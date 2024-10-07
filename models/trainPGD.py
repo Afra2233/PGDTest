@@ -672,7 +672,10 @@ class myLightningModule(LightningModule):
         epsilon = self.test_epsilons
         alpha = self.test_aphas
         attack_iters = self.test_numsteps
-        delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
+        delta = self.init_batch_delta(X,epsilon)
+        delta = delta.unsqueeze(0)
+        delta =delta.repeat(len(alpha),1,1,1,1,1)
+        #delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
         losses=[]
         return_dict={}
         for iter_count in range(max(attack_iters)):
