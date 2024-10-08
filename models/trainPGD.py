@@ -70,12 +70,10 @@ class myLightningModule(LightningModule):
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         self.criterion_kl = nn.KLDivLoss(reduction="sum")
-<<<<<<< HEAD
-=======
+
         self.test_alphas = torch.tensor([1/255,2/255,4/255])
         self.test_epsilons = torch.tensor([1/255,2/255,4/255])
         self.test_numsteps = torch.tensor([5,10])
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
 
         '''
         Dear Afra, heres where you put you transformer decoder to build your image! 
@@ -798,9 +796,7 @@ class myLightningModule(LightningModule):
         self.test_epsilons =torch.tensor([1/255,2/255,4/255])
        
         
-    
-<<<<<<< HEAD
-=======
+   
     def on_test_epoch_start(self):
        self.test_cleanresults = defaultdict(list)
        self.test_attackedresults = defaultdict(list)
@@ -817,14 +813,14 @@ class myLightningModule(LightningModule):
             self.testattack=self.no_attack
        else:
             raise ValueError 
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
+
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
        
         # alphas = np.array([1/255, 2/255, 4/255])
         # epsilons = np.array([1/255, 2/255, 4/255])
         # test_numsteps = np.array([5, 10])
-<<<<<<< HEAD
+
         print("this is my image {}".format(images.shape))
         img_embed=self.model.encode_image(images)
         print("this is img_embed {}".format(img_embed.shape))
@@ -834,13 +830,12 @@ class myLightningModule(LightningModule):
         scale_text_embed=self.model.encode_text(text)
         print("this is the  scale_text_embed.shape {}".format( scale_text_embed.shape))
         print(scale_text_embed.shape,3)
-=======
-        
+
         img_embed=self.model.encode_image(images)
         text =text.squeeze(1)
         scale_text_embed=self.model.encode_text(text)
         
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
+
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         print(img_embed_norm.shape,4)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
