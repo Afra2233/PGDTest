@@ -70,12 +70,6 @@ class myLightningModule(LightningModule):
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         self.criterion_kl = nn.KLDivLoss(reduction="sum")
-<<<<<<< HEAD
-=======
-        self.test_alphas = torch.tensor([1/255,2/255,4/255])
-        self.test_epsilons = torch.tensor([1/255,2/255,4/255])
-        self.test_numsteps = torch.tensor([5,10])
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
 
         '''
         Dear Afra, heres where you put you transformer decoder to build your image! 
@@ -644,23 +638,26 @@ class myLightningModule(LightningModule):
        
         print("this is eps", eps)
         delta=  torch.stack([torch.zeros_like(X,device=self.device,).uniform_(-v, v) for v in eps])
-        print("delta.grad_fn_uniform",delta.grad_fn)
+
         delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
         delta.requires_grad = True
+        print("delta.grad_fn_normal",delta.grad_fn)
+        print("delta.requires_grad",delta.requires_grad)
         return delta
     
     def init_batch_normal(self, X,eps):
            
             delta=torch.zeros_like(X,device=self.device)
-            print("delta.grad_fn_normal",delta.grad_fn)
+           
             delta.normal_()
             d_flat = delta.view(delta.size(0), -1)
             n = d_flat.norm(p=2, dim=1).view(delta.size(0), 1, 1, 1)
             r = torch.zeros_like(n).uniform_(0, 1)
             delta *= r / n * eps
             delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
-            
             delta.requires_grad = True
+            print("delta.grad_fn_normal",delta.grad_fn)
+            print("delta.requires_grad",delta.requires_grad)
             return delta
     
     def clamp_batch_inf(self,d,alpha,g,eps):
@@ -676,8 +673,7 @@ class myLightningModule(LightningModule):
   
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
-<<<<<<< HEAD
-    def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
+    def attack_batch_pgd(self, X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
         # epsilon =self.test_epsilons
         # alpha =self.test_alphas
         # attack_iters = self.test_numsteps
@@ -705,34 +701,24 @@ class myLightningModule(LightningModule):
         print("Delta requires grad after repeat:", delta.requires_grad)
 
         # delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
-=======
-    def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
-        epsilon = self.test_epsilons
-        alpha = self.test_aphas
-        attack_iters = self.test_numsteps
-        delta = self.init_batch_delta(X,epsilon)
-        delta = delta.unsqueeze(0)
-        delta =delta.repeat(len(alpha),1,1,1,1,1)
-        #delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
         losses=[]
         return_dict={}
         for iter_count in range(max(attack_iters)):
-            X.requires_grad = True
+            # X.requires_grad = True
             print("X requires grad:", X.requires_grad)
             print("Delta requires grad before add:", delta.requires_grad)
             new_images = delta+X
             print("new_images.grad_fn",new_images.grad_fn)
             print("Delta requires grad before use 2:", delta.requires_grad)
-            new_images.requires_grad = True
+            # new_images.requires_grad = True
             print("new_images:",new_images.shape)
             print("new_images requires grad:", new_images.requires_grad)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img), self.std_img) #normalize(new_images) but preserves grad
-            prompted_images.requires_grad = True
+            # prompted_images.requires_grad = True
             print("prompted_images requires grad:", prompted_images.requires_grad)
             print("prompted_images_1:",prompted_images.shape)
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
-            img_embed.requires_grad = True
+            # img_embed.requires_grad = True
             print("img_embed:",img_embed.shape)
             print("img_embed requires grad:", img_embed.requires_grad)
             img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
@@ -793,38 +779,16 @@ class myLightningModule(LightningModule):
             raise ValueError 
         self.model.train()
         self.model_ori.eval()
-        self.test_alphas = torch.tensor([1/255,2/255,4/255])
+        self.test_alphas = torch.tensor([1/255,2/255,4/255],requires_grad=True)
         self.test_numsteps =torch.tensor([5,10])
-        self.test_epsilons =torch.tensor([1/255,2/255,4/255])
+        self.test_epsilons =torch.tensor([1/255,2/255,4/255],requires_grad=True)
        
         
     
-<<<<<<< HEAD
-=======
-    def on_test_epoch_start(self):
-       self.test_cleanresults = defaultdict(list)
-       self.test_attackedresults = defaultdict(list)
-       self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
-       if self.args.get("test_attack_type","pgd")=="pgd":
-            self.testattack=self.attack_batch_pgd
-       elif self.args.get("test_attack_type","pgd")=="CW":
-            self.testattack= self.attack_CW
-       elif self.args.get("test_attack_type","pgd")=="text":
-            self.testattack= self.attack_text_pgd
-       elif self.args.get("test_attack_type","pgd")=="autoattack":
-            self.testattack=self.autoattack
-       elif self.args.get("test_attack_type","pgd")=="Noattack":
-            self.testattack=self.no_attack
-       else:
-            raise ValueError 
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
        
-        # alphas = np.array([1/255, 2/255, 4/255])
-        # epsilons = np.array([1/255, 2/255, 4/255])
-        # test_numsteps = np.array([5, 10])
-<<<<<<< HEAD
+     
         print("this is my image {}".format(images.shape))
         img_embed=self.model.encode_image(images)
         print("this is img_embed {}".format(img_embed.shape))
@@ -834,13 +798,6 @@ class myLightningModule(LightningModule):
         scale_text_embed=self.model.encode_text(text)
         print("this is the  scale_text_embed.shape {}".format( scale_text_embed.shape))
         print(scale_text_embed.shape,3)
-=======
-        
-        img_embed=self.model.encode_image(images)
-        text =text.squeeze(1)
-        scale_text_embed=self.model.encode_text(text)
-        
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         print(img_embed_norm.shape,4)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
