@@ -674,7 +674,6 @@ class myLightningModule(LightningModule):
   
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
-<<<<<<< HEAD
     def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
         # epsilon =self.test_epsilons
         # alpha =self.test_alphas
@@ -703,7 +702,7 @@ class myLightningModule(LightningModule):
         print("Delta requires grad after repeat:", delta.requires_grad)
 
         # delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
-=======
+
     def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
         epsilon = self.test_epsilons
         alpha = self.test_aphas
@@ -712,7 +711,7 @@ class myLightningModule(LightningModule):
         delta = delta.unsqueeze(0)
         delta =delta.repeat(len(alpha),1,1,1,1,1)
         #delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
->>>>>>> 36ccba190bf7392f89cee9133f86c6a7cde8cd7c
+
         losses=[]
         return_dict={}
         for iter_count in range(max(attack_iters)):
