@@ -69,6 +69,7 @@ class myLightningModule(LightningModule):
         '''
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
+        self.test_criterion = torch.nn.CrossEntropyLoss(reduction="none")
         self.criterion_kl = nn.KLDivLoss(reduction="sum")
 
         '''
@@ -85,10 +86,12 @@ class myLightningModule(LightningModule):
             self.init_delta=self.init_uniform
             self.clamp=self.clamp_inf
             self.init_batch_delta=self.init_batch_uniform
+            self.batch_clamp=self.clamp_batch_inf
         elif  args.get("norm",'l_inf')=='l_2':
             self.init_delta=self.init_normal
             self.init_batch_delta=self.init_batch_normal
             self.clamp=self.clamp_2
+            self.batch_clamp=self.clamp_batch_2
         else:
             raise ValueError
        
@@ -564,6 +567,9 @@ class myLightningModule(LightningModule):
             self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
             #we've selected 100 based on where it plateaus in the first few runs. 
         for dataset_idx in range(self.data_loader_count):
+            if len(self.cleanresults[dataset_idx]) == 0 or len(self.attackedresults[dataset_idx]) == 0:
+                print("No results for dataset {}".format(dataset_idx))
+                continue
             GoodLabels=torch.cat([val["textlabels"] for val in self.cleanresults[dataset_idx]],dim=0).cpu().numpy()
             GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.cleanresults[dataset_idx]],dim=0)).cpu().numpy()
             BadLabels=torch.cat([val["textlabels"] for val in self.attackedresults[dataset_idx]],dim=0).cpu().numpy()
@@ -641,8 +647,6 @@ class myLightningModule(LightningModule):
 
         delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
         delta.requires_grad = True
-        print("delta.grad_fn_normal",delta.grad_fn)
-        print("delta.requires_grad",delta.requires_grad)
         return delta
     
     def init_batch_normal(self, X,eps):
@@ -659,90 +663,58 @@ class myLightningModule(LightningModule):
             print("delta.grad_fn_normal",delta.grad_fn)
             print("delta.requires_grad",delta.requires_grad)
             return delta
-    
+     
+    @torch.enable_grad()
+    @torch.inference_mode(False)
     def clamp_batch_inf(self,d,alpha,g,eps):
-        return torch.cat([torch.clamp(d + alpha.view(-1,1,1,1,1,1) * torch.sign(g), min=-e
-                           , max=e) for e in eps],dim=1)
-    
+          return torch.clamp(d.clone() + alpha.clone().view(-1,1,1,1,1,1) * torch.sign(g.clone()), min=-eps.clone().view(1,-1,1,1,1,1), max=eps.clone().view(1,-1,1,1,1,1))
+    @torch.enable_grad()
+    @torch.inference_mode(False)
     def clamp_batch_2(self,d,alpha,g,eps):
         g_norm = torch.norm(g.view(g.shape[0], -1), dim=1).view(-1, 1, 1, 1)
         scaled_g = g / (g_norm + 1e-10)
-        d = (d + scaled_g * alpha.view(-1,1,1,1,1,1)).view(d.size(0), -1).renorm(p=2, dim=0, maxnorm=eps).view_as(d)
+        d = (d + scaled_g * alpha.view(-1,1,1,1,1,1)).view(d.size(0), -1).renorm(p=2, dim=0, maxnorm=eps.view(1,-1,1,1,1,1)).view_as(d)
         return d
     
   
     #insert function decorator to ensure this ALWAys has grad
     @torch.enable_grad()
+    @torch.inference_mode(False)
     def attack_batch_pgd(self, X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
-        # epsilon =self.test_epsilons
-        # alpha =self.test_alphas
-        # attack_iters = self.test_numsteps
-                # 生成 delta
-        delta = self.init_batch_delta(X, epsilon)
-        print("delta.grad_fn",delta.grad_fn)
-        print("Delta requires grad before use:", delta.requires_grad)
-
-        print("Delta shape before unsqueeze:", delta.shape)  # 确认维度
-
-        # 增加维度
-        delta = delta.unsqueeze(0).detach() # 变为 (1, B, 3, 224, 224)
-        print("delta.grad_fn.unsqueeze",delta.grad_fn)
-        delta.requires_grad = True
-        print("Delta shape after unsqueeze:", delta.shape)  # 确认维度
-        print("Delta requires grad after unsqueeze:", delta.requires_grad)
-        
-
-        # 生成所需形状
-        print("epsilon",len(epsilon))
-        delta = delta.repeat(len(alpha), 1, 1, 1, 1, 1)  # 使用逗号分隔，直接传递整数参数  # 变为 (len(alpha), epsilon, B, 3, 224, 224)
-        print("delta.grad_fn.repeat",delta.grad_fn)
-        delta.requires_grad = True
-        print("Final delta shape:", delta.shape)  # 确认最终形状
-        print("Delta requires grad after repeat:", delta.requires_grad)
-
-        # delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(len(alpha))#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
-        losses=[]
+        delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(alpha.shape[0],1,1,1,1,1)
+        #losses=[]
+        delta.retain_grad()
         return_dict={}
+        X= X.clone().detach()
+        text_tokens =text_tokens.clone().detach()
         for iter_count in range(max(attack_iters)):
+           
             # X.requires_grad = True
-            print("X requires grad:", X.requires_grad)
-            print("Delta requires grad before add:", delta.requires_grad)
-            new_images = delta+X
-            print("new_images.grad_fn",new_images.grad_fn)
-            print("Delta requires grad before use 2:", delta.requires_grad)
-            # new_images.requires_grad = True
-            print("new_images:",new_images.shape)
-            print("new_images requires grad:", new_images.requires_grad)
-            prompted_images = torch.div(torch.sub(new_images, self.mu_img), self.std_img) #normalize(new_images) but preserves grad
-            # prompted_images.requires_grad = True
-            print("prompted_images requires grad:", prompted_images.requires_grad)
-            print("prompted_images_1:",prompted_images.shape)
+            new_images = torch.add(X,delta)
+            
+            prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
             # img_embed.requires_grad = True
-            print("img_embed:",img_embed.shape)
-            print("img_embed requires grad:", img_embed.requires_grad)
-            img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
-            print("img_embed_norm requires grad:", img_embed_norm.requires_grad)
+            img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
+           
             scale_text_embed=self.model.encode_text(text_tokens)
-            print("scale_text_embed requires grad:", scale_text_embed.requires_grad)
+           
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-            output = img_embed_norm @ scale_text_embed.t()
-            print("output requires grad:", output.requires_grad)
+            output = img_embed @ scale_text_embed.t()
+          
             #unflatten the output into alpha,epsilon,B
             output = output.view(alpha.size(0),epsilon.size(0),X.size(0),-1)
-            print(output.shape)
-            print("Output shape after permute:", output.permute(-2, -1, 0, 1).shape)
           
-            print("prompted_images.size(2):",prompted_images.size(2))
-            target_loss = torch.arange(prompted_images.size(2), device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1, alpha.size(0), epsilon.size(0))
-            print("Target shape:", target_loss.shape)
-            loss = self.criterion(output.permute(-2, -1, 0, 1), target_loss)
-            print("loss:",loss)
-            print(delta.requires_grad, output.requires_grad, target_loss.requires_grad)
-            #loss = self.criterion(output.permute(-2,-1,0,1), torch.arange(prompted_images.size(0), device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1,alpha.size(0),epsilon.size(0)))
+          
+            # target_loss = torch.arange(prompted_images.size(2), device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1, alpha.size(0), epsilon.size(0))
+            # print("Target shape:", target_loss.shape)
+            # loss = self.criterion(output.permute(-2, -1, 0, 1), target_loss)
+            # print("loss:",loss)
+            # print(delta.requires_grad, output.requires_grad, target_loss.requires_grad)
+            loss = self.criterion(output.permute(-2,-1,0,1), torch.arange(X.shape[0], device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1,alpha.size(0),epsilon.size(0)))
             loss.backward()
-            losses.append(loss)
-            grad = delta.grad.detach()
+            # losses.append(loss)
+            # grad = delta.grad.detach()
             d = delta[:, :, :, :,:,:]
             g = grad[:, :, :, :,:,:]
             x = X[:, :, :, :]
@@ -750,7 +722,7 @@ class myLightningModule(LightningModule):
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :,:,:] = d
             delta.grad.zero_()
-            if iter_count in attack_iters:
+            if iter_count +1 in attack_iters:
                 #log the X+delta and the text tokens
                 return_dict.update({iter_count:(X+delta,text_tokens)})
                         
@@ -777,7 +749,8 @@ class myLightningModule(LightningModule):
             self.testattack=self.no_attack
         else:
             raise ValueError 
-        self.model.train()
+        self.model.eval()
+        torch.set_grad_enabled(True)
         self.model_ori.eval()
         self.test_alphas = torch.tensor([1/255,2/255,4/255],requires_grad=True)
         self.test_numsteps =torch.tensor([5,10])
@@ -787,23 +760,19 @@ class myLightningModule(LightningModule):
     
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
-       
-     
-        print("this is my image {}".format(images.shape))
         img_embed=self.model.encode_image(images)
-        print("this is img_embed {}".format(img_embed.shape))
-        print("this is the text.shape {}".format( text.shape))
+      
         text =text.squeeze(1)
-        print("this is the text2.shape {}".format( text.shape))
+      
         scale_text_embed=self.model.encode_text(text)
-        print("this is the  scale_text_embed.shape {}".format( scale_text_embed.shape))
-        print(scale_text_embed.shape,3)
+       
+       
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
-        print(img_embed_norm.shape,4)
+        
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-        print(scale_text_embed_norm.shape,5)
+       
         output_prompt = img_embed_norm @ scale_text_embed_norm.t()   
-        print(output_prompt.shape,6)
+        
 
 
         self.test_cleanresults[dataloader_idx].append({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
@@ -817,12 +786,12 @@ class myLightningModule(LightningModule):
 
         return_dict = self.testattack(images, target, text, self.test_alphas, self.test_numsteps, self.test_epsilons)
         #this returns a dict of "steps" entris, each entry has a tensor of shape Alphas, Epsilons, B, 3, 224, 224
-        result_data = []
-        for Attack_step, result_data in return_dict.items():
+        results_data = []
+        for Attack_step, results_data in return_dict.items():
             
-            attacked_images, attacked_text = result_data
+            attacked_images, attacked_text = results_data
             img_embed_dirty = self.model.encode_image(attacked_images.flatten(0,-4)).detach()
-            scale_text_embed_dirty = self.model.encode_text(attacked_text[Attack_step].flatten(0,-2))
+            scale_text_embed_dirty = self.model.encode_text(attacked_text.flatten(0,-2))
             img_embed_norm_dirty = img_embed_dirty / img_embed_dirty.norm(dim=-1, keepdim=True)
             scale_text_embed_norm_dirty = scale_text_embed_dirty / scale_text_embed_dirty.norm(dim=-1, keepdim=True)
             output_prompt_adv = img_embed_norm_dirty @ scale_text_embed_norm_dirty.t()
@@ -830,16 +799,20 @@ class myLightningModule(LightningModule):
             #we should reshape it to [alpha, epsilon, B, B]
             output_prompt_adv = output_prompt_adv.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
             img_embed_dirty = img_embed_dirty.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
-            print(output_prompt_adv.shape)
-            loss = self.criterion(output_prompt_adv.permute(-2,-1,0,1), torch.arange(images.size(0),device=images.device).unsqueeze(-1,-1).repeat(1,self.test_alphas.size(0),self.test_epsilons.size(0))) #shoudl be torch arange(images.size(0), device=self.device)
+           
+           
+            loss = self.test_criterion(output_prompt_adv.permute(-2,-1,0,1), torch.arange(images.size(0),device=images.device).unsqueeze(-1).unsqueeze(-1).repeat(1,self.test_alphas.size(0),self.test_epsilons.size(0))) #shoudl be torch arange(images.size(0), device=self.device)
+            
+            loss=loss.permute(1,2,0).view(self.test_epsilons.size(0),self.test_alphas.size(0),images.size(0)) #shoudl be torch arange(images.size(0), device=self.device)
             for alpha in range(self.test_alphas.size(0)):
                 for epsilon in range(self.test_epsilons.size(0)):
-                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[alpha,epsilon], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[alpha,epsilon].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                       
                         acc1 = accuracy(output_prompt_adv[alpha,epsilon], torch.arange(images.size(0),device=images.device), topk=(1,))
                         self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-                        result_data.append({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha], "epsilon": self.test_epsilons[epsilon], "step": Attack_step})
+                        results_data.append({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha], "epsilon": self.test_epsilons[epsilon], "step": Attack_step})
                     
-        self.test_attackedresults[dataloader_idx].extend(result_data)
+        self.test_attackedresults[dataloader_idx].extend(results_data)
        
         return loss
                     
@@ -890,3 +863,4 @@ class myLightningModule(LightningModule):
                 
         del self.test_cleanresults
         del self.test_attackedresults
+        print("done")
