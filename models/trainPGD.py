@@ -714,7 +714,7 @@ class myLightningModule(LightningModule):
             loss = self.criterion(output.permute(-2,-1,0,1), torch.arange(X.shape[0], device=self.device).unsqueeze(-1).unsqueeze(-1).repeat(1,alpha.size(0),epsilon.size(0)))
             loss.backward()
             # losses.append(loss)
-            # grad = delta.grad.detach()
+            grad = delta.grad.detach()
             d = delta[:, :, :, :,:,:]
             g = grad[:, :, :, :,:,:]
             x = X[:, :, :, :]
@@ -780,16 +780,16 @@ class myLightningModule(LightningModule):
 
         # measure accuracy and record loss
         acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
-        self.log('test_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('---------------test_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('---------------test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
 
         return_dict = self.testattack(images, target, text, self.test_alphas, self.test_numsteps, self.test_epsilons)
         #this returns a dict of "steps" entris, each entry has a tensor of shape Alphas, Epsilons, B, 3, 224, 224
         results_data = []
-        for Attack_step, results_data in return_dict.items():
+        for Attack_step, result_data in return_dict.items():
             
-            attacked_images, attacked_text = results_data
+            attacked_images, attacked_text = result_data
             img_embed_dirty = self.model.encode_image(attacked_images.flatten(0,-4)).detach()
             scale_text_embed_dirty = self.model.encode_text(attacked_text.flatten(0,-2))
             img_embed_norm_dirty = img_embed_dirty / img_embed_dirty.norm(dim=-1, keepdim=True)
@@ -806,10 +806,10 @@ class myLightningModule(LightningModule):
             loss=loss.permute(1,2,0).view(self.test_epsilons.size(0),self.test_alphas.size(0),images.size(0)) #shoudl be torch arange(images.size(0), device=self.device)
             for alpha in range(self.test_alphas.size(0)):
                 for epsilon in range(self.test_epsilons.size(0)):
-                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[alpha,epsilon].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}_-------loss =', loss[alpha,epsilon].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
                        
                         acc1 = accuracy(output_prompt_adv[alpha,epsilon], torch.arange(images.size(0),device=images.device), topk=(1,))
-                        self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                        self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}_-------acc =', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
                         results_data.append({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha], "epsilon": self.test_epsilons[epsilon], "step": Attack_step})
                     
         self.test_attackedresults[dataloader_idx].extend(results_data)
