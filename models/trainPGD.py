@@ -752,9 +752,9 @@ class myLightningModule(LightningModule):
         self.model.eval()
         torch.set_grad_enabled(True)
         self.model_ori.eval()
-        self.test_alphas = torch.tensor([1/255,2/255,4/255],requires_grad=True)
-        self.test_numsteps =torch.tensor([5,10])
-        self.test_epsilons =torch.tensor([1/255,2/255,4/255],requires_grad=True)
+        self.test_alphas = torch.tensor([1/255,2/255,4/255],requires_grad=True).to(self.device)
+        self.test_numsteps =torch.tensor([5,10]).to(self.device)
+        self.test_epsilons =torch.tensor([1/255,2/255,4/255],requires_grad=True).to(self.device)
        
         
     
