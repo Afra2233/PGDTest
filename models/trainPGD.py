@@ -694,7 +694,7 @@ class myLightningModule(LightningModule):
             
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
-            # img_embed.requires_grad = True
+            img_embed.requires_grad = True
             img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
            
             scale_text_embed=self.model.encode_text(text_tokens)
