@@ -681,7 +681,7 @@ class myLightningModule(LightningModule):
     @torch.enable_grad()
     @torch.inference_mode(False)
     def attack_batch_pgd(self, X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
-        delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(alpha.shape[0],1,1,1,1,1)
+        delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(alpha.shape[0],1,1,1,1,1).to(self.device)
         #losses=[]
         delta.retain_grad()
         return_dict={}
@@ -692,7 +692,7 @@ class myLightningModule(LightningModule):
             # X.requires_grad = True
             new_images = torch.add(X,delta)
             
-            prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
+            prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()).to(self.device) #normalize(new_images) but preserves grad
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
             img_embed.requires_grad = True
             img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
