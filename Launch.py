@@ -10,7 +10,7 @@ from models.trainPGD import myLightningModule
 
 
 def train(config={
-        "batch_size":8, # ADD MODEL ARGS HERE
+        "batch_size":64, # ADD MODEL ARGS HERE
          "codeversion":"-1",
     },dir=None,devices=None,accelerator=None,Dataset=None,logtool=None):
 
