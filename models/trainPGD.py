@@ -695,7 +695,7 @@ class myLightningModule(LightningModule):
 
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
             img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
-            scale_text_embed=self.model.encode_text(text_tokens)
+            scale_text_embed=self.model.encode_text(text_tokens).clone()
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             # print("requires grad on scale_text_embed? {} shape : {}".format(scale_text_embed.requires_grad,scale_text_embed.shape))
 
