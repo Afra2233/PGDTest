@@ -77,7 +77,7 @@ class baseparser(HyperOptArgumentParser):
    
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
-        self.opt_list("--batch_size", default=16, options=[16], type=int, tunable=True)
+        self.opt_list("--batch_size", default=32, options=[32], type=int, tunable=True)
         self.opt_list("--test_batch_size", default=16, type=int, tunable=False)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
         self.opt_list("--epochs", default=8, type=int, tunable=False)
