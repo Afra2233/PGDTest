@@ -178,7 +178,7 @@ Add COCO captions here ...
 
 '''
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self,Cache_dir, dataset: str,batch_size: int,imagenet_root: str="./data", tinyimagenet_root: str=None,  val_dataset_names: List[str]=None,**kwargs):
+    def __init__(self,Cache_dir, dataset: str,batch_size: int,test_batch_size:int=-1, imagenet_root: str="./data", tinyimagenet_root: str=None,  val_dataset_names: List[str]=None,**kwargs):
         super().__init__()
         self.cache_dir = Cache_dir
         self.imagenet_root = imagenet_root
@@ -191,11 +191,12 @@ class MyDataModule(pl.LightningDataModule):
                                 'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet', #'ImageNet',
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         self.batch_size = batch_size
+        self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
         if kwargs.get("debug",False):
             print("Debugging")
             print(" ---------------------------------------DEBUGGING---------------------------------------")
 
-            self.val_dataset_names = ['cifar10']
+            self.val_dataset_names = ['cifar10','cifar100']
             self.train_dataset_names = ['cifar10']
 
         self.template = 'This is a photo of a {}'
@@ -573,7 +574,7 @@ class MyDataModule(pl.LightningDataModule):
         return [DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=16 if not self.ISHEC else 4, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in self.val_datasets]
 
     def test_dataloader(self):
-        return [DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=16 if not self.ISHEC else 1, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in self.test_datasets]
+        return [DataLoader(dataset, batch_size=self.test_batch_size, shuffle=False, num_workers=4 if not self.ISHEC else 4, pin_memory=not self.ISHEC,prefetch_factor=4 if not self.ISHEC else 2,drop_last=True) for dataset in self.test_datasets]
 
 
 

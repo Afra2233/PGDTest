@@ -77,9 +77,10 @@ class baseparser(HyperOptArgumentParser):
    
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
-        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=True)
+        self.opt_list("--batch_size", default=16, options=[16], type=int, tunable=True)
+        self.opt_list("--test_batch_size", default=16, type=int, tunable=False)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
-        self.opt_list("--epochs", default=10, type=int, tunable=False)
+        self.opt_list("--epochs", default=8, type=int, tunable=False)
         self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-5], type=float, tunable=True) #originally 5e-5
         self.opt_list("--weight_decay", default=0, type=float, tunable=False)
         self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=False)
@@ -87,9 +88,9 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--train_eps", default=1/255, options=[1/255,2/255,4/255], type=float, tunable=True)
         self.opt_list("--train_numsteps", default=5, options=[2,5,10], type=int, tunable=True)
         self.opt_list("--train_stepsize", default=1/255, type=float,options=[1/255,2/255,4/255], tunable=True)
-        self.opt_list("--test_eps", default=1/255, type=float,options=[1/255,2/255,4/255], tunable=True)
+        self.opt_list("--test_eps", default=1/255, options=[1/255,2/255,4/255,8/255], type=float, tunable=False)
         self.opt_list("--test_numsteps", default=5, type=int, tunable=False)
-        self.opt_list("--test_stepsize", default=1/255, options=[1/255,2/255,4/255], type=float, tunable=True)
+        self.opt_list("--test_stepsize", default=1/255, options=[1/255,2/255,4/255,8/255], type=float , tunable=False)
         self.opt_list("--earlystop", default=1000, type=int, tunable=False)
         self.opt_list("--precision", default=32, type=int, options=[32,16], tunable=True)
         # model
