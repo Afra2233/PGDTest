@@ -690,7 +690,7 @@ class myLightningModule(LightningModule):
         X=X.clone().detach()
         text_tokens=text_tokens.clone().detach()
         for iter_count in range(max(attack_iters)):
-            new_images = torch.add(X, delta)
+            new_images = torch.add(X, delta).to(self.device)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
 
             img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
