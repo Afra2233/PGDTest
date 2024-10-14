@@ -855,7 +855,7 @@ class myLightningModule(LightningModule):
         self.test_epoch_end_called=False
         self.test_cleanresults=defaultdict(queue.Queue)
         self.test_attackedresults=defaultdict(queue.Queue)
-        self.test_data_loader_count = len(self.trainer.datamodule.val_dataloader())
+        self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
         if self.args.get("test_attack_type","pgd")=="pgd":
             self.testattack=self.attack_batch_pgd
         elif self.args.get("test_attack_type","pgd")=="CW":
@@ -873,8 +873,8 @@ class myLightningModule(LightningModule):
         torch.set_grad_enabled(True)
 
         self.model_ori.eval()
-        self.test_alphas = torch.tensor([1/255, 2/255, 4/255],device=self.device)
-        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255],device=self.device)
+        self.test_alphas = torch.tensor([1/255, 2/255, 4/255,8/255],device=self.device)
+        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255,8/255],device=self.device)
         self.test_numsteps = torch.tensor([5, 10],device=self.device)
         #instead of saving the results to memory, were going to save them to disk.
         #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
@@ -951,20 +951,28 @@ class myLightningModule(LightningModule):
             path=self.args.get("output_dir","./results")
             filenames=os.listdir(path)
             version=self.version
-            dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
-            cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+            #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
+            #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
 
             for dataset_idx in range(self.test_data_loader_count):
+                dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
+                cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+                #split each name by _ and get the dataset index
+                clean_files=list(filter(lambda x: int(x.split("_")[-2]) == dataset_idx,cleanfilenames))
+                                        
+                dirty_files=list(filter(lambda x: int(x.split("_")[-2]) == dataset_idx,dirtyfilenames))
 
-                clean_files=list(filter(lambda x: str("_{}_pt".format(dataset_idx)) in x,cleanfilenames))
-                dirty_files=list(filter(lambda x: str("_{}_pt".format(dataset_idx)) in x,dirtyfilenames))
+               
                 if len(clean_files) == 0 or len(dirty_files) == 0:
                     print("No results for dataset {}".format(dataset_idx))
+                    print("Clean files: ",clean_files)
+                    print("Dirty files: ",dirty_files)
+                    print("Clean files: ",list(cleanfilenames))
                     continue
 
                 GoodLabels=[]
                 GoodLogits=[]
-                for file in list(clean_files):#
+                for file in clean_files:#
                     if not os.path.exists(os.path.join(path,file)):
                         print("File {} does not exist".format(file))
                         continue
@@ -1039,34 +1047,34 @@ class myLightningModule(LightningModule):
                     os.remove(os.path.join(path,file))
                     time.sleep(1)
 
-        else:
-            for dataset_idx in range(self.test_data_loader_count):
-                #make the ground truth labels and logits
-                GoodLabels=torch.cat([val["textlabels"] for val in self.test_cleanresults[dataset_idx]],dim=0).cpu().numpy()
-                GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.test_cleanresults[dataset_idx]],dim=0)).cpu().numpy()
-                self.Cleanclassifier.fit(GoodLogits, GoodLabels)
+        # else:
+        #     for dataset_idx in range(self.test_data_loader_count):
+        #         #make the ground truth labels and logits
+        #         GoodLabels=torch.cat([val["textlabels"] for val in self.test_cleanresults[dataset_idx]],dim=0).cpu().numpy()
+        #         GoodLogits=torch.nan_to_num(torch.cat([val["logits"] for val in self.test_cleanresults[dataset_idx]],dim=0)).cpu().numpy()
+        #         self.Cleanclassifier.fit(GoodLogits, GoodLabels)
 
-                #now we need to sort the attacked results by alpha, epsilon, step
-                alpha_eps_step_dict = defaultdict(list)
-                for val in self.test_attackedresults[dataset_idx]:
-                    alpha_eps_step_dict[(val["alpha"],val["epsilon"],val["step"])].append({"logits":val["logits"],"textlabels":val["textlabels"]})
-                for key, val in alpha_eps_step_dict.items():
-                    BadLabels=torch.cat([v["textlabels"] for v in val],dim=0).cpu().numpy()
-                    BadLogits=torch.nan_to_num(torch.cat([v["logits"] for v in val],dim=0)).cpu().numpy()
-                    #check at least 2 classes are present in the dataset
-                    if len(np.unique(GoodLabels)) < 2 or len(np.unique(BadLabels)) < 2:
-                        print("Not enough classes to run linear probes on dataset {}".format(dataset_idx))
-                        #skip this dataset
-                        continue
-                    self.Dirtyclassifier.fit(BadLogits, BadLabels)
-                    self.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
-                    self.log( "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(GoodLogits, GoodLabels))
-                    self.log( "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(GoodLogits, GoodLabels))
-                    self.log( "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(BadLogits, BadLabels))
-                    self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-                    self.log( "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(BadLogits, BadLabels))
-                    self.log( "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(GoodLogits, GoodLabels))
-                    self.log( "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+        #         #now we need to sort the attacked results by alpha, epsilon, step
+        #         alpha_eps_step_dict = defaultdict(list)
+        #         for val in self.test_attackedresults[dataset_idx]:
+        #             alpha_eps_step_dict[(val["alpha"],val["epsilon"],val["step"])].append({"logits":val["logits"],"textlabels":val["textlabels"]})
+        #         for key, val in alpha_eps_step_dict.items():
+        #             BadLabels=torch.cat([v["textlabels"] for v in val],dim=0).cpu().numpy()
+        #             BadLogits=torch.nan_to_num(torch.cat([v["logits"] for v in val],dim=0)).cpu().numpy()
+        #             #check at least 2 classes are present in the dataset
+        #             if len(np.unique(GoodLabels)) < 2 or len(np.unique(BadLabels)) < 2:
+        #                 print("Not enough classes to run linear probes on dataset {}".format(dataset_idx))
+        #                 #skip this dataset
+        #                 continue
+        #             self.Dirtyclassifier.fit(BadLogits, BadLabels)
+        #             self.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
+        #             self.log( "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(GoodLogits, GoodLabels))
+        #             self.log( "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(GoodLogits, GoodLabels))
+        #             self.log( "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(BadLogits, BadLabels))
+        #             self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+        #             self.log( "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(BadLogits, BadLabels))
+        #             self.log( "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(GoodLogits, GoodLabels))
+        #             self.log( "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(dataset_idx,key[0],key[1],key[2]),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
                     
         del self.test_cleanresults
         del self.test_attackedresults
