@@ -947,7 +947,7 @@ class myLightningModule(LightningModule):
                         continue
 
                     with open(os.path.join(path,file), 'rb') as f:
-                        data = np.load(f, allow_pickle=True)
+                        data = np.load(f, allow_pickle=True) #allow_pickle=True 允许加载包含 Python 对象的数据
                         GoodLabels.append(data["labels"])
                         GoodLogits.append(data["logits"])
                     #delete the file
