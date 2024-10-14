@@ -814,39 +814,6 @@ class myLightningModule(LightningModule):
             delta.data[:, :, :, :] = d
             delta.grad.zero_()
         return X,text_tokens+delta
-    def on_test_epoch_start(self):
-        self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
-        self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
-        #to be thread safe we should create queues insead of lists.#
-        self.test_epoch_end_called=False
-        self.test_cleanresults=defaultdict(queue.Queue)
-        self.test_attackedresults=defaultdict(queue.Queue)
-        self.test_data_loader_count = len(self.trainer.datamodule.val_dataloader())
-        if self.args.get("test_attack_type","pgd")=="pgd":
-            self.testattack=self.attack_batch_pgd
-        elif self.args.get("test_attack_type","pgd")=="CW":
-            self.testattack= self.attack_CW
-        elif self.args.get("test_attack_type","pgd")=="text":
-            self.testattack= self.attack_text_pgd
-        elif self.args.get("test_attack_type","pgd")=="autoattack":
-            self.testattack=self.autoattack
-        elif self.args.get("test_attack_type","pgd")=="Noattack":
-            self.testattack=self.no_attack
-        else:
-            raise ValueError 
-        #enable grad through our model to allow the attacks to work.
-        self.model.eval()
-        torch.set_grad_enabled(True)
-
-        self.model_ori.eval()
-        self.test_alphas = torch.tensor([1/255, 2/255, 4/255],device=self.device)
-        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255],device=self.device)
-        self.test_numsteps = torch.tensor([5, 10],device=self.device)
-        #instead of saving the results to memory, were going to save them to disk.
-        #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
-        self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
-        self.save_result_worker_thread.start()
-        
     
     def on_test_epoch_start(self):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
@@ -880,7 +847,9 @@ class myLightningModule(LightningModule):
         #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
         self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
         self.save_result_worker_thread.start()
-
+       
+    @torch.enable_grad()
+    @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
         text=text.squeeze(1)
