@@ -663,13 +663,13 @@ class myLightningModule(LightningModule):
         delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
         delta.requires_grad = True
         return delta
-    @torch.enable_grad()
-    @torch.inference_mode(False)
+    # @torch.enable_grad()
+    # @torch.inference_mode(False)
     def clamp_batch_inf(self,d,alpha,g,eps):
         return torch.clamp(d.clone() + alpha.clone().view(-1,1,1,1,1,1) * torch.sign(g.clone()), min=-eps.clone().view(1,-1,1,1,1,1)
                            , max=eps.clone().view(1,-1,1,1,1,1))
-    @torch.enable_grad()
-    @torch.inference_mode(False)
+    # @torch.enable_grad()
+    # @torch.inference_mode(False)
     def clamp_batch_2(self,d,alpha,g,eps):
         g_norm = torch.norm(g.view(g.shape[0], -1), dim=1).view(-1, 1, 1, 1)
         scaled_g = g / (g_norm + 1e-10)
