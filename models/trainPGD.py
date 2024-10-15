@@ -685,6 +685,7 @@ class myLightningModule(LightningModule):
         delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(alpha.shape[0],1,1,1,1,1)#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
         # print("requires grad on delta? {} {}".format(delta.requires_grad,delta.retain_grad()))
         # losses=[]
+        delta.requires_grad =True
         delta.retain_grad()
         return_dict={}
         X=X.clone().detach()
@@ -692,8 +693,8 @@ class myLightningModule(LightningModule):
         for iter_count in range(max(attack_iters)):
             new_images = torch.add(X, delta)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
-            with torch.no_grad():
-               img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
+           
+            img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
             img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
             scale_text_embed=self.model.encode_text(text_tokens)
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
