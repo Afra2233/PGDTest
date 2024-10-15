@@ -1015,6 +1015,10 @@ class myLightningModule(LightningModule):
                     print("Deleting file: ",os.path.join(path,file))
                     os.remove(os.path.join(path,file))
                     time.sleep(1)
+                for file in list(clean_files):
+                    print("Deleting file: ",os.path.join(path,file))
+                    os.remove(os.path.join(path,file))
+                    time.sleep(1)
 
         # else:
         #     for dataset_idx in range(self.test_data_loader_count):
@@ -1066,7 +1070,7 @@ class myLightningModule(LightningModule):
         threshold=10
     
         while True:
-            time.sleep(200)
+            time.sleep(1200)
             for dataset_idx in range(self.test_data_loader_count):
                 # print("Saving results for dataset {}".format(dataset_idx))
                 filename="results_{}_{}_pt".format(version,dataset_idx)
