@@ -693,7 +693,7 @@ class myLightningModule(LightningModule):
             new_images = torch.add(X, delta)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
 
-            img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
+            img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
             img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
             scale_text_embed=self.model.encode_text(text_tokens)
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
@@ -853,8 +853,8 @@ class myLightningModule(LightningModule):
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
         text=text.squeeze(1)
-        with torch.no_grad():
-           img_embed=self.model.encode_image(images)
+       
+        img_embed=self.model.encode_image(images)
         scale_text_embed=self.model.encode_text(text)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
