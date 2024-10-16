@@ -17,5 +17,5 @@ pycountry
 scipy
 scikit-learn
 tqdm
-torchvision
+#torchvision
 gdown
