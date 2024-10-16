@@ -66,9 +66,9 @@ def train(config={
             precision=p,
             fast_dev_run=config.get("debug",False),
     )
-    #if config["batch_size"] !=1:
+    if config["batch_size"] !=1:
 
-        #trainer.fit(model,Dataset)
+        trainer.fit(model,Dataset)
 
     trainer.test(model,Dataset)
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
