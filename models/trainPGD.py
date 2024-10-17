@@ -456,13 +456,11 @@ class myLightningModule(LightningModule):
          '''
         l2_norm_obj = sum(p.norm(2) for p in self.model.visual.parameters())
         l2_norm_ori = sum(p.norm(2) for p in self.model_ori.visual.parameters())
+        ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
+
         '''
         这行代码计算两个模型的 L2 范数之差的绝对值，然后除以原始模型的 L2 范数，得到一个相对差异比率。这个比率显示了训练模型相对于原始模型参数变化的程度。
         '''
-
-        l2_norm_obj = sum(p.norm(2) for p in self.model.visual.parameters())
-        l2_norm_ori = sum(p.norm(2) for p in self.model_ori.visual.parameters())
-        ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
         '''
         这行简单计算两个模型的 L2 范数之差的绝对值，提供了另一种衡量参数变化的方式。
         '''
