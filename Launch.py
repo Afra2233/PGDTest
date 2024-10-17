@@ -46,7 +46,6 @@ def train(config={
             devices="auto" if devices is None else devices,
             accelerator="auto",
             max_epochs=config.get("epochs",10),
-            inference_mode=False,
             #profiler="advanced",
             #plugins=[SLURMEnvironment()],
             #https://lightning.ai/docs/pytorch/stable/clouds/cluster_advanced.html
