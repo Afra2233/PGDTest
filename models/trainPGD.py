@@ -692,8 +692,9 @@ class myLightningModule(LightningModule):
             new_images = torch.add(X, delta)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
             print(prompted_images.requires_grad)
-            img_embed=self.model.encode_image(prompted_images.flatten(0,-4)).clone()
-            img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
+            with torch.inference_mode(False):
+               img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
+               img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
             scale_text_embed=self.model.encode_text(text_tokens)
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             # print("requires grad on scale_text_embed? {} shape : {}".format(scale_text_embed.requires_grad,scale_text_embed.shape))
@@ -854,8 +855,9 @@ class myLightningModule(LightningModule):
         images = images.clone().detach().requires_grad_(True)
         text=text.squeeze(1)
         print(images.requires_grad)
-        img_embed=self.model.encode_image(images)
-        scale_text_embed=self.model.encode_text(text)
+        with torch.inference_mode(False):
+           img_embed=self.model.encode_image(images)
+           scale_text_embed=self.model.encode_text(text)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
         output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
