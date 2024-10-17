@@ -835,10 +835,10 @@ class myLightningModule(LightningModule):
         else:
             raise ValueError 
         #enable grad through our model to allow the attacks to work.
-        self.model.eval()
-        torch.set_grad_enabled(True)
+        with torch.set_grad_enabled(True):
+           self.model.eval() 
 
-        self.model_ori.eval()
+           self.model_ori.eval()
         self.test_alphas = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
         self.test_epsilons = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
         self.test_numsteps = torch.tensor([5, 10],device=self.device)
@@ -847,8 +847,8 @@ class myLightningModule(LightningModule):
         self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
         self.save_result_worker_thread.start()
        
-    # @torch.enable_grad()
-    # @torch.inference_mode(False)
+    @torch.enable_grad()
+    @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         images, target,text = batch
         text=text.squeeze(1)
