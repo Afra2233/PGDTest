@@ -951,8 +951,8 @@ class myLightningModule(LightningModule):
                         GoodLabels.append(data["labels"])
                         GoodLogits.append(data["logits"])
                     #delete the file
-                    os.remove(os.path.join(path,file))
-                    time.sleep(1)
+                    # os.remove(os.path.join(path,file))
+                    # time.sleep(1)
                 GoodLabels=np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
                 GoodLogits=np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
                 self.Cleanclassifier.fit(GoodLogits, GoodLabels)
