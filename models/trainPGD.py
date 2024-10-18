@@ -679,6 +679,7 @@ class myLightningModule(LightningModule):
     @torch.enable_grad()
     @torch.inference_mode(False)
     def attack_batch_pgd(self,  X, target, text_tokens, alpha, attack_iters,epsilon, restarts=1, early_stop=True):
+        self.model.train()
         delta=self.init_batch_delta(X,epsilon).unsqueeze(0).repeat(alpha.shape[0],1,1,1,1,1)#make epsilon stacks of delta and repeat for each alpha so we have shape alpha,epsilon,B,3,224,224
         # print("requires grad on delta? {} {}".format(delta.requires_grad,delta.retain_grad()))
         # losses=[]
@@ -691,10 +692,10 @@ class myLightningModule(LightningModule):
             new_images = torch.add(X, delta)
             prompted_images = torch.div(torch.sub(new_images, self.mu_img.clone()), self.std_img.clone()) #normalize(new_images) but preserves grad
             print(prompted_images.requires_grad)
-            with torch.inference_mode(False):
-               with torch.enable_grad(): 
-                  img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
-                  img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
+            # with torch.inference_mode(False):
+            #    with torch.enable_grad(): 
+            img_embed=self.model.encode_image(prompted_images.flatten(0,-4))
+            img_embed = img_embed / img_embed.norm(dim=-1, keepdim=True)
             scale_text_embed=self.model.encode_text(text_tokens)
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             # print("requires grad on scale_text_embed? {} shape : {}".format(scale_text_embed.requires_grad,scale_text_embed.shape))
