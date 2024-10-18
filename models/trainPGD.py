@@ -850,8 +850,8 @@ class myLightningModule(LightningModule):
         self.save_result_worker_thread.start()
        
        
-    @torch.enable_grad()
-    @torch.inference_mode(False)
+    # @torch.enable_grad()
+    # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
        
         if not torch.is_grad_enabled():
