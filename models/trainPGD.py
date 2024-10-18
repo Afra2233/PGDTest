@@ -848,8 +848,8 @@ class myLightningModule(LightningModule):
         #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
         self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
         self.save_result_worker_thread.start()
-        self.model.train()
-        torch.set_grad_enabled(True)
+       
+       
     @torch.enable_grad()
     @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
@@ -860,9 +860,11 @@ class myLightningModule(LightningModule):
            print("Currently NOT in inference mode (gradients enabled).")
            
         images, target,text = batch
+       
         images = images.clone().detach().requires_grad_(True)
         text=text.squeeze(1)
         print(images.requires_grad)  
+        self.model.train()
         with torch.inference_mode(False):
            with torch.enable_grad(): 
               img_embed=self.model.encode_image(images)
