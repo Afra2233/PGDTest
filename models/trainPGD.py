@@ -638,12 +638,6 @@ class myLightningModule(LightningModule):
         return optimizer#([optimizer],[scheduler])
 
 
-
-
-
-
-
-
     def init_batch_uniform(self, X,eps):
         
         delta=  torch.stack([torch.zeros_like(X,device=self.device,).uniform_(-v, v).clone().detach().requires_grad_(True) for v in eps])
@@ -854,10 +848,10 @@ class myLightningModule(LightningModule):
     # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
        
-        if not torch.is_grad_enabled():
-           print("Currently in inference mode (no gradients).")
-        else:
-           print("Currently NOT in inference mode (gradients enabled).")
+        # if not torch.is_grad_enabled():
+        #    print("Currently in inference mode (no gradients).")
+        # else:
+        #    print("Currently NOT in inference mode (gradients enabled).")
            
         images, target,text = batch
        
