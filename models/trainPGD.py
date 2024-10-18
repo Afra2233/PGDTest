@@ -852,6 +852,12 @@ class myLightningModule(LightningModule):
     @torch.enable_grad()
     @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
+       
+        if not torch.is_grad_enabled():
+           print("Currently in inference mode (no gradients).")
+        else:
+           print("Currently NOT in inference mode (gradients enabled).")
+           
         images, target,text = batch
         images = images.clone().detach().requires_grad_(True)
         text=text.squeeze(1)
