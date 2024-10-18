@@ -864,7 +864,7 @@ class myLightningModule(LightningModule):
         images = images.clone().detach().requires_grad_(True)
         text=text.squeeze(1)
         # print(images.requires_grad)  
-        # self.model.train()
+        self.model.train()
         with torch.inference_mode(False):
            with torch.enable_grad(): 
               img_embed=self.model.encode_image(images)
