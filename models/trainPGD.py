@@ -862,13 +862,13 @@ class myLightningModule(LightningModule):
         images, target,text = batch
        
         images = images.clone().detach().requires_grad_(True)
-        text=text.squeeze(1).clone().detach().requires_grad_(True)
+        text=text.squeeze(1).clone().detach()
         # print(images.requires_grad)  
         # self.model.train()
-        with torch.inference_mode(False):
-           with torch.enable_grad(): 
-              img_embed=self.model.encode_image(images)
-              scale_text_embed=self.model.encode_text(text)
+        # with torch.inference_mode(False):
+        #    with torch.enable_grad(): 
+        img_embed=self.model.encode_image(images)
+        scale_text_embed=self.model.encode_text(text)
         img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
         output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
