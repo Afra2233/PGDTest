@@ -136,7 +136,7 @@ def SlurmRun(trialconfig):
         comm="python3"
     else:
 
-        sub_commands.extend(['#SBATCH -p gpu-medium',
+        sub_commands.extend(['#SBATCH -p gpu-short',
                              #add command to request more memory
                              '#SBATCH --mem=96G',
                              '#SBATCH --cpus-per-task=8',
