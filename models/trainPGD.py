@@ -862,7 +862,7 @@ class myLightningModule(LightningModule):
         images, target,text = batch
        
         images = images.clone().detach().requires_grad_(True)
-        text=text.squeeze(1)
+        text=text.squeeze(1).clone().detach().requires_grad_(True)
         # print(images.requires_grad)  
         # self.model.train()
         with torch.inference_mode(False):
