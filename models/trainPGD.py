@@ -646,9 +646,8 @@ class myLightningModule(LightningModule):
 
     def init_batch_uniform(self, X,eps):
         
-        delta=  torch.stack([torch.zeros_like(X,device=self.device,).uniform_(-v, v) for v in eps])
+        delta=  torch.stack([torch.zeros_like(X,device=self.device,).uniform_(-v, v).clone().detach().requires_grad_(True) for v in eps])
         delta = clamp(delta, self.lower_limit - X, self.upper_limit - X)
-        delta.requires_grad = True
         return delta
     
     def init_batch_normal(self, X,eps):
