@@ -78,14 +78,14 @@ class baseparser(HyperOptArgumentParser):
    
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
-        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=True)
+        self.opt_list("--weight_decay", default=0, type=float, tunable=False)
+        self.opt_list("--warmup", default=0,options=[0,100,1000], type=int, tunable=False)
+        self.opt_list("--momentum", default=0.9, type=float, tunable=False)
         self.opt_list("--test_batch_size", default=8, type=int, tunable=False)
         self.opt_list("--num_workers", default=32, type=int, tunable=False)
         self.opt_list("--epochs", default=8, type=int, tunable=False)
         self.opt_list("--learning_rate", default=5e-4, options=[5e-5,5e-4,1e-5], type=float, tunable=True) #originally 5e-5
-        self.opt_list("--weight_decay", default=0, type=float, tunable=False)
-        self.opt_list("--warmup", default=1000,options=[0,100,1000], type=int, tunable=False)
-        self.opt_list("--momentum", default=0.9, type=float, tunable=False)
+        self.opt_list("--batch_size", default=64, options=[64], type=int, tunable=True)
         self.opt_list("--train_eps", default=1/255, options=[1/255,2/255,4/255], type=float, tunable=True)
         self.opt_list("--train_numsteps", default=5, options=[2,5,10], type=int, tunable=True)
         self.opt_list("--train_stepsize", default=1/255, type=float,options=[1/255,2/255,4/255], tunable=True)
@@ -96,6 +96,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--precision", default=32, type=int, options=[32,16], tunable=True)
         # model
         self.opt_list("--freeze_text",default=True,options=[True,False],type=bool,tunable=True)
+        self.opt_list("--labelType", default='text', type=str, options= ["image","text","Modimage"],tunable=True)
         self.opt_list("--model", default='clip', type=str, tunable=False)
         self.opt_list("--imagenet_root", default=os.getenv("global_storage","./data"),options=[os.getenv("global_storage","./data")], type=str, tunable=False)
         self.opt_list("--arch", default='vit_b32', type=str, tunable=False)
@@ -126,11 +127,11 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--num_trials", default=0, type=int, tunable=False)
         #debug mode - We want to just run in debug mode...
         self.opt_list("--name", default="TestRun",options=["hecDeployment"], type=str, tunable=False)
-        self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size","optimizer", "freeze_text"]
+        # self.argNames=["name","method","prompt_size","dataset","model","arch","learning_rate","weight_decay","batch_size","warmup","trial","add_prompt_size","optimizer", "freeze_text"]
         #self.opt_range('--neurons', default=50, type=int, tunable=True, low=100, high=800, nb_samples=8, log_base=None)
         
         #This is important when passing arguments as **config in launcher
-        self.keys_of_interest=set("learning_rate batch_size train_eps train_numsteps train_eps train_stepsize attack_type prompt_size add_prompt_size optimizer freeze_text".split())
+        self.keys_of_interest=set("learning_rate dataset precision labelType batch_size train_eps train_numsteps train_stepsize attack_type prompt_size add_prompt_size optimizer freeze_text".split())
 
 
 import wandb
