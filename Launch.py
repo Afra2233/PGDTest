@@ -10,7 +10,7 @@ from models.trainPGD import myLightningModule
 
 
 def train(config={
-        "batch_size":16, # ADD MODEL ARGS HERE
+        "batch_size":64, # ADD MODEL ARGS HERE
          "codeversion":"-1",
     },dir=None,devices=None,accelerator=None,Dataset=None,logtool=None):
 
@@ -46,8 +46,21 @@ def train(config={
             devices="auto" if devices is None else devices,
             accelerator="auto",
             max_epochs=config.get("epochs",10),
+            #profiler="advanced",
+            #plugins=[SLURMEnvironment()],
+            #https://lightning.ai/docs/pytorch/stable/clouds/cluster_advanced.html
             logger=logtool,
-
+            # strategy=FSDPStrategy(accelerator="gpu",
+            #                        parallel_devices=6,
+            #                        cluster_environment=SLURMEnvironment(),
+            #                        timeout=datetime.timedelta(seconds=1800),
+            #                        #cpu_offload=True,
+            #                        #mixed_precision=None,
+            #                        #auto_wrap_policy=True,
+            #                        #activation_checkpointing=True,
+            #                        #sharding_strategy='FULL_SHARD',
+            #                        #state_dict_type='full'
+            # ),
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
             precision=p,
@@ -55,11 +68,7 @@ def train(config={
     )
     # if config["batch_size"] !=1:
 
-<<<<<<< Updated upstream
     #trainer.fit(model,Dataset)
-=======
-       # trainer.fit(model,Dataset)
->>>>>>> Stashed changes
 
     trainer.test(model,Dataset)
 
@@ -71,36 +80,35 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
     NAME="TestDeploy"
     import pytorch_lightning
     import wandb
-   
-
     if config is not None:
-        config = config.__dict__
-        dir = config.get("dir", dir)
-        
-        # 尝试登录到 W&B
-        try:
-            wandb.login(key=os.getenv("WANDB_API_KEY", "3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
-            logtool = pl.loggers.WandbLogger(project=PROJECT, entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR", "."))
-            print("Config:", config)
-        except Exception as e:
-            print("Error logging in to W&B:", e)
-            logtool = None  # 如果登录失败，设置 logtool 为 None
+        config=config.__dict__
+        dir=config.get("dir",dir)
+        wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) 
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR","."))                               #<-----CHANGE ME
+        print(config)
 
     else:
-        print("No config provided. Using default settings.")
-        logtool = None  # 同样设置为 None
-
-    # 检查 logtool 是否有效
-    if logtool:
+        #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
+        print("Would recommend changing projectname according to config flags if major version swithching happens")
         try:
-            run = wandb.init(project=PROJECT, entity=USER, name=NAME, config=config)
-            config = run.config.as_dict()
-        except Exception as e:
-            print("Error initializing W&B run:", e)
-            logtool = None  # 初始化失败时设置为 None
+            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+            #check if api key exists in os.environ
+        except:
+            if "WANDB_API_KEY" not in os.environ:
+                if "wandb" in os.environ:
+                    os.environ["WANDB_API_KEY"]=os.environ["wandb"]
+                    wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) #<-----CHANGE ME
+                else:
+                    print("No API key found, please set WANDB_API_KEY in environment variables")
+            wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
 
-    # 调用训练函数
-    train(config, dir, devices, accelerator, Dataset, logtool)
+            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+
+        #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
+        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER,experiment=run, save_dir=os.getenv("WANDB_CACHE_DIR","."))                 #<-----CHANGE ME
+        config=run.config.as_dict()
+
+    train(config,dir,devices,accelerator,Dataset,logtool)
 def SlurmRun(trialconfig):
 
     job_with_version = '{}v{}'.format("SINGLEGPUTESTLAUNCH", 0)
