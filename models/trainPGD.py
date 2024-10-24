@@ -110,7 +110,7 @@ class myLightningModule(LightningModule):
         elif args.get("labelType","image")=="Modimage":
 
             self.make_labels=self.make_Modimage_labels
-            self.insert_eval_model_hook=self.insert_visual_model
+            self.insert_eval_model_hook=self.insert_visual_model_hook
         else:
             raise ValueError
        
