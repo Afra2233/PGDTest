@@ -75,37 +75,37 @@ def train(config={
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
 
-    USER="PGNTeam" 
-    PROJECT="AllDataPGN"
+    USER="st7ma784"  
+    #PROJECT="AllDataPGN"
     NAME="TestDeploy"
     import pytorch_lightning
     import wandb
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
-        wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) 
-        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR","."))                               #<-----CHANGE ME
+        wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc")) 
+        logtool= pytorch_lightning.loggers.WandbLogger(entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR","."))                               #<-----CHANGE ME
         print(config)
 
     else:
         #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
         print("Would recommend changing projectname according to config flags if major version swithching happens")
         try:
-            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+            run=wandb.init(entity=USER,name=NAME,config=config)                                          
             #check if api key exists in os.environ
         except:
             if "WANDB_API_KEY" not in os.environ:
                 if "wandb" in os.environ:
                     os.environ["WANDB_API_KEY"]=os.environ["wandb"]
-                    wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc")) #<-----CHANGE ME
+                    wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc")) 
                 else:
                     print("No API key found, please set WANDB_API_KEY in environment variables")
-            wandb.login(key=os.getenv("WANDB_API_KEY","3321f6f85c4170ccbf47a65d679842d4f3c8a6cc"))
+            wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc"))
 
-            run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
+            run=wandb.init(entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
 
         #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
-        logtool= pytorch_lightning.loggers.WandbLogger( project=PROJECT,entity=USER,experiment=run, save_dir=os.getenv("WANDB_CACHE_DIR","."))                 #<-----CHANGE ME
+        logtool= pytorch_lightning.loggers.WandbLogger(entity=USER,experiment=run, save_dir=os.getenv("WANDB_CACHE_DIR","."))                 #<-----CHANGE ME
         config=run.config.as_dict()
 
     train(config,dir,devices,accelerator,Dataset,logtool)
@@ -151,11 +151,11 @@ def SlurmRun(trialconfig):
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
         'export wandb=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
         'export WANDB_API_KEY=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
-        #'export ISHEC=True',                                                                               #<-----CHANGE ME                                         
+        #'export ISHEC=True',                                                                                                                       
         'source /etc/profile',
         'module add opence',
         'conda activate $CONDADIR',
-        #'pip install -r requirements.txt',                                                   # ...and activate the conda environment
+        #'pip install -r requirements.txt',                                                  
     ])
     script_name= os.path.realpath(sys.argv[0]) #Find this scripts name...
     trialArgs=__get_hopt_params(trialconfig)
