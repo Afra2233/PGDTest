@@ -68,7 +68,7 @@ def train(config={
     )
     # if config["batch_size"] !=1:
 
-    trainer.fit(model,Dataset)
+    #  trainer.fit(model,Dataset)
 
     trainer.test(model,Dataset)
 
