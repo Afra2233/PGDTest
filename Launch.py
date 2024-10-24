@@ -45,7 +45,7 @@ def train(config={
     trainer=pytorch_lightning.Trainer(
             devices="auto" if devices is None else devices,
             accelerator="auto",
-            max_epochs=config.get("epochs",10),
+            max_epochs=config.get("epochs",1),
             inference_mode=False,
             #profiler="advanced",
             #plugins=[SLURMEnvironment()],
@@ -69,7 +69,7 @@ def train(config={
     )
     # if config["batch_size"] !=1:
 
-    #trainer.fit(model,Dataset)
+    trainer.fit(model,Dataset)
 
     trainer.test(model,Dataset)
 
