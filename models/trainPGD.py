@@ -899,7 +899,7 @@ class myLightningModule(LightningModule):
 
         #    self.model_ori.eval()
         self.test_alphas = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
-        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
+        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255],device=self.device)
         self.test_numsteps = torch.tensor([5, 10],device=self.device)
         #instead of saving the results to memory, were going to save them to disk.
         #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
