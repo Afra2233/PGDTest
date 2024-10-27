@@ -995,10 +995,12 @@ class myLightningModule(LightningModule):
         path=self.args.get("output_dir","./results")
         filenames=os.listdir(path)
         version=self.version
+        print("test 1")
             #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
 
         for DataLoader_idx in range(self.test_data_loader_count):
+            print("test 2")
             dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
             #split each name by _ and get the dataset index
@@ -1117,6 +1119,7 @@ class myLightningModule(LightningModule):
         dirtyidx=0
         path=os.path.join(self.args.get("output_dir","./results"))
         os.makedirs(path,exist_ok=True)
+        print("save 1")
         #set version as a string of all the args
         version=self.version
         threshold=50
@@ -1124,6 +1127,7 @@ class myLightningModule(LightningModule):
         while EmptyCount < 3:
             time.sleep(1200)
             clear=False
+            print("save 2")
             for dataset_idx in range(self.test_data_loader_count):
                 # print("Saving results for dataset {}".format(dataset_idx))
                 filename="results_{}_{}_pt".format(version,dataset_idx)
