@@ -1164,13 +1164,7 @@ class myLightningModule(LightningModule):
                     dirtyidx+=1
                 if clear:
                     EmptyCount+=1
-                # print("Saved results for dataset {}".format(dataset_idx))
-            # if all([self.test_cleanresults[idx].empty() for idx in range(self.test_data_loader_count)]) and all([self.test_attackedresults[idx].empty() for idx in range(self.test_data_loader_count)]):
-            #     #if test_epoch_end has been called, we can exit the loop
-            #     if self.test_epoch_end_called:
-            #         break
-            # else:
-            #     threshold= int(self.args.get("test_batch_size",8)/2)
+              
         
         print("Exiting save results worker")
      
