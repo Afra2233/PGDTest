@@ -1002,7 +1002,11 @@ class myLightningModule(LightningModule):
         for DataLoader_idx in range(self.test_data_loader_count):
             print("test 2")
             dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
+            if not dirtyfilenames:
+               raise ValueError("Expected dirty results files, but found none.")
             cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+            if not cleanfilenames:
+               raise ValueError("Expected clean results files, but found none.")
             #split each name by _ and get the dataset index
             clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
                                     
