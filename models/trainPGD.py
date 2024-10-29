@@ -992,8 +992,8 @@ class myLightningModule(LightningModule):
             # self.save_result_worker_thread.join()
             #read in all files and begin processing them
             # del self.save_result_worker_thread
-        path = "./results"
-        #path=self.args.get("output_dir","./results")
+        #path = "./results"
+        path=self.args.get("output_dir","./results")
         filenames=os.listdir(path)
         version=self.version
         print("test 1")
@@ -1100,12 +1100,12 @@ class myLightningModule(LightningModule):
                 self.log( "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
 
             #delete the files
-            for file in list(dirty_files):
-                print("Deleting file: ",os.path.join(path,file))
-                os.remove(os.path.join(path,file))
-            for file in list(clean_files):
-                print("Deleting file: ",os.path.join(path,file))
-                os.remove(os.path.join(path,file))    
+            # for file in list(dirty_files):
+            #     print("Deleting file: ",os.path.join(path,file))
+            #     os.remove(os.path.join(path,file))
+            # for file in list(clean_files):
+            #     print("Deleting file: ",os.path.join(path,file))
+            #     os.remove(os.path.join(path,file))    
 
 
         del self.test_cleanresults
