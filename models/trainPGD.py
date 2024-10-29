@@ -1089,6 +1089,7 @@ class myLightningModule(LightningModule):
                 self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+                print("log classifer")
                 self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
                 self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
                 self.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
@@ -1135,7 +1136,7 @@ class myLightningModule(LightningModule):
             clear=False
             print("save 2")
             for dataset_idx in range(self.test_data_loader_count):
-                # print("Saving results for dataset {}".format(dataset_idx))
+                print("Saving results for dataset {}".format(dataset_idx))
                 filename="results_{}_{}_pt".format(version,dataset_idx)
                 clear=True
                 if not self.test_cleanresults[dataset_idx].empty():
@@ -1157,9 +1158,12 @@ class myLightningModule(LightningModule):
                     dirty_filename="dirty"+filename+str(dirtyidx)
                     dirtyPath=os.path.join(path,dirty_filename)
                     dirty_results=[self.test_attackedresults[dataset_idx].get(False) for _ in range(min(self.test_attackedresults[dataset_idx].qsize(),threshold))]
-                    # print("Saving dirty results {} to {}".format(len(dirty_results),dirtyPath))
+                    print("Saving dirty results {} to {}".format(len(dirty_results),dirtyPath))
+                    
                     logits=torch.cat([val["logits"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["logits"].cpu().numpy()
+                    print("logits") 
                     labels=torch.cat([val["textlabels"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["textlabels"].cpu().numpy()
+                    print("textlabels")  
                     alpha=torch.cat([val["alpha"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["alpha"].cpu().numpy()
                     epsilons=torch.cat([val["epsilon"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["epsilon"].cpu().numpy()
                     numsteps=torch.cat([val["step"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["step"].cpu().numpy()
