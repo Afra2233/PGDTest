@@ -75,7 +75,7 @@ class baseparser(HyperOptArgumentParser):
             return arg
         
         '''
-        self.opt_list("--root", default=os.getenv("PWD","./data"), options=[os.getenv("PWD","/data")], type=str, tunable=False)
+        
         self.opt_list("--save_freq", default=50, type=int, tunable=False)
         self.opt_list("--test_freq", default=3, type=int, tunable=False)
         self.opt_list("--weight_decay", default=0, type=float, tunable=False)
@@ -105,7 +105,8 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--add_prompt_size", default=0, type=int, tunable=False)
         self.opt_list("--optimizer", default='sgd', type=str, options=["sgd","adam","adamw"],tunable=True)
         # dataset
-        self.opt_list("--root", default=os.getenv("$PWD","./data"), options=[os.getenv("$PWD","/data")], type=str, tunable=False)
+        
+        self.opt_list("--root", default=os.getenv("PWD","./data"), options=[os.getenv("PWD","/data")], type=str, tunable=False)
         self.opt_list("--dataset", default='cifar10', options=["coco","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         # other
