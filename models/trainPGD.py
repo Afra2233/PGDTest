@@ -1100,12 +1100,12 @@ class myLightningModule(LightningModule):
                 self.log( "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
 
             #delete the files
-            # for file in list(dirty_files):
-            #     print("Deleting file: ",os.path.join(path,file))
-            #     os.remove(os.path.join(path,file))
-            # for file in list(clean_files):
-            #     print("Deleting file: ",os.path.join(path,file))
-            #     os.remove(os.path.join(path,file))    
+            for file in list(dirty_files):
+                print("Deleting file: ",os.path.join(path,file))
+                os.remove(os.path.join(path,file))
+            for file in list(clean_files):
+                print("Deleting file: ",os.path.join(path,file))
+                os.remove(os.path.join(path,file))    
 
 
         del self.test_cleanresults
