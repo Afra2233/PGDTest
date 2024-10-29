@@ -1024,6 +1024,7 @@ class myLightningModule(LightningModule):
             GoodLabels=[]
             GoodLogits=[]
             for file in clean_files:#
+                print("1027")
                 if not os.path.exists(os.path.join(path,file)):
                     print("File {} does not exist".format(file))
                     continue
