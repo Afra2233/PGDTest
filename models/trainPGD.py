@@ -1109,8 +1109,8 @@ class myLightningModule(LightningModule):
                 os.remove(os.path.join(path,file))    
 
 
-        del self.test_cleanresults
-        del self.test_attackedresults
+        # del self.test_cleanresults
+        # del self.test_attackedresults
         if hasattr(self,"save_result_worker_thread"):
             self.save_result_worker_thread.join()
             del self.save_result_worker_thread
