@@ -17,7 +17,7 @@ def train(config={
 
     model=myLightningModule(**config)
     if dir is None:
-        dir=config.get("root",".")
+        dir=config.get("dir",".")
     if Dataset is None:
         from DataModule import MyDataModule
         Dataset=MyDataModule(Cache_dir=dir,**config)
