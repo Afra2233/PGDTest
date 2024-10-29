@@ -1122,8 +1122,8 @@ class myLightningModule(LightningModule):
         # the most efficient way to store tensors is to save them as numpy arrays, so we'll do that. 
         cleanidx=0
         dirtyidx=0
-        path = "./results"
-        #path=os.path.join(self.args.get("output_dir","./results"))
+       # path = "./results"
+        path=os.path.join(self.args.get("output_dir","./results"))
         os.makedirs(path,exist_ok=True)
         print("save 1")
         #set version as a string of all the args
