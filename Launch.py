@@ -30,7 +30,7 @@ def train(config={
         accelerator=config.get("accelerator","auto")
     # print("Training with config: {}".format(config))
     Dataset.batch_size=config["batch_size"]
-    filename="model-{}".format(model.version)
+   
     callbacks=[
         TQDMProgressBar(),
         EarlyStopping(monitor="train_loss", mode="min",patience=10,check_finite=True,stopping_threshold=0.001),
