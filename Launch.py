@@ -17,7 +17,7 @@ def train(config={
 
     model=myLightningModule(**config)
     if dir is None:
-        dir=config.get("dir",".")
+        dir=config.get("root",".")
     if Dataset is None:
         from DataModule import MyDataModule
         Dataset=MyDataModule(Cache_dir=dir,**config)
@@ -30,6 +30,7 @@ def train(config={
         accelerator=config.get("accelerator","auto")
     # print("Training with config: {}".format(config))
     Dataset.batch_size=config["batch_size"]
+    filename="model-{}".format(model.version)
    
     callbacks=[
         TQDMProgressBar(),
