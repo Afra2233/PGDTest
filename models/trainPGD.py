@@ -932,10 +932,7 @@ class myLightningModule(LightningModule):
         output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
 
         self.test_cleanresults[dataloader_idx].put({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
-        if self.test_cleanresults[dataloader_idx].empty():
-           print("The queue for dataloader index", dataloader_idx, "is empty.")
-        else:
-           print("The queue for dataloader index", dataloader_idx, "is not empty.")
+       
 
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device)).detach()
 
@@ -1030,7 +1027,7 @@ class myLightningModule(LightningModule):
             GoodLabels=[]
             GoodLogits=[]
             for file in clean_files:#
-                print("1027")
+             
                 if not os.path.exists(os.path.join(path,file)):
                     print("File {} does not exist".format(file))
                     continue
@@ -1096,7 +1093,7 @@ class myLightningModule(LightningModule):
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-                print(DataLoader_idx)
+             
                 # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
                 # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
                 self.logger.experiment.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
@@ -1133,7 +1130,7 @@ class myLightningModule(LightningModule):
         #path = "./results"
         path=os.path.join(self.args.get("output_dir","./results"))
         os.makedirs(path,exist_ok=True)
-        print("save 1")
+        
         #set version as a string of all the args
         version=self.version
         threshold=50
@@ -1141,13 +1138,13 @@ class myLightningModule(LightningModule):
         while EmptyCount < 3:
             time.sleep(60)
             clear=False
-            print("save 2")
+            
             for dataset_idx in range(self.test_data_loader_count):
                 print("Saving results for dataset {}".format(dataset_idx))
                 filename="results_{}_{}_pt".format(version,dataset_idx)
                 clear=True
                 if not self.test_cleanresults[dataset_idx].empty():
-                    print("1149")
+                    
                     clear=False
                         #take the first 1000 results and save them to disk.
                     #take first n results and save them to disk, remove them from the list
@@ -1162,17 +1159,17 @@ class myLightningModule(LightningModule):
                     # print("Saved clean results to {}".format(cleanPath))
                     cleanidx+=1
                 elif not self.test_attackedresults[dataset_idx].empty():
-                    print("1164")
+                   
                     clear=False
                     dirty_filename="dirty"+filename+str(dirtyidx)
                     dirtyPath=os.path.join(path,dirty_filename)
                     dirty_results=[self.test_attackedresults[dataset_idx].get(False) for _ in range(min(self.test_attackedresults[dataset_idx].qsize(),threshold))]
-                    print("Saving dirty results {} to {}".format(len(dirty_results),dirtyPath))
+                    # print("Saving dirty results {} to {}".format(len(dirty_results),dirtyPath))
                     
                     logits=torch.cat([val["logits"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["logits"].cpu().numpy()
-                    print("logits") 
+                    # print("logits") 
                     labels=torch.cat([val["textlabels"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["textlabels"].cpu().numpy()
-                    print("textlabels")  
+                    # print("textlabels")  
                     alpha=torch.cat([val["alpha"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["alpha"].cpu().numpy()
                     epsilons=torch.cat([val["epsilon"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["epsilon"].cpu().numpy()
                     numsteps=torch.cat([val["step"] for val in dirty_results],dim=0).cpu().numpy() if threshold > 1 else dirty_results[0]["step"].cpu().numpy()
