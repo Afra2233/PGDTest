@@ -1092,8 +1092,8 @@ class myLightningModule(LightningModule):
                 BadLogits=np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
                 self.Dirtyclassifier.fit(BadLogits, BadLabels)
                 #Log classifier weights and bias
-                self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
-                self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
+                # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
+                # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
                 print("log classifer")
                 self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
