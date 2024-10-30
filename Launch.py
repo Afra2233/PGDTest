@@ -241,7 +241,7 @@ if __name__ == '__main__':
     #LEts pretend stephen fixed something
     #OR To run with Default Args
     else:
-        trials=hyperparams.generate_trials(NumTrials)
+        trials=myparser.generate_wandb_trials(entity="st7ma784",project="AllDataPGN")
 
         for i,trial in enumerate(trials):
             command=SlurmRun(trial)
@@ -250,8 +250,18 @@ if __name__ == '__main__':
             with open(slurm_cmd_script_path, "w") as f:
                 f.write(command)
             print('\nlaunching exp...')
+
+            
+            
             result = call('{} {}'.format("sbatch", slurm_cmd_script_path), shell=True)
             if result == 0:
                 print('launched exp ', slurm_cmd_script_path)
+                
+                #copy the file to a new folder with name time 2 days from now
+                TIMETORUN=(datetime.datetime.now()+datetime.timedelta(days=3)).strftime("%Y-%m-%d")
+                os.makedirs(os.path.join(defaultConfig.get("dir","."),"slurm_scripts","RunAfter{}".format(TIMETORUN)),exist_ok=True)
+                os.rename(slurm_cmd_script_path,os.path.join(defaultConfig.get("dir","."),"slurm_scripts","RunAfter{}".format(TIMETORUN),"EVAL"+slurm_cmd_script_path.split("/")[-1]))
+
+            
             else:
                 print('launch failed...')
