@@ -976,7 +976,7 @@ class myLightningModule(LightningModule):
     
     
     def on_test_epoch_end(self):
-      
+        time.sleep(60)
         print("Test epoch end called")
         # self.test_epoch_end_called=True
 
