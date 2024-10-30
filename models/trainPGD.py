@@ -1014,9 +1014,9 @@ class myLightningModule(LightningModule):
             cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
             
             #split each name by _ and get the dataset index
-            clean_files=list(filter(lambda x: int(list(x.split("_"))[-3]) == DataLoader_idx,cleanfilenames))
+            clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
             print("Clean files: ",clean_files)
-            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-3]) == DataLoader_idx,dirtyfilenames))
+            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
         #                dirty_files=list(filter(lambda x: str(dataset_idx)+"_pt" in x,list(dirtyfilenames)))
             if len(clean_files) == 0 or len(dirty_files) == 0:
                 print("No results for dataset {}".format(DataLoader_idx))
