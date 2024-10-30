@@ -910,7 +910,7 @@ class myLightningModule(LightningModule):
     # @torch.enable_grad()
     # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
-       
+        print("test step start")
         # if not torch.is_grad_enabled():
         #    print("Currently in inference mode (no gradients).")
         # else:
@@ -932,6 +932,11 @@ class myLightningModule(LightningModule):
         output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
 
         self.test_cleanresults[dataloader_idx].put({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
+        if self.test_cleanresults[dataloader_idx].empty():
+           print("The queue for dataloader index", dataloader_idx, "is empty.")
+        else:
+           print("The queue for dataloader index", dataloader_idx, "is not empty.")
+
         loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device)).detach()
 
         # measure accuracy and record loss
@@ -1141,6 +1146,7 @@ class myLightningModule(LightningModule):
                 filename="results_{}_{}_pt".format(version,dataset_idx)
                 clear=True
                 if not self.test_cleanresults[dataset_idx].empty():
+                    print("1149")
                     clear=False
                         #take the first 1000 results and save them to disk.
                     #take first n results and save them to disk, remove them from the list
@@ -1155,6 +1161,7 @@ class myLightningModule(LightningModule):
                     # print("Saved clean results to {}".format(cleanPath))
                     cleanidx+=1
                 elif not self.test_attackedresults[dataset_idx].empty():
+                    print("1164")
                     clear=False
                     dirty_filename="dirty"+filename+str(dirtyidx)
                     dirtyPath=os.path.join(path,dirty_filename)
