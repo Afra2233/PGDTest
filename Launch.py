@@ -1,7 +1,7 @@
 
 import os,sys
 import pytorch_lightning
-from pytorch_lightning.callbacks import TQDMProgressBar,EarlyStopping
+from pytorch_lightning.callbacks import TQDMProgressBar,EarlyStopping, ModelCheckpoint
 import datetime
 from pytorch_lightning.plugins.environments import SLURMEnvironment
 from models.trainPGD import myLightningModule
