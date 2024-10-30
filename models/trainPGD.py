@@ -976,7 +976,7 @@ class myLightningModule(LightningModule):
     
     
     def on_test_epoch_end(self):
-        time.sleep(60)
+        time.sleep(270)
         print("Test epoch end called")
         # self.test_epoch_end_called=True
 
@@ -998,11 +998,11 @@ class myLightningModule(LightningModule):
             self.save_result_worker_thread.join()
             # read in all files and begin processing them
             del self.save_result_worker_thread
-        #path = "./results"
-            path=self.args.get("output_dir","./results")
-            filenames=os.listdir(path)
-            version=self.version
-            print("test 1")
+       
+        path=self.args.get("output_dir","./results")
+        filenames=os.listdir(path)
+        version=self.version
+        print("test 1")
             #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
 
@@ -1115,11 +1115,11 @@ class myLightningModule(LightningModule):
                 os.remove(os.path.join(path,file))    
 
 
-        # del self.test_cleanresults
-        # del self.test_attackedresults
-        # if hasattr(self,"save_result_worker_thread"):
-        #     self.save_result_worker_thread.join()
-        #     del self.save_result_worker_thread
+        del self.test_cleanresults
+        del self.test_attackedresults
+        if hasattr(self,"save_result_worker_thread"):
+            self.save_result_worker_thread.join()
+            del self.save_result_worker_thread
 
     def save_result_worker(self):
         #in this function, we will save the results to disk.
