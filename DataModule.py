@@ -179,7 +179,7 @@ Add COCO captions here ...
 
 '''
 class MyDataModule(pl.LightningDataModule):
-    def __init__(self,Cache_dir, dataset: str,batch_size: int,test_batch_size:int=-1, imagenet_root: str="./data", tinyimagenet_root: str=None,  val_dataset_names: List[str]=None,**kwargs):
+    def __init__(self,Cache_dir, dataset: str,batch_size: int,test_batch_size:int=-1, imagenet_root: str="./data", tinyimagenet_root: str="./data",  val_dataset_names: List[str]=None,**kwargs):
         super().__init__()
         self.cache_dir = Cache_dir
         self.imagenet_root = imagenet_root
