@@ -532,7 +532,7 @@ class MyDataModule(pl.LightningDataModule):
                             print("532")
                             if not os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class)):
                                 os.makedirs(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class),exist_ok=True)
-                            if not os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class):
+                            if not os.path.exists(self.tinyimagenet_root,"tiny-imagenet-200","val",val_file):
                                 shutil.move(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images',val_file),os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class))
                         print("537")
                         #step four - remove the images folder
