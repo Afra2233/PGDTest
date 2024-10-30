@@ -976,7 +976,7 @@ class myLightningModule(LightningModule):
     
     
     def on_test_epoch_end(self):
-        time.sleep(270)
+        # time.sleep(270)
         print("Test epoch end called")
         # self.test_epoch_end_called=True
 
@@ -992,12 +992,12 @@ class myLightningModule(LightningModule):
             self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
         if not hasattr(self,"generalclassifier"):
             self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-        # if hasattr(self,"save_result_worker_thread"):
-        #     # queue the worker to 
-        #     # wait for the worker to finish
-        #     self.save_result_worker_thread.join()
-        #     # read in all files and begin processing them
-        #     del self.save_result_worker_thread
+        if hasattr(self,"save_result_worker_thread"):
+            # queue the worker to 
+            # wait for the worker to finish
+            self.save_result_worker_thread.join()
+            # read in all files and begin processing them
+            # del self.save_result_worker_thread
        
         path=self.args.get("output_dir","./results")
         filenames=os.listdir(path)
