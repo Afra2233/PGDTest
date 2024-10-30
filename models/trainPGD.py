@@ -999,10 +999,10 @@ class myLightningModule(LightningModule):
             # read in all files and begin processing them
             del self.save_result_worker_thread
         #path = "./results"
-        path=self.args.get("output_dir","./results")
-        filenames=os.listdir(path)
-        version=self.version
-        print("test 1")
+            path=self.args.get("output_dir","./results")
+            filenames=os.listdir(path)
+            version=self.version
+            print("test 1")
             #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
 
