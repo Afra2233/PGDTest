@@ -538,7 +538,7 @@ class MyDataModule(pl.LightningDataModule):
                         #step four - remove the images folder
                         shutil.rmtree(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images'))
                         
-                     val_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'val'), transform=preprocess224)})
+                    val_dataset_dict.update({'tinyImageNet': ImageFolder(os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'val'), transform=preprocess224)})
 
 
                     # val_dataset_list.append(ImageFolder(
