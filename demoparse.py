@@ -115,7 +115,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--attack_type", default="pgd", type=str,options=["pgd","cw","text","autoattack","noAttack"], tunable=False) # set this as tunable to trial different attack types
         self.opt_list("--test_attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False)
         self.opt_list("--seed", default=0, type=int, tunable=False)
-        self.opt_list("--model_dir", default='./save/models', type=str, tunable=False)
+        # self.opt_list("--model_dir", default='./save/models', type=str, tunable=False)
         self.opt_list("--output_dir", default=self.TEMPDIR, type=str, tunable=False)
         self.opt_list("--filename", default=None, type=str, tunable=False)
         self.opt_list("--trial", default=1, type=int, tunable=False)
