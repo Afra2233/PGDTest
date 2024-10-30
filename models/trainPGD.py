@@ -1008,7 +1008,7 @@ class myLightningModule(LightningModule):
 
         for DataLoader_idx in range(self.test_data_loader_count):
             print("test 2")
-            print(len(test_data_loader_count))
+            print(len(self.test_data_loader_count))
             dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             
             cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
