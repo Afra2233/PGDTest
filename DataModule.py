@@ -519,22 +519,22 @@ class MyDataModule(pl.LightningDataModule):
                         #step three, make a set of folders with the class names, and move the files to the folders
                         #step four: load the dataset
                     if os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images')):
-                        print("522")
+                 
                         #step one
                         with open(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val","val_annotations.txt"),'r') as f:
-                            print("525")
+                     
                             lines=f.readlines()
                             #step two
                             val_files=[line.split()[0] for line in lines]
                             val_classes=[line.split()[1] for line in lines]
                         #step three
                         for val_file, val_class in zip(val_files,val_classes):
-                            print("532")
+               
                             if not os.path.exists(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class)):
                                 os.makedirs(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class),exist_ok=True)
                             if not os.path.exists(self.tinyimagenet_root,"tiny-imagenet-200","val",val_file):
                                 shutil.move(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images',val_file),os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",val_class))
-                        print("537")
+                      
                         #step four - remove the images folder
                         shutil.rmtree(os.path.join(self.tinyimagenet_root,"tiny-imagenet-200","val",'images'))
                         
