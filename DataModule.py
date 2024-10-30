@@ -220,7 +220,7 @@ class MyDataModule(pl.LightningDataModule):
         return class_tokens
     def setup(self, stage=None,download=False):
 
-        if stage == 'fit' or stage is None or stage == 'test':
+        if True: #stage == 'fit' or stage is None or stage == 'test':
             self.train_dataset_dict={}
             self.train_text_names_dict={}
             self.plainnames_dict={}
