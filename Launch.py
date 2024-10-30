@@ -66,7 +66,7 @@ def train(config={
             #                        #sharding_strategy='FULL_SHARD',
             #                        #state_dict_type='full'
             # ),
-            strategy='ddp_find_unused_parameters_true',
+           
 
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
