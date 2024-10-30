@@ -1039,8 +1039,8 @@ class myLightningModule(LightningModule):
             GoodLogits=np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
             self.Cleanclassifier.fit(GoodLogits, GoodLabels)
             #Log classifier weights and bias
-            self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
-            self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
+            # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
+            # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
 
             cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
             BadLabels=[]
