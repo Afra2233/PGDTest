@@ -1008,14 +1008,15 @@ class myLightningModule(LightningModule):
 
         for DataLoader_idx in range(self.test_data_loader_count):
             print("test 2")
+            print(len(test_data_loader_count))
             dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             
             cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
             
             #split each name by _ and get the dataset index
-            clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
-                                    
-            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
+            clean_files=list(filter(lambda x: int(list(x.split("_"))[-3]) == DataLoader_idx,cleanfilenames))
+            print("Clean files: ",clean_files)
+            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-3]) == DataLoader_idx,dirtyfilenames))
         #                dirty_files=list(filter(lambda x: str(dataset_idx)+"_pt" in x,list(dirtyfilenames)))
             if len(clean_files) == 0 or len(dirty_files) == 0:
                 print("No results for dataset {}".format(DataLoader_idx))
@@ -1095,7 +1096,7 @@ class myLightningModule(LightningModule):
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-                print("log classifer")
+                print(DataLoader_idx)
                 # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
                 # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
                 self.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
