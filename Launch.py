@@ -12,29 +12,31 @@ from models.trainPGD import myLightningModule
 def train(config={
         "batch_size":64, # ADD MODEL ARGS HERE
          "codeversion":"-1",
-    },dir=None,devices=None,accelerator=None,Dataset=None,logtool=None):
+    },dire=None,devices=None,accelerator=None,Dataset=None,logtool=None):
 
 
     model=myLightningModule(**config)
-    if dir is None:
-        dir=config.get("root",".")
+    if dire is None:
+        dire=config.get("root",".")
     if Dataset is None:
         from DataModule import MyDataModule
-        Dataset=MyDataModule(Cache_dir=dir,**config)
+        Dataset=MyDataModule(Cache_dir=dire,**config)
     elif config.get("dataset",None)== 'coco':
         from COCODataModule import MyDataModule
-        Dataset=MyDataModule(Cache_dir=dir,**config)
+        Dataset=MyDataModule(Cache_dir=dire,**config)
     if devices is None:
         devices=config.get("devices","auto")
     if accelerator is None:
         accelerator=config.get("accelerator","auto")
     # print("Training with config: {}".format(config))
     Dataset.batch_size=config["batch_size"]
-    #filename="model-{}".format(model.version)
+    filename="model-{}".format(model.version)
+    modelSavedir=config.get("model_dir",dire)
    
     callbacks=[
         TQDMProgressBar(),
-        EarlyStopping(monitor="train_loss", mode="min",patience=10,check_finite=True,stopping_threshold=0.001),
+        # EarlyStopping(monitor="train_loss", mode="min",patience=10,check_finite=True,stopping_threshold=0.001),
+        ModelCheckpoint(monitor="train_loss", mode="min",dirpath=modelSavedir,filename=filename,save_top_k=1,save_last=True,save_weights_only=True),
     ]
     p=config['precision']
     if isinstance(p,str):
@@ -64,16 +66,19 @@ def train(config={
             #                        #sharding_strategy='FULL_SHARD',
             #                        #state_dict_type='full'
             # ),
+            strategy='ddp_find_unused_parameters_true',
+
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
             precision=p,
             fast_dev_run=config.get("debug",False),
     )
-    # if config["batch_size"] !=1:
+    if not os.path.exists(os.path.join(modelSavedir,filename)):
 
-    #trainer.fit(model,Dataset)
-
-    trainer.test(model,Dataset)
+            trainer.fit(model,Dataset)
+    else:
+            model.load_from_checkpoint(os.path.join(modelSavedir,filename))
+            trainer.test(model,Dataset)
 
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
@@ -135,6 +140,7 @@ def SlurmRun(trialconfig):
                 '#SBATCH --account bdlan08',
                 'export CONDADIR=/nobackup/projects/bdlan08/$USER/miniconda',                                                         #<-----CHANGE ME                                                    
                 'export WANDB_CACHE_DIR=/nobackup/projects/bdlan08/$USER/',
+                'export MODELDIR=/nobackup/projects/bdlan08/$USER/modelckpts',
                 'export TEMP=/nobackup/projects/bdlan08/$USER/',
                 'export NCCL_SOCKET_IFNAME=ib0'])
         comm="python3"
@@ -147,6 +153,7 @@ def SlurmRun(trialconfig):
                              'export CONDADIR=/storage/hpc/07/zhang303/conda_envs/torch',                                                     
                              'export NCCL_SOCKET_IFNAME=enp0s31f6',
                              'export WANDB_CACHE_DIR=$global_scratch',
+                             'export MODELDIR=$global_storage/modelckpts',
                              'export TEMP=$global_scratch',
                              'export ISHEC=True'])
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
