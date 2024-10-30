@@ -7,6 +7,7 @@ class baseparser(HyperOptArgumentParser):
 
         #our base parser looks like :
         self.TEMPDIR=os.path.join(os.getenv("TEMP","."),"results")
+        self.MODELDIR=os.path.join(os.getenv("MODELDIR","."),"MODELDIR")
         '''
             parser = argparse.ArgumentParser('Pre-trained-Model-Guided-Fine-Tuning for CLIP')
 
@@ -109,6 +110,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--root", default=os.getenv("PWD","./data"), options=[os.getenv("PWD","./data")], type=str, tunable=False)
         self.opt_list("--dataset", default='cifar10', options=["coco","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
+        self.opt_list("--model_dir", default=os.path.join(self.MODELDIR,"modelckpts"), type=str, tunable=False)
         # other
         self.opt_list("--attack_type", default="pgd", type=str,options=["pgd","cw","text","autoattack","noAttack"], tunable=False) # set this as tunable to trial different attack types
         self.opt_list("--test_attack_type", default="pgd", type=str,options=["pgd","cw","text","noAttack"], tunable=False)
