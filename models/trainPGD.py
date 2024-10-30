@@ -975,7 +975,7 @@ class myLightningModule(LightningModule):
                     
     
     
-    def on_test_epoch_end(self):
+    def on_test_end(self):
         # time.sleep(270)
         print("Test epoch end called")
         # self.test_epoch_end_called=True
@@ -1183,7 +1183,7 @@ class myLightningModule(LightningModule):
                     dirtyidx+=1
                 if clear:
                     EmptyCount+=1
-                    #time.sleep(300)
+                    time.sleep(300)
               
         
         print("Exiting save results worker")
