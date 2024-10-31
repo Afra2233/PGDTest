@@ -977,8 +977,6 @@ class myLightningModule(LightningModule):
     
     
     def on_test_end(self):
-        time.sleep(300)
-        print("Test epoch end called")
         if hasattr(self,"save_result_worker_thread"):
             self.save_result_worker_thread.join()
         # time.sleep(270)
