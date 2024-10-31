@@ -938,8 +938,10 @@ class myLightningModule(LightningModule):
 
         # measure accuracy and record loss
         acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
-        self.log('test_clean_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log('test_clean_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log('test_clean_batch_loss', loss, on_epoch=True, prog_bar=False, logger=True)
+        self.log('test_clean_batch_acc', acc1[0].item(), on_epoch=True, prog_bar=False, logger=True)
 
 
         return_dict = self.testattack(images, target, text, self.test_alphas, self.test_numsteps, self.test_epsilons)
@@ -963,9 +965,11 @@ class myLightningModule(LightningModule):
             loss=loss.permute(1,2,0).view(self.test_epsilons.size(0),self.test_alphas.size(0),images.size(0))
             for alpha in range(self.test_alphas.size(0)):
                 for epsilon in range(self.test_epsilons.size(0)):
-                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_epoch=True, logger=True)
+                        #self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
                         acc1 = accuracy(output_prompt_adv[alpha,epsilon], torch.arange(images.size(0),device=images.device), topk=(1,))
-                        self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+                        self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_epoch=True, logger=True)     
+                        #self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
                         self.test_attackedresults[dataloader_idx].put({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha].repeat(target.shape[0]), "epsilon": self.test_epsilons[epsilon].repeat(target.shape[0]), "step": torch.tensor(Attack_step).repeat(target.shape[0])})  
                
         return loss
@@ -973,6 +977,9 @@ class myLightningModule(LightningModule):
     
     
     def on_test_end(self):
+        print("Test epoch end called")
+        if hasattr(self,"save_result_worker_thread"):
+            self.save_result_worker_thread.join()
         # time.sleep(270)
         print("Test epoch end called")
         # self.test_epoch_end_called=True
@@ -989,12 +996,8 @@ class myLightningModule(LightningModule):
             self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
         if not hasattr(self,"generalclassifier"):
             self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-        if hasattr(self,"save_result_worker_thread"):
-            # queue the worker to 
-            # wait for the worker to finish
-            self.save_result_worker_thread.join()
-            # read in all files and begin processing them
-            # del self.save_result_worker_thread
+       
+           
        
         path=self.args.get("output_dir","./results")
         filenames=os.listdir(path)
@@ -1044,6 +1047,8 @@ class myLightningModule(LightningModule):
             #Log classifier weights and bias
             # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
             # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
+            self.logger.experiment.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_.tolist())
+            self.logger.experiment.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_.tolist())
 
             cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
             BadLabels=[]
@@ -1092,6 +1097,8 @@ class myLightningModule(LightningModule):
                 #Log classifier weights and bias
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
+                self.logger.experiment.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_.tolist())
+                self.logger.experiment.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_.tolist())
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
              
                 # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
@@ -1113,8 +1120,8 @@ class myLightningModule(LightningModule):
                 os.remove(os.path.join(path,file))    
 
 
-        del self.test_cleanresults
-        del self.test_attackedresults
+        # del self.test_cleanresults
+        # del self.test_attackedresults
         # if hasattr(self,"save_result_worker_thread"):
         #     self.save_result_worker_thread.join()
         #     del self.save_result_worker_thread
