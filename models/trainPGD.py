@@ -1178,9 +1178,9 @@ class myLightningModule(LightningModule):
                     np.savez(dirtyPath,logits=logits,labels=labels,alphas=alpha,epsilons=epsilons,numsteps=numsteps)
                     # print("Saved dirty results to {}".format(dirtyPath))
                     dirtyidx+=1
-                if clear:
-                    EmptyCount+=1
-                    time.sleep(300)
+            if clear:
+               EmptyCount+=1
+               time.sleep(300)
               
         
         print("Exiting save results worker")
