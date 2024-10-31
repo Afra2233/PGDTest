@@ -73,12 +73,14 @@ def train(config={
             precision=p,
             fast_dev_run=config.get("debug",False),
     )
-    if not os.path.exists(os.path.join(modelSavedir,filename)):
+    # if not os.path.exists(os.path.join(modelSavedir,filename)):
 
-            trainer.fit(model,Dataset)
-    else:
-            model.load_from_checkpoint(os.path.join(modelSavedir,filename))
-            trainer.test(model,Dataset)
+    #         trainer.fit(model,Dataset)
+    # else:
+    #         model.load_from_checkpoint(os.path.join(modelSavedir,filename))
+    #         trainer.test(model,Dataset)
+
+    trainer.test(model,Dataset)
 
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
