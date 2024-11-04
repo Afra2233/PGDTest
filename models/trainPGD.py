@@ -614,12 +614,12 @@ class myLightningModule(LightningModule):
         fig=plt.figure()
         plt.imshow(output_prompt.cpu().detach().numpy())
         plt.colorbar()
-        plt.savefig("Cleanoutput_prompt_idx={}.png".format(batch_idx))
+        plt.savefig("Cleanoutput_prompt_idx={}{}.png".format(batch_idx,dataloader_idx))
         plt.close(fig)
         fig=plt.figure()
         plt.imshow(movement.cpu().detach().numpy())
         plt.colorbar()
-        plt.savefig("movement_idx={}.png".format(batch_idx))
+        plt.savefig("movement_idx={}{}.png".format(batch_idx,dataloader_idx))
         plt.close(fig)
 
 
