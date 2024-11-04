@@ -607,8 +607,8 @@ class myLightningModule(LightningModule):
 
        #compare class probabilities between output_prompt and output_prompt_adv
         movement= output_prompt_adv - output_prompt
-        self.log("movement",movement)
-        self.log("CleanSimilarity",output_prompt)
+        # self.log("movement",movement)
+        # self.log("CleanSimilarity",output_prompt)
         #plot as heatmap using matplot and save as png
         #plot as scatter plot using matplot and save as png
         fig=plt.figure()
