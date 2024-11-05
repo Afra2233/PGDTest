@@ -1068,7 +1068,13 @@ class myLightningModule(LightningModule):
             #Log classifier weights and bias
             # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
             # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
-            self.logger.experiment.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_.tolist())
+            
+            log_data = {
+                "Clean Classifier Weights Dataset {}".format(DataLoader_idx): self.Cleanclassifier.coef_.tolist()
+            }
+            self.logger.experiment.log(log_data)
+
+            # self.logger.experiment.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_.tolist())
             self.logger.experiment.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_.tolist())
 
             cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
