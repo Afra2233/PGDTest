@@ -606,21 +606,21 @@ class myLightningModule(LightningModule):
         output_prompt_adv = img_embed_norm @ scale_text_embed_norm.t()
 
        #compare class probabilities between output_prompt and output_prompt_adv
-        movement= output_prompt_adv - output_prompt
+        # movement= output_prompt_adv - output_prompt
         # self.log("movement",movement)
         # self.log("CleanSimilarity",output_prompt)
         #plot as heatmap using matplot and save as png
         #plot as scatter plot using matplot and save as png
-        fig=plt.figure()
-        plt.imshow(output_prompt.cpu().detach().numpy())
-        plt.colorbar()
-        plt.savefig("Cleanoutput_prompt_idx={}{}.png".format(batch_idx,dataloader_idx))
-        plt.close(fig)
-        fig=plt.figure()
-        plt.imshow(movement.cpu().detach().numpy())
-        plt.colorbar()
-        plt.savefig("movement_idx={}{}.png".format(batch_idx,dataloader_idx))
-        plt.close(fig)
+        # fig=plt.figure()
+        # plt.imshow(output_prompt.cpu().detach().numpy())
+        # plt.colorbar()
+        # plt.savefig("Cleanoutput_prompt_idx={}{}.png".format(batch_idx,dataloader_idx))
+        # plt.close(fig)
+        # fig=plt.figure()
+        # plt.imshow(movement.cpu().detach().numpy())
+        # plt.colorbar()
+        # plt.savefig("movement_idx={}{}.png".format(batch_idx,dataloader_idx))
+        # plt.close(fig)
 
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
