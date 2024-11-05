@@ -929,6 +929,7 @@ class myLightningModule(LightningModule):
     # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         print("test step start")
+        self.test_epoch_end_called=True
         # if not torch.is_grad_enabled():
         #    print("Currently in inference mode (no gradients).")
         # else:
@@ -1160,8 +1161,9 @@ class myLightningModule(LightningModule):
         version=self.version
         threshold=50
         EmptyCount=0
-        while EmptyCount < 3:
-            time.sleep(60)
+        while not self.test_epoch_end_called:
+        # while EmptyCount < 3:
+            time.sleep(120)
             clear=False
             
             for dataset_idx in range(self.test_data_loader_count):
