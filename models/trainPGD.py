@@ -1185,7 +1185,7 @@ class myLightningModule(LightningModule):
                     np.savez(cleanPath,logits=logits,labels=labels)
                     # print("Saved clean results to {}".format(cleanPath))
                     cleanidx+=1
-                elif not self.test_attackedresults[dataset_idx].empty():
+                if not self.test_attackedresults[dataset_idx].empty():
                    
                     clear=False
                     dirty_filename="dirty"+filename+str(dirtyidx)
