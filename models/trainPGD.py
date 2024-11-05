@@ -929,7 +929,7 @@ class myLightningModule(LightningModule):
     # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
         print("test step start")
-        self.test_epoch_end_called=True
+        
         # if not torch.is_grad_enabled():
         #    print("Currently in inference mode (no gradients).")
         # else:
@@ -997,10 +997,12 @@ class myLightningModule(LightningModule):
     
     
     def on_test_end(self):
+        print("Test epoch end called")
+        self.test_epoch_end_called=True
         if hasattr(self,"save_result_worker_thread"):
             self.save_result_worker_thread.join()
         # time.sleep(270)
-        print("Test epoch end called")
+        # print("Test epoch end called")
         # self.test_epoch_end_called=True
 
 
