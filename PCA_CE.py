@@ -38,7 +38,7 @@ transform = transforms.Compose([
 ])
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
-image, label = cifar100[37]
+image, label = cifar100[37] #37,52
 class_names_100 = cifar100.classes
 print("class_names_100:",class_names_100)
 
@@ -89,7 +89,7 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
     return perturbed_image
     
 epsilons = [1/255,4/255,8/255]   
-alphas = [1/255,4/255,8/255]           
+alphas = [64/255,32/255,125/255]           
 num_steps = [5,10]               
 attack_point = {}
 for eps in epsilons:
