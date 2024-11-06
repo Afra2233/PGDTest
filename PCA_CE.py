@@ -95,7 +95,7 @@ acctack_point = {}
 for eps in epsilons:
     for alpha in alphas:
         
-        adv_image = pgd_attack(model, image.to(device), text_embedding, eps, alpha, num_steps)
+        adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num_steps)
         
        
         with torch.no_grad():
