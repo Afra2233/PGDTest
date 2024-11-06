@@ -85,7 +85,7 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
            
             perturbation = torch.clamp(perturbed_image - image, min=-eps, max=eps)
             perturbed_image = torch.clamp(image + perturbation, min=0, max=1)
-            perturbed_image.requires_grad = True
+            # perturbed_image.requires_grad = True
     
     return perturbed_image
     
