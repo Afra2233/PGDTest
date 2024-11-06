@@ -99,7 +99,7 @@ for eps in epsilons:
         
        
         with torch.no_grad():
-            image_features = model.encode_image(preprocess(Image.fromarray((adv_image.squeeze().cpu().numpy() * 255).astype('uint8'))).unsqueeze(0).to(device))
+            image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image)).unsqueeze(0).to('cuda'))
             text_features = model.encode_text(text_inputs)
             similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
         
