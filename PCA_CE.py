@@ -47,7 +47,7 @@ text_embedding = model.encode_text(text_inputs)
 
 #predicted label
 image_embedding = model.encode_image(image)
-similarity = (image_embedding @ text_embedding.T).softmax(dim=-1).detach().numpy()
+similarity = (image_embedding @ text_embedding.T).softmax(dim=-1).cpu().detach().numpy()
 best_match_index = similarity.argmax()
 predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
