@@ -127,7 +127,7 @@ add_attack_label = True
 for (eps, alpha), embedding in acctack_point.items():
     point = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
     if add_attack_label:
-        ax.scatter(point[:, 0], point[:, 1], color='red', marker='x', label=f"eps={eps}, alpha={alpha}")
+        ax.scatter(point[:, 0], point[:, 1], color='red', marker='x', label='Attacked Point')
         add_attack_label = False  
     else:
         ax.scatter(point[:, 0], point[:, 1], color='red', marker='x')  
