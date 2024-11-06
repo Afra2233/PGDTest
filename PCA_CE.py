@@ -96,10 +96,10 @@ for eps in epsilons:
     for alpha in alphas:
         
         adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num_steps)
-        
+        adv_image_squeezed = adv_image.squeeze(0)
        
         with torch.no_grad():
-            image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image)).unsqueeze(0).to('cuda'))
+            image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image_squeezed)).unsqueeze(0).to('cuda'))
             text_features = model.encode_text(text_inputs)
             similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
         
