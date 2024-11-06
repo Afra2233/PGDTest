@@ -109,7 +109,7 @@ for eps in epsilons:
         predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
 
         attack_point.update({(eps, alpha):model.encode_text(predict_inputs_attack).cpu()})
-print(acctack_point)
+print(attack_point)
         # acctack_point[(eps, alpha)] = model.encode_text(predict_inputs_attack).cpu()
 
 
