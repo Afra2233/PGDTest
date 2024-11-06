@@ -34,16 +34,18 @@ transform = transforms.Compose([
     transforms.Resize((224, 224)),  
     transforms.ToTensor() 
 ])
-
+#load the datasets
 cifar100 = datasets.cifar100(root='./data', train=False, download=True, transform=transform)
 image, label = cifar100[50]
 class_names = cifar100.classes
+
+#pick one sample from the dataset and get the ground truth label.
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
 text_prompts = ["This is a photo of a {}".format(class_names[label])]
 text_inputs =clip.tokenize(text_prompts).to('cuda')
 text_embedding = model.encode_text(text_inputs).cpu()
-# text_token = list(tokens.values())[0].to(torch.float)
 
+#predicted label
 image_embedding = model.encode_image(image)
 similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
 best_match_index = similarity.argmax()
@@ -51,7 +53,7 @@ predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
 predict_embedding = model.encode_text(predict_inputs).cpu()
 
-# text_pca = pca.fit_transform(text_embedding.detach().cpu().numpy())
+#draw the picture
 X_pca = pca.fit_transform(fullpoints.detach().cpu().numpy())
 text_pac =pca.transform(text_embedding.detach().numpy())
 predict_pac =pca.transform(predict_embedding.detach().numpy())
