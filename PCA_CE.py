@@ -125,7 +125,7 @@ for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
 add_attack_label = True
-for (eps, alpha), embedding in enumerate(attack_point.keys()):
+for (eps, alpha), embedding in acctack_point.items():
     point = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
     if add_attack_label:
         ax.scatter(point[:, 0], point[:, 1], color='red', marker='x', label='Attacked Point')
