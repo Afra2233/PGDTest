@@ -50,7 +50,7 @@ text_predict = ["This is a photo of a {}".format(class_name) for class_name in c
 text_inputs_predict = clip.tokenize(text_predict).to('cuda')
 text_embeddings_predict = model.encode_text(text_inputs_predict)
 image_embedding = model.encode_image(image)
-similarity = (image_embedding @ text_embedding_predict.T).softmax(dim=-1).cpu().detach().numpy()
+similarity = (image_embedding @ text_embeddings_predict.T).softmax(dim=-1).cpu().detach().numpy()
 print("similarity :",similarity[:10])
 best_match_index = similarity.argmax().item()
 print("best_match_index:",best_match_index)
