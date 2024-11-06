@@ -96,7 +96,7 @@ for eps in epsilons:
     for alpha in alphas:
         for num in num_steps:
         
-            adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num_steps)
+            adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num)
             adv_image_squeezed = adv_image.squeeze(0)
            
             with torch.no_grad():
