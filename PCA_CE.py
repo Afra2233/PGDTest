@@ -38,7 +38,7 @@ transform = transforms.Compose([
 ])
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
-image, label = cifar100[51]
+image, label = cifar100[37]
 class_names_100 = cifar100.classes
 print("class_names_100:",class_names_100)
 
@@ -88,27 +88,28 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
     
     return perturbed_image
     
-epsilons = [1,4,6]   
-alphas = [1,4,10]          
-num_steps = 10               
+epsilons = [1/255,4/255,8/255]   
+alphas = [1/255,4/255,8/255]           
+num_steps = [5,10]               
 attack_point = {}
 for eps in epsilons:
     for alpha in alphas:
+        for num in num_steps:
         
-        adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num_steps)
-        adv_image_squeezed = adv_image.squeeze(0)
-       
-        with torch.no_grad():
-            image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image_squeezed)).unsqueeze(0).to('cuda'))
-            # text_features = model.encode_text(text_inputs)
-            similarity = (image_features @ text_embeddings_predict.T).softmax(dim=-1).cpu().numpy()
-        
-        print("similarity:",similarity.argmax())
-        best_match_index_acctack = similarity.argmax().item()
-        predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
-        predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
-
-        attack_point.update({(eps, alpha):model.encode_text(predict_inputs_attack).cpu()})
+            adv_image = pgd_attack(model, image, text_embedding, eps, alpha, num_steps)
+            adv_image_squeezed = adv_image.squeeze(0)
+           
+            with torch.no_grad():
+                image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image_squeezed)).unsqueeze(0).to('cuda'))
+                # text_features = model.encode_text(text_inputs)
+                similarity = (image_features @ text_embeddings_predict.T).softmax(dim=-1).cpu().numpy()
+            
+            print("similarity:",similarity.argmax())
+            best_match_index_acctack = similarity.argmax().item()
+            predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
+            predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
+    
+            attack_point.update({(eps, alpha):model.encode_text(predict_inputs_attack).cpu()})
 print("Keys in attack_point:", list(attack_point.keys()))
 for key, embedding in attack_point.items():
     print(f"{key}: {embedding.flatten()[:10]}") 
