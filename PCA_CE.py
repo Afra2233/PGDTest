@@ -47,6 +47,7 @@ text_embedding = model.encode_text(text_inputs)
 
 #predicted label
 image_embedding = model.encode_image(image)
+print("Image embedding content (first 10 elements):", image_embedding[0][:10])
 similarity = (image_embedding @ text_embedding.T).softmax(dim=-1).cpu().detach().numpy()
 best_match_index = similarity.argmax()
 predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
