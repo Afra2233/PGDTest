@@ -75,7 +75,7 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
             loss = -F.cosine_similarity(image_embedding, label, dim=-1).mean()
           
             model.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
             
             
             perturbed_image = perturbed_image + alpha * perturbed_image.grad.sign()
