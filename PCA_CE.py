@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.datasets import make_classification
+import torch.nn.functional as F
 pca = PCA(n_components=2)
 class_names = {}
 with open(os.path.join(".","train_class_names.json"),'r') as f:
@@ -62,18 +63,69 @@ print(predict_prompts)
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
 predict_embedding = model.encode_text(predict_inputs).cpu()
 
+def pgd_attack(model, image, label, eps, alpha, num_steps):
+    
+    perturbed_image = image.clone().detach().to('cuda')
+    perturbed_image.requires_grad = True
+    
+  
+    for _ in range(num_steps):
+      
+        output = model(perturbed_image)
+        loss = F.cross_entropy(output, label)
+        
+      
+        model.zero_grad()
+        loss.backward()
+        
+        
+        perturbed_image = perturbed_image + alpha * perturbed_image.grad.sign()
+        
+       
+        perturbation = torch.clamp(perturbed_image - image, min=-eps, max=eps)
+        perturbed_image = torch.clamp(image + perturbation, min=0, max=1).detach_()
+        perturbed_image.requires_grad = True
+    
+    return perturbed_image
+    
+epsilons = [1/255, 2/255, 4/255]   
+alphas = [1/255, 2/255, 4/255]          
+num_steps = 10               
+acctack_point = {}
+for eps in epsilons:
+    for alpha in alphas:
+        
+        adv_image = pgd_attack(model, image.to(device), text_embedding, eps, alpha, num_steps)
+        
+       
+        with torch.no_grad():
+            image_features = model.encode_image(preprocess(Image.fromarray((adv_image.squeeze().cpu().numpy() * 255).astype('uint8'))).unsqueeze(0).to(device))
+            text_features = model.encode_text(text_inputs)
+            similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
+        
+        
+        best_match_index_acctack = similarity.argmax().item()
+        predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
+        predict_inputs_attack =model.tokenize(predict_prompts_attack).to('cuda')
+      
+        acctack_point[(eps, alpha)] = model.encode_text(predict_inputs_attack).cpu()
+
+
+        
 #draw the picture
 X_pca = pca.fit_transform(fullpoints.detach().cpu().numpy())
 text_pac =pca.transform(text_embedding.detach().cpu().numpy())
 predict_pac =pca.transform(predict_embedding.detach().cpu().numpy())
-optimumscore=fullpoints
-#normalise the optimum score
+# optimumscore=fullpoints
 
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111)
 for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
+for (eps, alpha), embedding in acctack_point.items():
+    points = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
+    ax.scatter(point[:, 0], point[:, 1], label=f"eps={eps}, alpha={alpha}", color='red', marker='x')
 ax.scatter(text_pac[:,0],text_pac[:,1],color='Black',marker="x", label='Target Annotation')
 ax.scatter(predict_pac[:,0],predict_pac[:,1],color='Yellow',marker="*", label='Prediction Point')
 
