@@ -124,7 +124,7 @@ for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
 for (eps, alpha), embedding in acctack_point.items():
-    points = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
+    point = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
     ax.scatter(point[:, 0], point[:, 1], label=f"eps={eps}, alpha={alpha}", color='red', marker='x')
 ax.scatter(text_pac[:,0],text_pac[:,1],color='Black',marker="x", label='Target Annotation')
 ax.scatter(predict_pac[:,0],predict_pac[:,1],color='Yellow',marker="*", label='Prediction Point')
