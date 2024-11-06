@@ -36,7 +36,7 @@ transform = transforms.Compose([
 ])
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
-image, label = cifar100[52]
+image, label = cifar100[46]
 class_names_100 = cifar100.classes
 print("class_names_100:",class_names_100)
 
