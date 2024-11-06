@@ -37,16 +37,17 @@ transform = transforms.Compose([
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 image, label = cifar100[52]
-class_names = cifar100.classes
+class_names_100 = cifar100.classes
+print("class_names_100":class_names_100)
 
 #pick one sample from the dataset and get the ground truth label.
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
-text_prompts = ["This is a photo of a {}".format(class_names[label])]
+text_prompts = ["This is a photo of a {}".format(class_names_100[label])]
 text_inputs =clip.tokenize(text_prompts).to('cuda')
 text_embedding = model.encode_text(text_inputs)
 
 #predicted label
-text_predict = ["This is a photo of a {}".format(class_name) for class_name in class_names]
+text_predict = ["This is a photo of a {}".format(class_name) for class_name in class_names_100]
 text_inputs_predict = clip.tokenize(text_predict).to('cuda')
 text_embeddings_predict = model.encode_text(text_inputs_predict)
 image_embedding = model.encode_image(image)
@@ -55,7 +56,7 @@ print("similarity :",similarity[:10])
 best_match_index = similarity.argmax().item()
 print("best_match_index:",best_match_index)
 print("similarity.argmax:",similarity.argmax())
-predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
+predict_prompts = ["This is a photo of a {}".format(class_names_100[best_match_index])]
 print(predict_prompts)
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
 predict_embedding = model.encode_text(predict_inputs).cpu()
