@@ -50,6 +50,8 @@ image_embedding = model.encode_image(image)
 print("Image embedding content (first 10 elements):", image_embedding[0][:10])
 similarity = (image_embedding @ text_embedding.T).softmax(dim=-1).cpu().detach().numpy()
 best_match_index = similarity.argmax()
+print("best_match_index:",best_match_index)
+print("similarity.argmax:",similarity.argmax())
 predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
 print(predict_prompts)
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
