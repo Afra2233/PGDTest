@@ -2,6 +2,7 @@ import json
 import os
 import clip
 import torch
+from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
