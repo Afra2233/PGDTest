@@ -71,9 +71,8 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
   
     for _ in range(num_steps):
       
-        output = model(perturbed_image)
-        loss = F.cross_entropy(output, label)
-        
+        image_embedding = model.encode_image(perturbed_image)
+        loss = -F.cosine_similarity(image_embedding, label, dim=-1).mean()
       
         model.zero_grad()
         loss.backward()
