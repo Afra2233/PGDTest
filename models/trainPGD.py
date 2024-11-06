@@ -1069,13 +1069,15 @@ class myLightningModule(LightningModule):
             # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
             # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
             
-            log_data = {
-                "Clean Classifier Weights Dataset {}".format(DataLoader_idx): self.Cleanclassifier.coef_.tolist()
-            }
-            self.logger.experiment.log(log_data)
-
+            # log_data = {
+            #     "Clean Classifier Weights Dataset {}".format(DataLoader_idx): self.Cleanclassifier.coef_.tolist()
+            # }
+            # self.logger.experiment.log(log_data)
+            
             # self.logger.experiment.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_.tolist())
-            self.logger.experiment.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_.tolist())
+            self.logger.experiment.log(dict([("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_.tolist())]))
+            self.logger.experiment.log(dict([("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_.tolist())]))
+            # self.logger.experiment.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_.tolist())
 
             cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
             BadLabels=[]
@@ -1124,8 +1126,10 @@ class myLightningModule(LightningModule):
                 #Log classifier weights and bias
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
-                self.logger.experiment.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_.tolist())
-                self.logger.experiment.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_.tolist())
+                self.logger.experiment.log(dict([("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_.tolist())]))
+                self.logger.experiment.log(dict([("Dirty Classifier Bias Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.intercept_.tolist())]))
+                # self.logger.experiment.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_.tolist())
+                # self.logger.experiment.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_.tolist())
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
              
                 # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
