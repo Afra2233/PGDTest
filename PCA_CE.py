@@ -46,7 +46,7 @@ text_embedding = model.encode_text(text_inputs).cpu()
 
 # text_pca = pca.fit_transform(text_embedding.detach().cpu().numpy())
 X_pca = pca.fit_transform(fullpoints.detach().cpu().numpy())
-text_pac =pca.transform(text_embedding)
+text_pac =pca.transform(text_embedding.detach().numpy())
 optimumscore=fullpoints
 #normalise the optimum score
 
