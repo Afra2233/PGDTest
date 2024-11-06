@@ -72,8 +72,8 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
   
     for _ in range(num_steps):
         with torch.enable_grad():
-            image_embedding = model.encode_image(perturbed_image)
-            loss = F.cross_entropy(image_embedding, label)
+            image_embedding_attack = model.encode_image(perturbed_image)
+            loss = F.cross_entropy(image_embedding_attack, label)
           
             model.zero_grad()
             loss.backward(retain_graph=True)
