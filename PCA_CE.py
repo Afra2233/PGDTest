@@ -107,8 +107,9 @@ for eps in epsilons:
         best_match_index_acctack = similarity.argmax().item()
         predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
         predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
-      
-        acctack_point[(eps, alpha)] = model.encode_text(predict_inputs_attack).cpu()
+
+        attack_point.update({(eps, alpha):model.encode_text(predict_inputs_attack).cpu()})
+        # acctack_point[(eps, alpha)] = model.encode_text(predict_inputs_attack).cpu()
 
 
         
@@ -124,7 +125,7 @@ for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
 add_attack_label = True
-for (eps, alpha), embedding in acctack_point.items():
+for (eps, alpha), embedding in enumerate(tokens.keys()):
     point = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
     if add_attack_label:
         ax.scatter(point[:, 0], point[:, 1], color='red', marker='x', label='Attacked Point')
