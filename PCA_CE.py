@@ -100,8 +100,8 @@ for eps in epsilons:
        
         with torch.no_grad():
             image_features = model.encode_image(preprocess(transforms.ToPILImage()(adv_image_squeezed)).unsqueeze(0).to('cuda'))
-            text_features = model.encode_text(text_inputs)
-            similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
+            # text_features = model.encode_text(text_inputs)
+            similarity = (image_features @ text_embeddings_predict.T).softmax(dim=-1).cpu().numpy()
         
         
         best_match_index_acctack = similarity.argmax().item()
