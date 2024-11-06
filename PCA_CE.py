@@ -14,12 +14,6 @@ with open(os.path.join(".","train_class_names.json"),'r') as f:
     class_names = json.load(f)
 Loss=torch.nn.CrossEntropyLoss()
 
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),  
-    transforms.ToTensor() 
-])
-
-
 tokens={}
 model, preprocess = clip.load("ViT-B/32",device='cuda')
 with torch.inference_mode(True):
@@ -35,6 +29,11 @@ fullpoints=torch.cat(tuple(list(tokens.values())),axis=0).to(torch.float)
 # optimumscore=optimumscore@optimumscore.T
 # LossLabels=torch.arange(0,optimumscore.shape[0],device=optimumscore.device)
 # loss=Loss(optimumscore,LossLabels)
+
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),  
+    transforms.ToTensor() 
+])
 
 cifar10 = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 image, label = cifar10[0]
