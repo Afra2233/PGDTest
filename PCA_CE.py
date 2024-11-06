@@ -36,7 +36,7 @@ transform = transforms.Compose([
 ])
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
-image, label = cifar100[24]
+image, label = cifar100[68]
 class_names = cifar100.classes
 
 #pick one sample from the dataset and get the ground truth label.
