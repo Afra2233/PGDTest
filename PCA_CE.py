@@ -103,7 +103,7 @@ for eps in epsilons:
             # text_features = model.encode_text(text_inputs)
             similarity = (image_features @ text_embeddings_predict.T).softmax(dim=-1).cpu().numpy()
         
-        
+        print("similarity:",similarity.argmax())
         best_match_index_acctack = similarity.argmax().item()
         predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
         predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
