@@ -88,8 +88,8 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
     
     return perturbed_image
     
-epsilons = [1/255, 2/255, 4/255]   
-alphas = [1/255, 2/255, 4/255]          
+epsilons = [4/255,8/255,16/255]   
+alphas = [4/255,8/255,16/255]          
 num_steps = 10               
 attack_point = {}
 for eps in epsilons:
