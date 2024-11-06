@@ -1133,7 +1133,7 @@ class myLightningModule(LightningModule):
                 # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
                 self.logger.experiment.log({ "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Cleanclassifier.score(BadLogits, BadLabels)})
                 self.logger.experiment.log({ "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(GoodLogits, GoodLabels)})
-                self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore)
+                self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore})
                 self.logger.experiment.log({ "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(BadLogits, BadLabels)})
                 self.logger.experiment.log({ "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(BadLogits, BadLabels)})
                 self.logger.experiment.log({ "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(GoodLogits, GoodLabels)})
