@@ -70,20 +70,20 @@ def pgd_attack(model, image, label, eps, alpha, num_steps):
     
   
     for _ in range(num_steps):
-      
-        image_embedding = model.encode_image(perturbed_image)
-        loss = -F.cosine_similarity(image_embedding, label, dim=-1).mean()
-      
-        model.zero_grad()
-        loss.backward()
-        
-        
-        perturbed_image = perturbed_image + alpha * perturbed_image.grad.sign()
-        
-       
-        perturbation = torch.clamp(perturbed_image - image, min=-eps, max=eps)
-        perturbed_image = torch.clamp(image + perturbation, min=0, max=1).detach()
-        perturbed_image.requires_grad = True
+        with torch.enable_grad():
+            image_embedding = model.encode_image(perturbed_image)
+            loss = -F.cosine_similarity(image_embedding, label, dim=-1).mean()
+          
+            model.zero_grad()
+            loss.backward()
+            
+            
+            perturbed_image = perturbed_image + alpha * perturbed_image.grad.sign()
+            
+           
+            perturbation = torch.clamp(perturbed_image - image, min=-eps, max=eps)
+            perturbed_image = torch.clamp(image + perturbation, min=0, max=1).detach()
+            perturbed_image.requires_grad = True
     
     return perturbed_image
     
