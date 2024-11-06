@@ -123,9 +123,16 @@ ax = fig.add_subplot(111)
 for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
+add_attack_label = True
 for (eps, alpha), embedding in acctack_point.items():
     point = pca.transform(embedding.detach().cpu().numpy().reshape(1, -1))
-    ax.scatter(point[:, 0], point[:, 1], label=f"eps={eps}, alpha={alpha}", color='red', marker='x')
+    if add_attack_label:
+        ax.scatter(point[:, 0], point[:, 1], color='red', marker='x', label=f"eps={eps}, alpha={alpha}")
+        add_attack_label = False  
+    else:
+        ax.scatter(point[:, 0], point[:, 1], color='red', marker='x')  
+
+    # ax.scatter(point[:, 0], point[:, 1], label=f"eps={eps}, alpha={alpha}", color='red', marker='x')
 ax.scatter(text_pac[:,0],text_pac[:,1],color='Black',marker="x", label='Target Annotation')
 ax.scatter(predict_pac[:,0],predict_pac[:,1],color='Yellow',marker="*", label='Prediction Point')
 
