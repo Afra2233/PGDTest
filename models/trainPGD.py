@@ -1074,9 +1074,9 @@ class myLightningModule(LightningModule):
             # }
             # self.logger.experiment.log(log_data)
             
-            self.logger.experiment.log({"Clean Classifier Weights Dataset {}".format(DataLoader_idx):self.Cleanclassifier.coef_.tolist()})
-            self.logger.experiment.log({"Clean Classifier Bias Dataset {}".format(DataLoader_idx):self.Cleanclassifier.intercept_.tolist()})
-
+            # self.logger.experiment.log({"Clean Classifier Weights Dataset {}".format(DataLoader_idx):self.Cleanclassifier.coef_.tolist()})
+            # self.logger.experiment.log({"Clean Classifier Bias Dataset {}".format(DataLoader_idx):self.Cleanclassifier.intercept_.tolist()})
+            np.savez(os.path.join(path,"CleanClassifierWeights{}_{}.npz".format(self.version,DataLoader_idx)),weights=self.Cleanclassifier.coef_,bias=self.Cleanclassifier.intercept_)
             cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
             BadLabels=[]
             BadLogits=[]
@@ -1125,12 +1125,15 @@ class myLightningModule(LightningModule):
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
                 # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
               
-                self.logger.experiment.log({"Dirty Classifier Weights Dataset {}".format(DataLoader_idx):self.Dirtyclassifier.coef_.tolist()})
-                self.logger.experiment.log({"Dirty Classifier Bias Dataset {}".format(DataLoader_idx): self.Dirtyclassifier.intercept_.tolist()})
+                # self.logger.experiment.log({"Dirty Classifier Weights Dataset {}".format(DataLoader_idx):self.Dirtyclassifier.coef_.tolist()})
+                # self.logger.experiment.log({"Dirty Classifier Bias Dataset {}".format(DataLoader_idx): self.Dirtyclassifier.intercept_.tolist()})
                 self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
              
                 # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
                 # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
+                np.savez(os.path.join(path,"DirtyClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.Dirtyclassifier.coef_,bias=self.Dirtyclassifier.intercept_)
+                np.savez(os.path.join(path,"GeneralClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.generalclassifier.coef_,bias=self.generalclassifier.intercept_)
+                
                 self.logger.experiment.log({ "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Cleanclassifier.score(BadLogits, BadLabels)})
                 self.logger.experiment.log({ "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(GoodLogits, GoodLabels)})
                 self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore})
