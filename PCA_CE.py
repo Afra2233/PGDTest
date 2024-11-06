@@ -72,7 +72,7 @@ ax = fig.add_subplot(111)
 for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
-ax.scatter(text_pac[:,0],text_pac[:,1],color='Green',marker="x", label='Target Annotation')
+ax.scatter(text_pac[:,0],text_pac[:,1],color='Black',marker="x", label='Target Annotation')
 ax.scatter(predict_pac[:,0],predict_pac[:,1],color='Yellow',marker="*", label='Prediction Point')
 
 ax.set_title('2D PCA of Text Embeddings for each class')
