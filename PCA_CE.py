@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.datasets import make_classification
 import torch.nn.functional as F
+from PIL import Image
 pca = PCA(n_components=2)
 class_names = {}
 with open(os.path.join(".","train_class_names.json"),'r') as f:
