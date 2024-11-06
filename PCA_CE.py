@@ -36,7 +36,7 @@ transform = transforms.Compose([
 ])
 #load the datasets
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
-image, label = cifar100[16]
+image, label = cifar100[24]
 class_names = cifar100.classes
 
 #pick one sample from the dataset and get the ground truth label.
@@ -50,6 +50,7 @@ image_embedding = model.encode_image(image)
 similarity = (image_embedding @ text_embedding.T).softmax(dim=-1).cpu().detach().numpy()
 best_match_index = similarity.argmax()
 predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
+print(predict_prompts)
 predict_inputs =clip.tokenize(predict_prompts).to('cuda')
 predict_embedding = model.encode_text(predict_inputs).cpu()
 
