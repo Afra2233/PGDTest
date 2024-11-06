@@ -3,6 +3,7 @@ import os
 import clip
 import torch
 from torchvision import transforms
+from torchvision import datasets
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
