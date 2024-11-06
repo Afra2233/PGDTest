@@ -44,9 +44,17 @@ text_inputs =clip.tokenize(text_prompts).to('cuda')
 text_embedding = model.encode_text(text_inputs).cpu()
 # text_token = list(tokens.values())[0].to(torch.float)
 
+image_embedding = model.encode_image(image)
+similarity = (image_features @ text_features.T).softmax(dim=-1).cpu().numpy()
+best_match_index = similarity.argmax()
+predict_prompts = ["This is a photo of a {}".format(class_names[best_match_index])]
+predict_inputs =clip.tokenize(predict_prompts).to('cuda')
+predict_embedding = model.encode_text(predict_inputs).cpu()
+
 # text_pca = pca.fit_transform(text_embedding.detach().cpu().numpy())
 X_pca = pca.fit_transform(fullpoints.detach().cpu().numpy())
 text_pac =pca.transform(text_embedding.detach().numpy())
+predict_pac =pca.transform(predict_embedding.detach().numpy())
 optimumscore=fullpoints
 #normalise the optimum score
 
@@ -56,6 +64,7 @@ for i, key in enumerate(tokens.keys()):
     points=pca.transform(tokens[key])
     ax.scatter(points[:,0],points[:,1], label=key, alpha=0.5)
 ax.scatter(text_pac[:,0],text_pac[:,1],color='Green',marker="x", label='Target Annotation')
+ax.scatter(predict_pac[:,0],predict_pac[:,1],color='Yellow', label='Prediction Point')
 
 ax.set_title('2D PCA of Text Embeddings for each class')
 ax.set_xlabel('Principal Component 1')
