@@ -55,8 +55,8 @@ predict_embedding = model.encode_text(predict_inputs).cpu()
 
 #draw the picture
 X_pca = pca.fit_transform(fullpoints.detach().cpu().numpy())
-text_pac =pca.transform(text_embedding.detach().numpy())
-predict_pac =pca.transform(predict_embedding.detach().numpy())
+text_pac =pca.transform(text_embedding.detach().cpu().numpy())
+predict_pac =pca.transform(predict_embedding.detach().cpu().numpy())
 optimumscore=fullpoints
 #normalise the optimum score
 
