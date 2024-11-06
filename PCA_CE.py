@@ -43,7 +43,7 @@ class_names = cifar100.classes
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
 text_prompts = ["This is a photo of a {}".format(class_names[label])]
 text_inputs =clip.tokenize(text_prompts).to('cuda')
-text_embedding = model.encode_text(text_inputs).cpu()
+text_embedding = model.encode_text(text_inputs)
 
 #predicted label
 image_embedding = model.encode_image(image)
