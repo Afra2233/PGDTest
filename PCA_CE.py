@@ -38,7 +38,7 @@ transform = transforms.Compose([
 cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 image, label = cifar100[52]
 class_names_100 = cifar100.classes
-print("class_names_100":class_names_100)
+print("class_names_100:",class_names_100)
 
 #pick one sample from the dataset and get the ground truth label.
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
