@@ -43,6 +43,7 @@ print("class_names_100:",class_names_100)
 #pick one sample from the dataset and get the ground truth label.
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
 text_prompts = ["This is a photo of a {}".format(class_names_100[label])]
+print("text_prompts:",text_prompts)
 text_inputs =clip.tokenize(text_prompts).to('cuda')
 text_embedding = model.encode_text(text_inputs)
 
