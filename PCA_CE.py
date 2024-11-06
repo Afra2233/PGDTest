@@ -106,7 +106,7 @@ for eps in epsilons:
         
         best_match_index_acctack = similarity.argmax().item()
         predict_prompts_attack = ["This is a photo of a {}".format(class_names_100[best_match_index_acctack])]
-        predict_inputs_attack =model.tokenize(predict_prompts_attack).to('cuda')
+        predict_inputs_attack =clip.tokenize(predict_prompts_attack).to('cuda')
       
         acctack_point[(eps, alpha)] = model.encode_text(predict_inputs_attack).cpu()
 
