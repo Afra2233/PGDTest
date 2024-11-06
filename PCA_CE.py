@@ -35,9 +35,9 @@ transform = transforms.Compose([
     transforms.ToTensor() 
 ])
 
-cifar10 = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-image, label = cifar10[0]
-class_names = cifar10.classes
+tinyImageNet = datasets.tinyImageNet(root='./data', train=False, download=True, transform=transform)
+image, label = tinyImageNet[50]
+class_names = tinyImageNet.classes
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
 text_prompts = ["This is a photo of a {}".format(class_names[label])]
 text_inputs =clip.tokenize(text_prompts).to('cuda')
