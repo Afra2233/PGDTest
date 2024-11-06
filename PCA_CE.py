@@ -35,7 +35,7 @@ transform = transforms.Compose([
     transforms.ToTensor() 
 ])
 #load the datasets
-cifar100 = datasets.cifar100(root='./data', train=False, download=True, transform=transform)
+cifar100 = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 image, label = cifar100[50]
 class_names = cifar100.classes
 
