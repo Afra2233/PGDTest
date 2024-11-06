@@ -40,7 +40,7 @@ image, label = cifar10[0]
 class_names = cifar10.classes
 image = preprocess(transforms.ToPILImage()(image)).unsqueeze(0).to('cuda')
 text_prompts = ["This is a photo of a {}".format(class_names[label])]
-text_inputs =clip.tokenize(names).to('cuda')
+text_inputs =clip.tokenize(text_prompts).to('cuda')
 text_embedding = model.encode_text(text_inputs).cpu()
 # text_token = list(tokens.values())[0].to(torch.float)
 
