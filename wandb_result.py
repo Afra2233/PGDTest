@@ -76,7 +76,7 @@ g = sns.barplot(
 )
 
 # 添加图例和标签
-plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset Index")
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset")
 plt.xlabel("(Alpha, Epsilon) Pair")
 plt.ylabel("Test Accuracy")
 plt.xticks(rotation=90)
