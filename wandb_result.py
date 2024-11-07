@@ -44,7 +44,7 @@ for index, row in logs.iterrows():
 df = pd.DataFrame(data)
 
 # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
-df['alpha_epsilon_pair'] = df.apply(lambda row: f"({row['alpha']}, {row['epsilon']})", axis=1)
+df['alpha_epsilon_pair'] = df.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
 
 # 映射 dataloader_idx 到数据集名称
 dataset_mapping = {
