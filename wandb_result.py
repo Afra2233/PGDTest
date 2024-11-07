@@ -93,30 +93,49 @@ logs_Test_Classifier = history.filter(regex="^Test General Classifier.*")
 
 # 初始化一个空列表存储符合条件的数据
 filtered_data = []
-
-# 过滤日志
-for index, row in logs_Test_Classifier.iterrows():
+for index, row in history.iterrows():
     for col_name, value in row.items():
         if pd.notna(value):
             # 使用正则表达式筛选以 "Test General Classifier" 开头的日志
-            match = re.match(r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", col_name)
+            match = re.match(
+                r"Test General Classifier on Dirty Features on dataset .* alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
+                col_name
+            )
             if match:
-                dataloader_idx, alpha, epsilon, step = match.groups()
-                # 仅提取符合 epsilon 前几位为 0.00392 且 step 为 9 的记录
-                if epsilon.startswith("0.003921") and int(step) == 9:
+                alpha, epsilon, step = match.groups()
+                # 仅提取符合条件的记录
+                if float(alpha) == 0.003921568859368563 and float(epsilon) == 0.003921568859368563 and int(step) == 9:
                     filtered_data.append({
-                        "dataset": dataloader_idx,
-                        "alpha": alpha,
-                        "epsilon": epsilon,
-                        "step": step,
-                        "test_accuracy": value
+                        "log_name": col_name,
+                        "value": value
                     })
 
-# 将数据转换为 DataFrame
-df = pd.DataFrame(filtered_data)
+# 将筛选后的数据打印出来
+for data in filtered_data:
+    print(f"{data['log_name']}: {data['value']}")
+# # 过滤日志
+# for index, row in logs_Test_Classifier.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             # 使用正则表达式筛选以 "Test General Classifier" 开头的日志
+#             match = re.match(r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", col_name)
+#             if match:
+#                 dataloader_idx, alpha, epsilon, step = match.groups()
+#                 # 仅提取符合 epsilon 前几位为 0.00392 且 step 为 9 的记录
+#                 if epsilon.startswith("0.003921") and int(step) == 9:
+#                     filtered_data.append({
+#                         "dataset": dataloader_idx,
+#                         "alpha": alpha,
+#                         "epsilon": epsilon,
+#                         "step": step,
+#                         "test_accuracy": value
+#                     })
 
-# 将数据重塑为每个数据集为一列
-df_pivot = df.pivot(index="alpha", columns="dataset", values="test_accuracy")
+# # 将数据转换为 DataFrame
+# df = pd.DataFrame(filtered_data)
 
-# 检查结果
-print(df_pivot)
+# # 将数据重塑为每个数据集为一列
+# df_pivot = df.pivot(index="alpha", columns="dataset", values="test_accuracy")
+
+# # 检查结果
+# print(df_pivot)
