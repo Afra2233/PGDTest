@@ -9,7 +9,7 @@ wandb.login()
 
 ENTITY = "st7ma784"  
 PROJECT = "AllDataPGN"  
-RUN_ID = "795d73up" 
+RUN_ID = "olnxxo2t" 
 
 
 api = wandb.Api()
