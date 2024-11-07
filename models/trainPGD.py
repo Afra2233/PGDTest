@@ -1153,9 +1153,9 @@ class myLightningModule(LightningModule):
 
         # del self.test_cleanresults
         # del self.test_attackedresults
-        # if hasattr(self,"save_result_worker_thread"):
-        #     self.save_result_worker_thread.join()
-        #     del self.save_result_worker_thread
+        if hasattr(self,"save_result_worker_thread"):
+            self.save_result_worker_thread.join()
+            del self.save_result_worker_thread
 
     def save_result_worker(self):
         #in this function, we will save the results to disk.
