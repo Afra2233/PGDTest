@@ -46,6 +46,20 @@ df = pd.DataFrame(data)
 # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
 df['alpha_epsilon_pair'] = df.apply(lambda row: f"({row['alpha']}, {row['epsilon']})", axis=1)
 
+# 映射 dataloader_idx 到数据集名称
+dataset_mapping = {
+    0: "cifar10",
+    1: "cifar100",
+    2: "STL10",
+    3: "Food101",
+    4: "dtd",
+    5: "fgvc_aircraft",
+    6: "tinyImageNet"
+}
+
+# 替换 dataloader_idx 为数据集名称
+df['dataset'] = df['dataloader_idx'].map(dataset_mapping)
+
 # 检查数据格式是否正确
 print(df.head())
 
@@ -57,7 +71,7 @@ g = sns.barplot(
     data=df,
     x="alpha_epsilon_pair",
     y="test_accuracy",
-    hue="dataloader_idx",
+    hue="dataset",
     dodge=True  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
 )
 
