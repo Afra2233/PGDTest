@@ -50,7 +50,7 @@ df['alpha_epsilon_pair'] = df.apply(lambda row: f"({row['alpha']}, {row['epsilon
 print(df.head())
 
 # 设置绘图样式
-plt.figure(figsize=(14, 8))
+plt.figure(figsize=(20, 8))
 
 # 绘制测试准确率条形图，用颜色表示 dataloader_idx
 g = sns.barplot(
@@ -66,7 +66,7 @@ plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset Index")
 plt.xlabel("(Alpha, Epsilon) Pair")
 plt.ylabel("Test Accuracy")
 plt.xticks(rotation=45)
-plt.legend(title="Dataloader Index")
+plt.legend(title="Dataset")
 plt.tight_layout()
 
 # 显示图表
