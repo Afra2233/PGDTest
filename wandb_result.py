@@ -72,7 +72,8 @@ g = sns.barplot(
     x="alpha_epsilon_pair",
     y="test_accuracy",
     hue="dataset",
-    dodge=True  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
+    dodge=True,  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
+    ci=None
 )
 
 # 添加图例和标签
