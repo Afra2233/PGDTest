@@ -1134,13 +1134,13 @@ class myLightningModule(LightningModule):
                 np.savez(os.path.join(path,"DirtyClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.Dirtyclassifier.coef_,bias=self.Dirtyclassifier.intercept_)
                 np.savez(os.path.join(path,"GeneralClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.generalclassifier.coef_,bias=self.generalclassifier.intercept_)
                 
-                self.logger.experiment.log( "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Cleanclassifier.score(BadLogits, BadLabels))
-                self.logger.experiment.log( "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(GoodLogits, GoodLabels))
-                self.logger.experiment.log( "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),cleanscore)
-                self.logger.experiment.log( "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.Dirtyclassifier.score(BadLogits, BadLabels))
-                self.logger.experiment.log( "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.generalclassifier.score(BadLogits, BadLabels))
-                self.logger.experiment.log( "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.generalclassifier.score(GoodLogits, GoodLabels))
-                self.logger.experiment.log( "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
+                self.logger.experiment.log({ "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Cleanclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(GoodLogits, GoodLabels)})
+                self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore})
+                self.logger.experiment.log({ "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(GoodLogits, GoodLabels)})
+                self.logger.experiment.log({ "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))})
 
             #delete the files
             for file in list(dirty_files):
