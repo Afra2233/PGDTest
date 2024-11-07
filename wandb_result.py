@@ -118,7 +118,7 @@ for index, row in logs_classfar.iterrows():
                 })
 
 # 将数据转为 DataFrame
-df = pd.DataFrame(data)
+df_classifar = pd.DataFrame(data_classifar)
 
 # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
 df['alpha_epsilon_pair'] = df.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
@@ -145,7 +145,7 @@ plt.figure(figsize=(14, 10))
 
 # 绘制测试准确率条形图，用颜色表示 dataloader_idx
 g = sns.barplot(
-    data=df,
+    data=df_classifar,
     x="alpha_epsilon_pair",
     y="test_accuracy",
     hue="dataset",
