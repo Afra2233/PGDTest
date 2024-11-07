@@ -67,3 +67,4 @@ plt.tight_layout()
 
 # 显示图表
 plt.show()
+plt.savefig('test_acc.png')
