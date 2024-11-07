@@ -102,7 +102,7 @@ for index, row in logs_Test_Classifier.iterrows():
             if match:
                 dataloader_idx, alpha, epsilon, step = match.groups()
                 # 仅提取符合 epsilon 前几位为 0.00392 且 step 为 9 的记录
-                if epsilon.startswith("0.003921568859368563") and int(step) == 9:
+                if epsilon == 0.003921568859368563 and int(step) == 9:
                     filtered_data.append({
                         "dataset": dataloader_idx,
                         "alpha": alpha,
