@@ -103,7 +103,7 @@ for index, row in logs_classfar.iterrows():
             #     r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
             #     col_name
             # )
-             match = re.match(
+            match = re.match(
                 r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
                 col_name
             )
@@ -166,30 +166,33 @@ plt.tight_layout()
 plt.show()
 plt.savefig('test_classifiers_acc.png')
 
-logs_Test_Classifier = history.filter(regex="^Test General Classifier.*")
+# logs_Test_Classifier = history.filter(regex="^Test General Classifier.*")
 
-# 初始化一个空列表存储符合条件的数据
-filtered_data = []
-for index, row in history.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            # 使用正则表达式筛选以 "Test General Classifier" 开头的日志
-            match = re.match(
-                r"Test General Classifier on Dirty Features on dataset .* alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
-                col_name
-            )
-            if match:
-                alpha, epsilon, step = match.groups()
-                # 仅提取符合条件的记录
-                if float(alpha) == 0.003921568859368563 and float(epsilon) == 0.003921568859368563 and int(step) == 9:
-                    filtered_data.append({
-                        "log_name": col_name,
-                        "value": value
-                    })
+# # 初始化一个空列表存储符合条件的数据
+# filtered_data = []
+# for index, row in history.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             # 使用正则表达式筛选以 "Test General Classifier" 开头的日志
+#             match = re.match(
+#                 r"Test General Classifier on Dirty Features on dataset .* alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
+#                 col_name
+#             )
+#             if match:
+#                 alpha, epsilon, step = match.groups()
+#                 # 仅提取符合条件的记录
+#                 if float(alpha) == 0.003921568859368563 and float(epsilon) == 0.003921568859368563 and int(step) == 9:
+#                     filtered_data.append({
+#                         "log_name": col_name,
+#                         "value": value
+#                     })
 
-# 将筛选后的数据打印出来
-for data in filtered_data:
-    print(f"{data['log_name']}: {data['value']}")
+# # 将筛选后的数据打印出来
+# for data in filtered_data:
+#     print(f"{data['log_name']}: {data['value']}")
+
+
+
 # # 过滤日志
 # for index, row in logs_Test_Classifier.iterrows():
 #     for col_name, value in row.items():
