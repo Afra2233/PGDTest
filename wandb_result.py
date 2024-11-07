@@ -64,7 +64,7 @@ df['dataset'] = df['dataloader_idx'].map(dataset_mapping)
 print(df.head())
 
 # 设置绘图样式
-plt.figure(figsize=(20, 8))
+plt.figure(figsize=(14, 8))
 
 # 绘制测试准确率条形图，用颜色表示 dataloader_idx
 g = sns.barplot(
