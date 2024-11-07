@@ -43,30 +43,30 @@ for index, row in logs.iterrows():
 # 将数据转为 DataFrame
 df = pd.DataFrame(data)
 
+# 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
+df['alpha_epsilon_pair'] = df.apply(lambda row: f"({row['alpha']}, {row['epsilon']})", axis=1)
+
 # 检查数据格式是否正确
 print(df.head())
 
 # 设置绘图样式
-sns.set(style="whitegrid")
+plt.figure(figsize=(14, 8))
 
-# 绘制测试准确率散点图，用颜色表示 alpha，用形状表示 epsilon
-plt.figure(figsize=(12, 8))
-g = sns.scatterplot(
+# 绘制测试准确率条形图，用颜色表示 dataloader_idx
+g = sns.barplot(
     data=df,
-    x="dataloader_idx",
+    x="alpha_epsilon_pair",
     y="test_accuracy",
-    hue="alpha",
-    style="epsilon",
-    palette="viridis",
-    s=100
+    hue="dataloader_idx",
+    dodge=True  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
 )
 
 # 添加图例和标签
-plt.title("Test Accuracy by Dataset Index, Alpha, and Epsilon")
-plt.xlabel("Dataset (dataloader_idx)")
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset Index")
+plt.xlabel("(Alpha, Epsilon) Pair")
 plt.ylabel("Test Accuracy")
-plt.legend(title="Alpha and Epsilon")
 plt.xticks(rotation=45)
+plt.legend(title="Dataloader Index")
 plt.tight_layout()
 
 # 显示图表
