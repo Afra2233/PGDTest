@@ -87,3 +87,11 @@ plt.tight_layout()
 # 显示图表
 plt.show()
 plt.savefig('test_acc.png')
+
+logs_Test_Classifier = history.filter(regex="^Test General Classifier.*")
+
+# 打印结果
+for index, row in logs_Test_Classifier.iterrows():
+    for col_name, value in row.items():
+        if col_name.startswith("Test General Classifier") and pd.notna(value):
+            print(f"{col_name}: {value}")
