@@ -90,8 +90,32 @@ plt.savefig('test_acc.png')
 
 logs_Test_Classifier = history.filter(regex="^Test General Classifier.*")
 
-# 打印结果
+# 初始化一个空列表存储符合条件的数据
+filtered_data = []
+
+# 过滤日志
 for index, row in logs_Test_Classifier.iterrows():
     for col_name, value in row.items():
-        if col_name.startswith("Test General Classifier") and pd.notna(value):
-            print(f"{col_name}: {value}")
+        if pd.notna(value):
+            # 使用正则表达式筛选以 "Test General Classifier" 开头的日志
+            match = re.match(r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", col_name)
+            if match:
+                dataloader_idx, alpha, epsilon, step = match.groups()
+                # 仅提取符合 epsilon 前几位为 0.00392 且 step 为 9 的记录
+                if epsilon.startswith("0.00392") and int(step) == 9:
+                    filtered_data.append({
+                        "dataset": dataloader_idx,
+                        "alpha": alpha,
+                        "epsilon": epsilon,
+                        "step": step,
+                        "test_accuracy": value
+                    })
+
+# 将数据转换为 DataFrame
+df = pd.DataFrame(filtered_data)
+
+# 将数据重塑为每个数据集为一列
+df_pivot = df.pivot(index="alpha", columns="dataset", values="test_accuracy")
+
+# 检查结果
+print(df_pivot)
