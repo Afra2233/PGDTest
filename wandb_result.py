@@ -73,7 +73,7 @@ g = sns.barplot(
     y="test_accuracy",
     hue="dataset",
     dodge=True,  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
-    ci=None
+    errorbar=None
 )
 
 # 添加图例和标签
@@ -102,7 +102,7 @@ for index, row in logs_Test_Classifier.iterrows():
             if match:
                 dataloader_idx, alpha, epsilon, step = match.groups()
                 # 仅提取符合 epsilon 前几位为 0.00392 且 step 为 9 的记录
-                if epsilon.startswith("0.00392") and int(step) == 9:
+                if epsilon.startswith("0.003921568859368563") and int(step) == 9:
                     filtered_data.append({
                         "dataset": dataloader_idx,
                         "alpha": alpha,
