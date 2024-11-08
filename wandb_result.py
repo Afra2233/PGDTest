@@ -141,7 +141,7 @@ df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 print(df_classifar.head())
 
 # 设置绘图样式
-plt.figure(figsize=(14, 10))
+plt.figure(figsize=(16, 20))
 
 # 绘制测试准确率条形图，用颜色表示 dataloader_idx
 g = sns.barplot(
@@ -161,6 +161,7 @@ plt.ylabel("Test classifiers's Accuracy")
 plt.xticks(rotation=90)
 plt.legend(title="Dataset")
 plt.tight_layout()
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}%'.format(y * 100)))
 
 # 显示图表
 plt.show()
