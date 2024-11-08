@@ -101,7 +101,7 @@ dataset_mapping = {
 
 summary_data = run.summary
 
-logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
+logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Clean Features")}
 
 # 打印结果
 for col_name, value in logs_yy.items():
