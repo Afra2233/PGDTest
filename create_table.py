@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
 # 数据表中提供的数据
-datasets = ["CIFAR10", "CIFAR100", "Food101", "DTD", "Tiny-ImageNet", "Average"]
-epsilon_4_255 = [55.48, 46.51, 35.21, 3.78, 29.14, 34.02]
-epsilon_4_255_LP = [86.82, 91.92, 68.27, 96.58, 99.61, 88.64]
-epsilon_8_255 = [32.30, 28.90, 10.90, 6.67, 13.78, 22.05]
-epsilon_8_255_LP = [78.77, 87.67, 49.04, 93.50, 98.63, 81.52]
+datasets = ["CIFAR10", "CIFAR100", "Food101", "DTD", "Tiny-ImageNet"]
+epsilon_4_255 = [55.48, 46.51, 35.21, 3.78, 29.14]
+epsilon_4_255_LP = [86.82, 91.92, 68.27, 96.58, 99.61]
+epsilon_8_255 = [32.30, 28.90, 10.90, 6.67, 13.78]
+epsilon_8_255_LP = [78.77, 87.67, 49.04, 93.50, 98.63]
 
 # 绘制折线图
 plt.figure(figsize=(10, 6))
@@ -26,3 +26,4 @@ plt.tight_layout()
 
 # 显示图表
 plt.show()
+plt.savefig('absolute_test.png')
