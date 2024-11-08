@@ -92,10 +92,10 @@ dataset_mapping = {
 
 logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.*")
 
-# logs = history.filter(regex="Test General Classifier.*")
+logs_yy = history.filter(regex="Test General Classifier.*")
 
 # 打印结果
-for index, row in logs_classfar.iterrows():
+for index, row in logs_yy.iterrows():
     for col_name, value in row.items():
         if pd.notna(value):
             print(f"{col_name}: {value}")
