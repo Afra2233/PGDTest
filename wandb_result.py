@@ -15,7 +15,7 @@ RUN_ID = "as33xopq"
 
 api = wandb.Api()
 run = api.run(f"{ENTITY}/{PROJECT}/{RUN_ID}")
-all_logs = pd.DataFrame()
+# all_logs = pd.DataFrame()
 history = run.history()
 # logs = history.filter(regex="test_dirty_batch_acc_.*")
 
@@ -89,16 +89,24 @@ dataset_mapping = {
 # # 显示图表
 # plt.show()
 # plt.savefig('test_acc.png')
+summary_data = run.summary
+logs_yy = {key: value for key, value in summary.items() if key.startswith("Test General")}
+
+# 打印结果
+for col_name, value in logs_yy.items():
+    print(f"{col_name}: {value}")
+
+
 
 logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.*")
 
-logs_yy = history.filter(regex="Test General.*")
+# logs_yy = history.filter(regex="Test General.*")
 
-# 打印结果
-for index, row in logs_yy.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            print(f"{col_name}: {value}")
+# # 打印结果
+# for index, row in logs_yy.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             print(f"{col_name}: {value}")
 
 # 初始化一个空列表存储提取的数据
 data_classifar = []
