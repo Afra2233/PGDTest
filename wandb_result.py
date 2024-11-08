@@ -100,7 +100,7 @@ dataset_mapping = {
 
 
 summary_data = run.summary
-log_xx = {key: value for key, value in summary_data.items() if key.startswith("test_dirty_batch_acc_.*")}
+logs_xx = {key: value for key, value in summary_data.items() if key.startswith("test_dirty_batch_acc_.*")}
 logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
 
 # 打印结果
