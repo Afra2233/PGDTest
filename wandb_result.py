@@ -183,7 +183,8 @@ plt.ylabel("Test classifiers's Accuracy")
 plt.xticks(rotation=90)
 plt.legend(title="Dataset")
 plt.tight_layout()
-plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}%'.format(y * 100)))
+plt.ylim(50, 100)
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}'.format(y * 100)))
 
 # 显示图表
 plt.show()
