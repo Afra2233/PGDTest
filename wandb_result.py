@@ -133,7 +133,7 @@ for item in linear_filtered_data:
 
 # # 解析每行日志记录
 # # 初始化一个空列表存储提取的数据
-data_classifar = []
+# data_classifar = []
 
 # for col_name, value in logs_yy.items():
 #     if pd.notna(value):
