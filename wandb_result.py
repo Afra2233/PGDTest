@@ -109,7 +109,7 @@ for index, row in logs_classfar.iterrows():
             )
             if match:
                 dataloader_idx, alpha, epsilon, numsteps = match.groups()
-                df_classifar.append({
+                data_classifar.append({
                     "alpha": float(alpha),
                     "epsilon": float(epsilon),
                     "numsteps": int(numsteps),
