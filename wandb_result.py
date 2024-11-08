@@ -35,8 +35,8 @@ for index, row in logs.iterrows():
             # )
             match = re.match(
               r"test_dirty_batch_acc_alpha_(0\.00392[\d.]+)_epsilon_(0\.0156[\d.]+)_numsteps_(9\d+)/dataloader_idx_(\d+)",
-#             col_name
-#          )
+              col_name
+            )
             if match:
                 alpha, epsilon, numsteps, dataloader_idx = match.groups()
                 data.append({
