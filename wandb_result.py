@@ -100,35 +100,38 @@ dataset_mapping = {
 
 
 summary_data = run.summary
-# logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
+log_xx = {key: value for key, value in summary_data.items() if key.startswith("test_dirty_batch_acc_.*")}
+logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
 
-# # 打印结果
-# for col_name, value in logs_yy.items():
-#     print(f"{col_name}: {value}")
+# 打印结果
+for col_name, value in logs_yy.items():
+    print(f"{col_name}: {value}")
+for col_name, value in logs_xx.items():
+    print(f"{col_name}: {value}")
 
 
 
-linear_filtered_data =[]
-for col_name, value in summary_data.items():
-    if pd.notna(value):
-        # 使用正则表达式匹配特定条件的字段
-        match = re.match(
-            r"Test General Classifier on Dirty Features on dataset (\d+) alpha (0\.00392[\d]*) epsilon (0\.0392[\d]*) step (9)", 
-            col_name
-        )
-        if match:
-            dataloader_idx, alpha, epsilon, numsteps = match.groups()
-            linear_filtered_data.append({
-                "alpha": float(alpha),
-                "epsilon": float(epsilon),
-                "numsteps": int(numsteps),
-                "dataloader_idx": int(dataloader_idx),
-                "test_accuracy": value
-            })
+# linear_filtered_data =[]
+# for col_name, value in summary_data.items():
+#     if pd.notna(value):
+#         # 使用正则表达式匹配特定条件的字段
+#         match = re.match(
+#             r"Test General Classifier on Dirty Features on dataset (\d+) alpha (0\.00392[\d]*) epsilon (0\.0392[\d]*) step (9)", 
+#             col_name
+#         )
+#         if match:
+#             dataloader_idx, alpha, epsilon, numsteps = match.groups()
+#             linear_filtered_data.append({
+#                 "alpha": float(alpha),
+#                 "epsilon": float(epsilon),
+#                 "numsteps": int(numsteps),
+#                 "dataloader_idx": int(dataloader_idx),
+#                 "test_accuracy": value
+#             })
 
-# 输出筛选后的数据
-for item in linear_filtered_data:
-    print(item)
+# # 输出筛选后的数据
+# for item in linear_filtered_data:
+#     print(item)
 
 
 # # 解析每行日志记录
