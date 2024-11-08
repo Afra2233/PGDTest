@@ -104,7 +104,7 @@ logs_yy = {key: value for key, value in summary_data.items() if key.startswith("
 
 
 linear_filtered_data =[]
-for col_name, value in summary.items():
+for col_name, value in summary_data.items():
     if pd.notna(value):
         # 使用正则表达式匹配特定条件的字段
         match = re.match(
