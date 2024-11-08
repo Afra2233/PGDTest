@@ -20,28 +20,27 @@ run = api.run(f"{ENTITY}/{PROJECT}/{RUN_ID}")
 # all_logs = pd.DataFrame()
 history = run.history()
 logs = history.filter(regex="test_dirty_batch_acc_.*")
-
+summary = run.summary
 # 初始化一个空列表存储提取的数据
 data = []
 
 # # 解析每行日志记录
-for index, row in logs.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
-            match = re.match(
-                r"test_dirty_batch_acc_alpha_(0\.00392[\d]*)_epsilon_(0\.0156[\d]*)_numsteps_(9)_dataloader_idx_(\d+)",
-                col_name
-            )
-            if match:
-                alpha, epsilon, numsteps, dataloader_idx = match.groups()
-                data.append({
-                    "alpha": float(alpha),
-                    "epsilon": float(epsilon),
-                    "numsteps": int(numsteps),
-                    "dataloader_idx": int(dataloader_idx),
-                    "test_accuracy": value
-                })
+for col_name, value in summary.items():
+    if pd.notna(value):
+        # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
+        match = re.match(
+            r"test_dirty_batch_acc_alpha_(0\.00392[\d]*)_epsilon_(0\.00392[\d]*)_numsteps_(9)_dataloader_idx_(\d+)",
+            col_name
+        )
+        if match:
+            alpha, epsilon, numsteps, dataloader_idx = match.groups()
+            data.append({
+                "alpha": float(alpha),
+                "epsilon": float(epsilon),
+                "numsteps": int(numsteps),
+                "dataloader_idx": int(dataloader_idx),
+                "test_accuracy": value
+            })
 
 # 检查结果
 print(data)
