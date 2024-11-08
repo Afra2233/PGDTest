@@ -15,6 +15,23 @@ RUN_ID = "as33xopq"
 
 api = wandb.Api()
 run = api.run(f"{ENTITY}/{PROJECT}/{RUN_ID}")
+all_logs = pd.DataFrame()
+
+# 循环获取所有页面的数据
+for i in range(20):  # 试试设置一个较大的页数上限，确保抓取完所有数据
+    page = run.history(page=i, keys=["Test General Classifier"])
+    if page.empty:
+        break
+    all_logs = pd.concat([all_logs, page], ignore_index=True)
+
+# 使用正则表达式过滤出符合条件的日志
+logs_yy = all_logs.filter(regex="Test General.*")
+
+# 打印结果
+for index, row in logs_yy.iterrows():
+    for col_name, value in row.items():
+        if pd.notna(value):
+            print(f"{col_name}: {value}")
 
 history = run.history()
 # logs = history.filter(regex="test_dirty_batch_acc_.*")
@@ -92,13 +109,13 @@ dataset_mapping = {
 
 logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.*")
 
-logs_yy = history.filter(regex="Test General.*")
+# logs_yy = history.filter(regex="Test General.*")
 
-# 打印结果
-for index, row in logs_yy.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            print(f"{col_name}: {value}")
+# # 打印结果
+# for index, row in logs_yy.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             print(f"{col_name}: {value}")
 
 # 初始化一个空列表存储提取的数据
 data_classifar = []
