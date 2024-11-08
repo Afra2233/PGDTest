@@ -92,7 +92,7 @@ dataset_mapping = {
 
 logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.*")
 
-logs_yy = history.filter(regex="Test General Classifier on Dirty.*")
+logs_yy = history.filter(regex="Test General.*")
 
 # 打印结果
 for index, row in logs_yy.iterrows():
