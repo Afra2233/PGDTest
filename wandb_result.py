@@ -90,7 +90,7 @@ dataset_mapping = {
 # plt.show()
 # plt.savefig('test_acc.png')
 summary_data = run.summary
-logs_yy = {key: value for key, value in summary.items() if key.startswith("Test General")}
+logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General")}
 
 # 打印结果
 for col_name, value in logs_yy.items():
