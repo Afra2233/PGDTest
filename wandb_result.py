@@ -138,7 +138,7 @@ df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({round(ro
 # df['dataset'] = df['dataloader_idx'].map(dataset_mapping)
 
 # 检查数据格式是否正确
-print(df.head())
+print(df_classifar.head())
 
 # 设置绘图样式
 plt.figure(figsize=(14, 10))
