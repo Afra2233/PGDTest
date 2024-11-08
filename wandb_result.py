@@ -135,7 +135,7 @@ df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({round(ro
 # }
 
 # # 替换 dataloader_idx 为数据集名称
-df_classifar['dataset'] = dfdf_classifar['dataloader_idx'].map(dataset_mapping)
+df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 
 # 检查数据格式是否正确
 print(df_classifar.head())
