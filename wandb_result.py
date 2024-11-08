@@ -89,7 +89,7 @@ dataset_mapping = {
 # plt.show()
 # plt.savefig('test_acc.png')
 
-logs_classfar = history.filter(regex="Test General Classifier on Dirty Features on dataset.*")
+logs_classfar = history.filter(regex="Test General Classifier on Dirty Features on.*")
 
 # 初始化一个空列表存储提取的数据
 data_classifar = []
