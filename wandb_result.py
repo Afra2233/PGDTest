@@ -22,34 +22,34 @@ history = run.history()
 logs = history.filter(regex="test_dirty_batch_acc_.*")
 # summary = run.summary
 # 初始化一个空列表存储提取的数据
-data = []
+# data = []
 
-logs_test_clip = history.filter(regex="test_dirty_batch_acc_.*")
-# # 解析每行日志记录
-for index, row in logs_test_clip.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
-            match = re.match(
-                r"test_dirty_batch_acc_alpha_(0\.00392[\d]*)_epsilon_(0\.00392[\d]*)_numsteps_(9)_dataloader_idx_(\d+)",
-                col_name
-            )
-            if match:
-                alpha, epsilon, numsteps, dataloader_idx = match.groups()
-                data.append({
-                    "alpha": float(alpha),
-                    "epsilon": float(epsilon),
-                    "numsteps": int(numsteps),
-                    "dataloader_idx": int(dataloader_idx),
-                    "test_accuracy": value
-                })
+# logs_test_clip = history.filter(regex="test_dirty_batch_acc_.*")
+# # # 解析每行日志记录
+# for index, row in logs_test_clip.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
+#             match = re.match(
+#                 r"test_dirty_batch_acc_alpha_(0\.00392[\d]*)_epsilon_(0\.00392[\d]*)_numsteps_(9)_dataloader_idx_(\d+)",
+#                 col_name
+#             )
+#             if match:
+#                 alpha, epsilon, numsteps, dataloader_idx = match.groups()
+#                 data.append({
+#                     "alpha": float(alpha),
+#                     "epsilon": float(epsilon),
+#                     "numsteps": int(numsteps),
+#                     "dataloader_idx": int(dataloader_idx),
+#                     "test_accuracy": value
+#                 })
 
-# 检查结果
-print(data)
-for item in data:
-    print(item)
-# 将数据转为 DataFrame
-df = pd.DataFrame(data)
+# # 检查结果
+# print(data)
+# for item in data:
+#     print(item)
+# # 将数据转为 DataFrame
+# df = pd.DataFrame(data)
 
 # # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
 # df['alpha_epsilon_pair'] = df.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
@@ -99,7 +99,7 @@ dataset_mapping = {
 
 
 
-# summary_data = run.summary
+summary_data = run.summary
 # logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
 
 # # 打印结果
@@ -108,27 +108,27 @@ dataset_mapping = {
 
 
 
-# linear_filtered_data =[]
-# for col_name, value in summary_data.items():
-#     if pd.notna(value):
-#         # 使用正则表达式匹配特定条件的字段
-#         match = re.match(
-#             r"Test General Classifier on Dirty Features on dataset (\d+) alpha (0\.00392[\d]*) epsilon (0\.0156[\d]*) step (9)", 
-#             col_name
-#         )
-#         if match:
-#             dataloader_idx, alpha, epsilon, numsteps = match.groups()
-#             linear_filtered_data.append({
-#                 "alpha": float(alpha),
-#                 "epsilon": float(epsilon),
-#                 "numsteps": int(numsteps),
-#                 "dataloader_idx": int(dataloader_idx),
-#                 "test_accuracy": value
-#             })
+linear_filtered_data =[]
+for col_name, value in summary_data.items():
+    if pd.notna(value):
+        # 使用正则表达式匹配特定条件的字段
+        match = re.match(
+            r"Test General Classifier on Dirty Features on dataset (\d+) alpha (0\.00392[\d]*) epsilon (0\.0313[\d]*) step (9)", 
+            col_name
+        )
+        if match:
+            dataloader_idx, alpha, epsilon, numsteps = match.groups()
+            linear_filtered_data.append({
+                "alpha": float(alpha),
+                "epsilon": float(epsilon),
+                "numsteps": int(numsteps),
+                "dataloader_idx": int(dataloader_idx),
+                "test_accuracy": value
+            })
 
-# # 输出筛选后的数据
-# for item in linear_filtered_data:
-#     print(item)
+# 输出筛选后的数据
+for item in linear_filtered_data:
+    print(item)
 
 
 # # 解析每行日志记录
