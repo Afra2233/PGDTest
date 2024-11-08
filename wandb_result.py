@@ -24,8 +24,9 @@ logs = history.filter(regex="test_dirty_batch_acc_.*")
 # 初始化一个空列表存储提取的数据
 data = []
 
+logs_test_clip = history.filter(regex="test_dirty_batch_acc_.*")
 # # 解析每行日志记录
-for index, row in logs.iterrows():
+for index, row in logs_test_clip.iterrows():
     for col_name, value in row.items():
         if pd.notna(value):
             # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
