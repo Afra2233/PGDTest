@@ -21,7 +21,7 @@ plt.xlabel("Dataset")
 plt.ylabel("Adversarial Robust Accuracy")
 plt.title("Adversarial Robust Accuracies across Datasets for Different $\epsilon$ Values")
 plt.legend()
-plt.grid(True)
+plt.grid(False)
 plt.tight_layout()
 
 # 显示图表
