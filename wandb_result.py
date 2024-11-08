@@ -21,7 +21,7 @@ run = api.run(f"{ENTITY}/{PROJECT}/{RUN_ID}")
 history = run.history()
 logs = history.filter(regex="test_dirty_batch_acc_.*")
 
-初始化一个空列表存储提取的数据
+# 初始化一个空列表存储提取的数据
 data = []
 
 # 解析每行日志记录
