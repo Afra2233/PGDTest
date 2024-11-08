@@ -90,7 +90,15 @@ dataset_mapping = {
 # plt.show()
 # plt.savefig('test_acc.png')
 
-logs_classfar = history.filter(regex="Test General Classifier on Dirty Features on.*")
+logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.*")
+
+# logs = history.filter(regex="Test General Classifier on Dirty Features.*")
+
+# 打印结果
+for index, row in logs_classfar.iterrows():
+    for col_name, value in row.items():
+        if pd.notna(value):
+            print(f"{col_name}: {value}")
 
 # 初始化一个空列表存储提取的数据
 data_classifar = []
