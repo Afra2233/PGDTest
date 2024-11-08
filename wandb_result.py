@@ -122,7 +122,7 @@ for col_name, value in summary_data.items():
             })
 
 # 输出筛选后的数据
-for item in filtered_data:
+for item in linear_filtered_data:
     print(item)
 
 
