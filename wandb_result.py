@@ -81,7 +81,7 @@ g = sns.barplot(
 )
 
 # 添加图例和标签
-plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (CLIP)")
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (Without Linear Prob)")
 plt.xlabel("(Alpha, Epsilon) Pair")
 plt.ylabel("Test Accuracy")
 plt.xticks(rotation=90)
@@ -177,7 +177,7 @@ g = sns.barplot(
 )
 
 # 添加图例和标签
-plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (Linear prob)")
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)")
 plt.xlabel("(Alpha, Epsilon) Pair")
 plt.ylabel("Test Accuracy")
 plt.xticks(rotation=90)
