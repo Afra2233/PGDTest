@@ -90,7 +90,7 @@ dataset_mapping = {
 # plt.show()
 # plt.savefig('test_acc.png')
 summary_data = run.summary
-logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General")}
+logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on Dirty Features")}
 
 # 打印结果
 for col_name, value in logs_yy.items():
@@ -112,27 +112,27 @@ logs_classfar = history.filter(regex="Test General Classifier on Dirty Features.
 data_classifar = []
 
 # 解析每行日志记录
-for index, row in logs_classfar.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
-            # match = re.match(
-            #     r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
-            #     col_name
-            # )
-            match = re.match(
-                r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
-                col_name
-            )
-            if match:
-                dataloader_idx, alpha, epsilon, numsteps = match.groups()
-                data_classifar.append({
-                    "alpha": float(alpha),
-                    "epsilon": float(epsilon),
-                    "numsteps": int(numsteps),
-                    "dataloader_idx": int(dataloader_idx),
-                    "test_accuracy": value
-                })
+# for index, row in logs_classfar.iterrows():
+for col_name, value in logs_yy.items():
+    if pd.notna(value):
+        # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
+        # match = re.match(
+        #     r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
+        #     col_name
+        # )
+        match = re.match(
+            r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
+            col_name
+        )
+        if match:
+            dataloader_idx, alpha, epsilon, numsteps = match.groups()
+            data_classifar.append({
+                "alpha": float(alpha),
+                "epsilon": float(epsilon),
+                "numsteps": int(numsteps),
+                "dataloader_idx": int(dataloader_idx),
+                "test_accuracy": value
+            })
 
 # 将数据转为 DataFrame
 df_classifar = pd.DataFrame(data_classifar)
