@@ -44,6 +44,7 @@ for index, row in logs.iterrows():
                 })
 
 # 检查结果
+print(data)
 for item in data:
     print(item)
 # 将数据转为 DataFrame
