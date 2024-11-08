@@ -49,16 +49,16 @@ logs = history.filter(regex="test_dirty_batch_acc_.*")
 # # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
 # df['alpha_epsilon_pair'] = df.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
 
-# # 映射 dataloader_idx 到数据集名称
-# dataset_mapping = {
-#     0: "cifar10",
-#     1: "cifar100",
-#     2: "STL10",
-#     3: "Food101",
-#     4: "dtd",
-#     5: "fgvc_aircraft",
-#     6: "tinyImageNet"
-# }
+# 映射 dataloader_idx 到数据集名称
+dataset_mapping = {
+    0: "cifar10",
+    1: "cifar100",
+    2: "STL10",
+    3: "Food101",
+    4: "dtd",
+    5: "fgvc_aircraft",
+    6: "tinyImageNet"
+}
 
 # # 替换 dataloader_idx 为数据集名称
 # df['dataset'] = df['dataloader_idx'].map(dataset_mapping)
