@@ -19,7 +19,7 @@ plt.plot(datasets, epsilon_8_255_LP, marker='o', label=r'$\epsilon = 8/255$ (CLI
 # 添加标签和标题
 plt.xlabel("Dataset")
 plt.ylabel("Adversarial Robust Accuracy")
-plt.title("Adversarial Robust Accuracies across Datasets for Different $\epsilon$ Values")
+# plt.title("Adversarial Robust Accuracies across Datasets for Different $\epsilon$ Values")
 plt.legend()
 plt.grid(False)
 plt.tight_layout()
