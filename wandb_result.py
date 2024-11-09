@@ -202,12 +202,12 @@ g = sns.barplot(
 )
 
 # # 添加图例和标签
-plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)")
-plt.xlabel("(Alpha, Epsilon) Pair")
-plt.ylabel("Test Accuracy")
-plt.xticks(rotation=90,fontsize=16)
-plt.yticks(fontsize=16)
-plt.legend(title="Dataset")
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=18)
+plt.xlabel("(Alpha, Epsilon) Pair",fontsize=18)
+plt.ylabel("Test Accuracy",fontsize=18)
+plt.xticks(rotation=90,fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(title="Dataset",fontsize=18)
 plt.tight_layout()
 # plt.ylim(50, 100)
 # plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.0f}'))
