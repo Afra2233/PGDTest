@@ -178,7 +178,7 @@ df_classifar['alpha_epsilon_pair_long'] = df_classifar.apply(lambda row: f"({rou
 
 # # # 替换 dataloader_idx 为数据集名称
 df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
-df_classifar['alpha_epsilon_pair']= df_classifar['dataloader_idx_long'].map(alpha_epsilon_mapping)
+df_classifar['alpha_epsilon_pair']= df_classifar['alpha_epsilon_pair_long'].map(alpha_epsilon_mapping)
 
 # # 检查数据格式是否正确
 print(df_classifar.head())
