@@ -202,7 +202,7 @@ g = sns.barplot(
 )
 
 # # 添加图例和标签
-plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=18)
+plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=24)
 plt.xlabel("(Alpha, Epsilon) Pair",fontsize=24)
 plt.ylabel("Test Accuracy",fontsize=24)
 plt.xticks(rotation=90,fontsize=24)
