@@ -31,21 +31,18 @@ dataset_mapping = {
 
 
 history = run.history()
+logs = history.filter(regex="test_dirty_batch_acc_.*")
 
-
-#logs = history.filter(regex="test_dirty_batch_acc_.*")
-# summary = run.summary
 # 初始化一个空列表存储提取的数据
 data = []
 
-logs_test_clip = history.filter(regex="test_dirty_batch_acc_.*")
-# # # # 解析每行日志记录
-for index, row in logs_test_clip.iterrows():
+# 解析每行日志记录
+for index, row in logs.iterrows():
     for col_name, value in row.items():
         if pd.notna(value):
             # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
             match = re.match(
-                r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)",
+                r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
                 col_name
             )
             if match:
@@ -58,10 +55,6 @@ for index, row in logs_test_clip.iterrows():
                     "test_accuracy": value
                 })
 
-# 检查结果
-# print(data)
-# for item in data:
-#     print(item)
 # 将数据转为 DataFrame
 df = pd.DataFrame(data)
 
