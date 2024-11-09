@@ -30,30 +30,49 @@ dataset_mapping = {
 }
 
 
-history = run.history()
-logs = history.filter(regex="test_dirty_batch_acc_.*")
+# history = run.history()
+# logs = history.filter(regex="test_dirty_batch_acc_.*")
+
+summary_data = run.summary
+logs_yy = {key: value for key, value in summary_data.items() if key.startswith("test_dirty_batch_acc_")}
 
 # 初始化一个空列表存储提取的数据
 data = []
-
-# 解析每行日志记录
-for index, row in logs.iterrows():
-    for col_name, value in row.items():
-        if pd.notna(value):
-            # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
-            match = re.match(
-                r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
-                col_name
-            )
-            if match:
-                alpha, epsilon, numsteps, dataloader_idx = match.groups()
-                data.append({
-                    "alpha": float(alpha),
-                    "epsilon": float(epsilon),
-                    "numsteps": int(numsteps),
-                    "dataloader_idx": int(dataloader_idx),
-                    "test_accuracy": value
+for col_name, value in logs_yy.items():
+    if pd.notna(value):
+        # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
+        match = re.match(
+            r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
+            col_name
+        )
+        if match:
+            alpha, epsilon, numsteps,dataloader_idx = match.groups()
+            data.append({
+                "alpha": float(alpha),
+                 "epsilon": float(epsilon),
+                 "numsteps": int(numsteps),
+                 "dataloader_idx": int(dataloader_idx),
+                 "test_accuracy": value
                 })
+
+# # 解析每行日志记录
+# for index, row in logs.iterrows():
+#     for col_name, value in row.items():
+#         if pd.notna(value):
+#             # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
+#             match = re.match(
+#                 r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
+#                 col_name
+#             )
+#             if match:
+#                 alpha, epsilon, numsteps, dataloader_idx = match.groups()
+#                 data.append({
+#                     "alpha": float(alpha),
+#                     "epsilon": float(epsilon),
+#                     "numsteps": int(numsteps),
+#                     "dataloader_idx": int(dataloader_idx),
+#                     "test_accuracy": value
+#                 })
 print(data)
 
 # 将数据转为 DataFrame
