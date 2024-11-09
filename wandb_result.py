@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import wandb
+from fractions import Fraction
 
 wandb.login()
 
