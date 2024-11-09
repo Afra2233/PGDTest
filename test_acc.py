@@ -10,7 +10,7 @@ wandb.login()
 
 ENTITY = "st7ma784"  
 PROJECT = "AllDataPGN"  
-RUN_ID = "f5jq1b65" 
+RUN_ID = "1h2lllig" 
 # RUN_ID = "olnxxo2t"
 # f5jq1b65 1h2lllig
 # RUN_ID = "as33xopq"
@@ -54,6 +54,7 @@ for index, row in logs.iterrows():
                     "dataloader_idx": int(dataloader_idx),
                     "test_accuracy": value
                 })
+print(data)
 
 # 将数据转为 DataFrame
 df = pd.DataFrame(data)
@@ -95,4 +96,4 @@ plt.tight_layout()
 
 # # 显示图表
 plt.show()
-plt.savefig('test_acc.png')
+plt.savefig('test_acc2.png')
