@@ -176,7 +176,7 @@ df_classifar = pd.DataFrame(data_classifar)
 # df_classifar['alpha_epsilon_pair_long'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
 # df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
 df_classifar['alpha_epsilon_pair'] = df_classifar.apply(
-    lambda row: f"({alpha_epsilon_mapping.get(row['alpha'], row['alpha'])}, {alpha_epsilon_mapping.get(row['epsilon'], row['epsilon'])})", 
+    lambda row: f"({alpha_epsilon_mapping.get(round(row['alpha'], 8), str(round(row['alpha'], 8)))}, {alpha_epsilon_mapping.get(round(row['epsilon'], 8), str(round(row['epsilon'], 8)))})",
     axis=1
 )
 
