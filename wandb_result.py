@@ -173,12 +173,12 @@ for col_name, value in logs_yy.items():
 df_classifar = pd.DataFrame(data_classifar)
 
 # # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
-df_classifar['alpha_epsilon_pair_long'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
-
+# df_classifar['alpha_epsilon_pair_long'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
+df['alpha_epsilon_pair'] = df.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
 
 # # # 替换 dataloader_idx 为数据集名称
 df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
-df_classifar['alpha_epsilon_pair']= df_classifar['alpha_epsilon_pair_long'].map(alpha_epsilon_mapping)
+# df_classifar['alpha_epsilon_pair']= df_classifar['alpha_epsilon_pair_long'].map(alpha_epsilon_mapping)
 
 # # 检查数据格式是否正确
 print(df_classifar.head())
