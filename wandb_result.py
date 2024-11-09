@@ -42,7 +42,7 @@ for index, row in logs.iterrows():
         if pd.notna(value):
             # 使用正则表达式提取 alpha, epsilon, numsteps 和 dataloader_idx
             match = re.match(
-                r"test_dirty_batch_acc_alpha_[\d.]+_epsilon_[\d.]+_numsteps_\d+/dataloader_idx_\d+",
+                r"test_dirty_batch_acc_alpha_([\d.]+)_epsilon_([\d.]+)_numsteps_(\d+)/dataloader_idx_(\d+)",
                 col_name
             )
             if match:
