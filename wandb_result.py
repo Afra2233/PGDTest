@@ -174,7 +174,11 @@ df_classifar = pd.DataFrame(data_classifar)
 
 # # 创建一个新的列，将 (alpha, epsilon) 组合作为字符串
 # df_classifar['alpha_epsilon_pair_long'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
-df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
+# df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({round(row['alpha'], 6)}, {round(row['epsilon'], 6)})", axis=1)
+df_classifar['alpha_epsilon_pair'] = df_classifar.apply(
+    lambda row: f"({alpha_epsilon_mapping.get(row['alpha'], row['alpha'])}, {alpha_epsilon_mapping.get(row['epsilon'], row['epsilon'])})", 
+    axis=1
+)
 
 # # # 替换 dataloader_idx 为数据集名称
 df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
