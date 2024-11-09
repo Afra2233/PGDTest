@@ -188,7 +188,7 @@ df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 print(df_classifar.head())
 
 # # 设置绘图样式
-plt.figure(figsize=(14, 20))
+plt.figure(figsize=(14, 14))
 
 # # 绘制测试准确率条形图，用颜色表示 dataloader_idx
 g = sns.barplot(
@@ -203,11 +203,11 @@ g = sns.barplot(
 
 # # 添加图例和标签
 plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=18)
-plt.xlabel("(Alpha, Epsilon) Pair",fontsize=18)
-plt.ylabel("Test Accuracy",fontsize=18)
-plt.xticks(rotation=90,fontsize=18)
-plt.yticks(fontsize=18)
-plt.legend(title="Dataset",fontsize=18)
+plt.xlabel("(Alpha, Epsilon) Pair",fontsize=24)
+plt.ylabel("Test Accuracy",fontsize=24)
+plt.xticks(rotation=90,fontsize=24)
+plt.yticks(fontsize=24)
+plt.legend(title="Dataset",fontsize=24)
 plt.tight_layout()
 # plt.ylim(50, 100)
 # plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.0f}'))
