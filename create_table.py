@@ -11,10 +11,10 @@ epsilon_8_255_LP = [78.77, 87.67, 49.04, 93.50, 98.63]
 plt.figure(figsize=(10, 6))
 
 # 使用不同的颜色表示不同的 epsilon 值
-plt.plot(datasets, epsilon_4_255, marker='o', label=r'$\epsilon = 4/255$ (Ours)')
-plt.plot(datasets, epsilon_4_255_LP, marker='o', label=r'$\epsilon = 4/255$ (Ours LP)')
-plt.plot(datasets, epsilon_8_255, marker='o', label=r'$\epsilon = 8/255$ (Ours)')
-plt.plot(datasets, epsilon_8_255_LP, marker='o', label=r'$\epsilon = 8/255$ (Ours LP)')
+plt.plot(datasets, epsilon_4_255, marker='o', label=r'$\epsilon = 4/255$ (CLIP)')
+plt.plot(datasets, epsilon_4_255_LP, marker='o', label=r'$\epsilon = 4/255$ (CLIP + LP)')
+plt.plot(datasets, epsilon_8_255, marker='o', label=r'$\epsilon = 8/255$ (CLIP)')
+plt.plot(datasets, epsilon_8_255_LP, marker='o', label=r'$\epsilon = 8/255$ (CLIP + LP)')
 
 # 添加标签和标题
 plt.xlabel("Dataset")
