@@ -73,7 +73,7 @@ for stepsize, eps_clusters in clusters.items():
     for eps, runs_in_cluster in eps_clusters.items():
         print(f"  Eps {eps:.6f}: {len(runs_in_cluster)} runs")
         for run in runs_in_cluster:
-            for key in run.summary:
+            for key in run.summary.keys():
                 if key.startswith("Test General Classifier on Dirty Features on dataset 1"):
                 # if train_stepsize not in selected_runs:
                 #     selected_runs[train_stepsize] = {}
