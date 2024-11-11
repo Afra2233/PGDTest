@@ -61,19 +61,23 @@ for run in runs:
         #             selected_runs[train_stepsize][train_eps] = []
         #         selected_runs[train_stepsize][train_eps].append(run)
 
-# 打印组织好的 runs 信息
+
+
+
 for stepsize, eps_clusters in clusters.items():
     print(f"Runs with train_stepsize {stepsize:.6f}:")
     for eps, runs_in_cluster in eps_clusters.items():
         print(f"  Eps {eps:.6f}: {len(runs_in_cluster)} runs")
         for run in runs_in_cluster:
-            for key,value in run.summary.items():
-                if key.startswith("Test General Classifier on Dirty Features on dataset 1"):
-                    if train_stepsize not in selected_runs:
-                        selected_runs[train_stepsize] = {}
-                    if train_eps not in selected_runs[train_stepsize]:
-                        selected_runs[train_stepsize][train_eps] = []
-                    selected_runs[train_stepsize][train_eps].append(run)
+            # for key,value in run.summary.items():
+            has_relevant_key = any(key.startswith("Test General Classifier on Dirty Features on dataset 1") for key in run.summary.keys())
+            if has_relevant_key: 
+            # if key.startswith("Test General Classifier on Dirty Features on dataset 1"):
+                if train_stepsize not in selected_runs:
+                    selected_runs[train_stepsize] = {}
+                if train_eps not in selected_runs[train_stepsize]:
+                    selected_runs[train_stepsize][train_eps] = []
+                selected_runs[train_stepsize][train_eps].append(run)
                 
 
 # 打印选定的 runs 信息
