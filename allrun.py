@@ -6,9 +6,9 @@ PROJECT = "AllDataPGN"
 
 # Initialize clusters with nested dictionaries for train_eps values
 clusters = {
-    1/255: {1/255: [], 4/255: [], 8/255: []},
-    2/255: {1/255: [], 4/255: [], 8/255: []},
-    4/255: {1/255: [], 4/255: [], 8/255: []}
+    1/255: {1/255: [], 2/255: [], 4/255: []},
+    2/255: {1/255: [], 2/255: [], 4/255: []},
+    4/255: {1/255: [], 2/255: [], 4/255: []}
 }
 
 runs = api.runs(f"{ENTITY}/{PROJECT}")
