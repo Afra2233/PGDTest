@@ -42,19 +42,24 @@ for run in runs:
         # Fetch logs and filter those relevant to the specified dataset
         for log in run.scan_history(keys=["_runtime", "_timestamp"]):
             if "Test General Classifier on Dirty Features on dataset 5" in log:
-                acc_key = "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(run.config['DataLoader_idx'], train_eps, run.config['train_stepsize'])
-                if acc_key in log:
-                    accuracies[train_stepsize][train_eps].append(log[acc_key])
+                acc_key = f"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)"
+                if acc_key in run.summary:
+                    accuracy = run.summary[acc_key]
+                    clusters[train_stepsize][train_eps].append(accuracy)
+for stepsize, eps_clusters in clusters.items():
+    for eps, accuracies in eps_clusters.items():
+        average_accuracy = np.mean(accuracies) if accuracies else 0
+        print(f"Stepsize {stepsize:.6f}, Eps {eps:.6f}: Average Accuracy = {average_accuracy:.2f}")
 
-# Calculate average accuracies and prepare data for plotting
-plot_data = {key: np.mean(values) for key, values in accuracies.items() if values}
-
-# Plotting
+# Prepare data for plotting
 fig, ax = plt.subplots()
-for stepsize, eps_dict in plot_data.items():
-    ax.plot(list(eps_dict.keys()), list(eps_dict.values()), label=f'stepsize {stepsize}')
-ax.set_xlabel('train_eps')
-ax.set_ylabel('Average Accuracy')
+for stepsize, eps_dict in clusters.items():
+    x = [np.mean(accuracies) if accuracies else 0 for accuracies in eps_dict.values()]
+    y = [stepsize] * len(x)  # Replicate stepsize for matching x values
+    ax.scatter(x, y, label=f'Stepsize {stepsize:.6f}')
+
+ax.set_xlabel('Average Accuracy')
+ax.set_ylabel('Train Step Size')
 ax.set_title('Average Accuracy vs. Train Step Size')
 ax.legend()
 plt.show()
