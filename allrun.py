@@ -63,6 +63,7 @@ ax.set_ylabel('Train Step Size')
 ax.set_title('Average Accuracy vs. Train Step Size')
 ax.legend()
 plt.show()
+plt.savefig('average_accuracy.png')
 # # Print the runs organized by train_stepsize and then by train_eps
 # for stepsize, eps_clusters in clusters.items():
 #     print(f"Runs with train_stepsize {stepsize:.6f}:")
