@@ -63,7 +63,7 @@ for run in runs:
 
 
 
-
+print(clusters)
 for stepsize, eps_clusters in clusters.items():
     print(f"Runs with train_stepsize {stepsize:.6f}:")
     for eps, runs_in_cluster in eps_clusters.items():
