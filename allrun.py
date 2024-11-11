@@ -46,24 +46,25 @@ for run in runs:
                 if acc_key in run.summary:
                     accuracy = run.summary[acc_key]
                     clusters[train_stepsize][train_eps].append(accuracy)
-for stepsize, eps_clusters in clusters.items():
-    for eps, accuracies in eps_clusters.items():
-        average_accuracy = np.mean(accuracies) if accuracies else 0
-        print(f"Stepsize {stepsize:.6f}, Eps {eps:.6f}: Average Accuracy = {average_accuracy:.2f}")
+print(clusters)
+# for stepsize, eps_clusters in clusters.items():
+#     for eps, accuracies in eps_clusters.items():
+#         average_accuracy = np.mean(accuracies) if accuracies else 0
+#         print(f"Stepsize {stepsize:.6f}, Eps {eps:.6f}: Average Accuracy = {average_accuracy:.2f}")
 
-# Prepare data for plotting
-fig, ax = plt.subplots()
-for stepsize, eps_dict in clusters.items():
-    x = [np.mean(accuracies) if accuracies else 0 for accuracies in eps_dict.values()]
-    y = [stepsize] * len(x)  # Replicate stepsize for matching x values
-    ax.scatter(x, y, label=f'Stepsize {stepsize:.6f}')
+# # Prepare data for plotting
+# fig, ax = plt.subplots()
+# for stepsize, eps_dict in clusters.items():
+#     x = [np.mean(accuracies) if accuracies else 0 for accuracies in eps_dict.values()]
+#     y = [stepsize] * len(x)  # Replicate stepsize for matching x values
+#     ax.scatter(x, y, label=f'Stepsize {stepsize:.6f}')
 
-ax.set_xlabel('Average Accuracy')
-ax.set_ylabel('Train Step Size')
-ax.set_title('Average Accuracy vs. Train Step Size')
-ax.legend()
-plt.show()
-plt.savefig('average_accuracy.png')
+# ax.set_xlabel('Average Accuracy')
+# ax.set_ylabel('Train Step Size')
+# ax.set_title('Average Accuracy vs. Train Step Size')
+# ax.legend()
+# plt.show()
+# plt.savefig('average_accuracy.png')
 # # Print the runs organized by train_stepsize and then by train_eps
 # for stepsize, eps_clusters in clusters.items():
 #     print(f"Runs with train_stepsize {stepsize:.6f}:")
