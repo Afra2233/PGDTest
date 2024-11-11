@@ -83,6 +83,7 @@ for stepsize, eps_clusters in selected_runs.items():
         print(f"  Selected Eps {eps:.6f}: {len(selected_runs_in_cluster)} runs")
         for run in selected_runs_in_cluster:
             print(f"  Run ID: {run.id}")
+            print(f"    Train Step Size: {stepsize:.6f}, Train EPS: {eps:.6f}")
 
 
 # ax.set_xlabel('Average Accuracy')
