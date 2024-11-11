@@ -35,7 +35,7 @@ accuracies = {key: {subkey: [] for subkey in clusters[key]} for key in clusters}
 # average_accuracies = {}
 runs = api.runs(f"{ENTITY}/{PROJECT}")
 for run in runs:
-     train_stepsize = run.config.get("train_stepsize")
+    train_stepsize = run.config.get("train_stepsize")
     train_eps = run.config.get("train_eps")
     
     if train_stepsize in clusters and train_eps in clusters[train_stepsize]:
