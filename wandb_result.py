@@ -172,7 +172,7 @@ df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 
 
 # # 检查数据格式是否正确
-print(df_classifar.head())
+print(df_classifar)
 
 # # 设置绘图样式
 plt.figure(figsize=(14, 14))
