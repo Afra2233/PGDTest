@@ -3,7 +3,7 @@ api = wandb.Api()
 
 ENTITY = "st7ma784"  
 PROJECT = "AllDataPGN"
-project = api.project("ENTITY/PROJECT")
+runs = api.runs(f"{ENTITY}/{PROJECT}")
 
 clusters = {
     1/255: [],
