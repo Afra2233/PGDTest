@@ -170,9 +170,16 @@ df_classifar['alpha_epsilon_pair'] = df_classifar.apply(lambda row: f"({Fraction
 # # # 替换 dataloader_idx 为数据集名称
 df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 
+# 确保 DataFrame 中包含所需的列
+if 'alpha_epsilon_pair' in df_classifar.columns:
+    # 筛选 alpha 为 1/255 的行
+    filtered_rows = df_classifar[df_classifar['alpha_epsilon_pair'].str.contains(r'\(1/255')]
+    print(filtered_rows)
+else:
+    print("DataFrame does not contain the required 'alpha_epsilon_pair' column.")
 
 # # 检查数据格式是否正确
-print(df_classifar)
+# print(df_classifar)
 
 # # 设置绘图样式
 plt.figure(figsize=(14, 14))
