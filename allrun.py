@@ -73,11 +73,11 @@ for stepsize, eps_clusters in clusters.items():
             has_relevant_key = any(key.startswith("Test General Classifier on Dirty Features on dataset 1") for key in run.summary.keys())
             if has_relevant_key: 
             # if key.startswith("Test General Classifier on Dirty Features on dataset 1"):
-                if train_stepsize not in selected_runs:
-                    selected_runs[train_stepsize] = {}
-                if train_eps not in selected_runs[train_stepsize]:
-                    selected_runs[train_stepsize][train_eps] = []
-                selected_runs[train_stepsize][train_eps].append(run)
+                # if train_stepsize not in selected_runs:
+                #     selected_runs[train_stepsize] = {}
+                # if train_eps not in selected_runs[train_stepsize]:
+                #     selected_runs[train_stepsize][train_eps] = []
+                selected_runs[stepsize][eps].append(run)
                 
 
 # 打印选定的 runs 信息
