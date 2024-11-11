@@ -49,7 +49,7 @@ for stepsize, eps_clusters in clusters.items():
     for eps, runs_in_cluster in eps_clusters.items():
         print(f"  Eps {eps:.6f}: {len(runs_in_cluster)} runs")
         for run in runs_in_cluster:
-            print(run.summary())
+            print(run.summary)
 
 # ax.set_xlabel('Average Accuracy')
 # ax.set_ylabel('Train Step Size')
