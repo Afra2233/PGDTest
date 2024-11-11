@@ -1,17 +1,16 @@
 import wandb
 api = wandb.Api()
 
-project = api.project("your-entity/your-project-name")
-
-runs = project.runs()
-
+ENTITY = "st7ma784"  
+PROJECT = "AllDataPGN"
+project = api.project("ENTITY/PROJECT")
 
 clusters = {
     1/255: [],
     4/255: [],
     8/255: []
 }
-
+runs = project.runs()
 for run in runs:
     alpha = run.config.get("train_stepsize")
     if alpha in clusters:
