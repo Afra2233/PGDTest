@@ -145,7 +145,7 @@ for col_name, value in logs_yy.items():
         #     col_name
         # )
         match = re.match(
-            r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
+            r"Test General Classifier on Clean Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
             col_name
         )
         if match:
@@ -184,29 +184,29 @@ else:
 # # 设置绘图样式
 plt.figure(figsize=(14, 14))
 
-# # 绘制测试准确率条形图，用颜色表示 dataloader_idx
-g = sns.barplot(
-    data=df_classifar,
-    x="alpha_epsilon_pair",
-    y="test_accuracy",
-    hue="dataset",
-    dodge=True,  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
-    # ci=None
-    errorbar=None
-)
+# # # 绘制测试准确率条形图，用颜色表示 dataloader_idx
+# g = sns.barplot(
+#     data=df_classifar,
+#     x="alpha_epsilon_pair",
+#     y="test_accuracy",
+#     hue="dataset",
+#     dodge=True,  # 将不同的 dataloader_idx 在每个 alpha_epsilon_pair 上分开显示
+#     # ci=None
+#     errorbar=None
+# )
 
-# # # 添加图例和标签
-# plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=24)
-plt.xlabel("(Alpha, Epsilon) Pair",fontsize=24)
-plt.ylabel("Test Accuracy",fontsize=24)
-plt.xticks(rotation=90,fontsize=24)
-plt.yticks(fontsize=24)
-plt.legend(title="Dataset",fontsize=24)
-plt.tight_layout()
-# plt.ylim(50, 100)
-# plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.0f}'))
-plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}'.format(y * 100)))
+# # # # 添加图例和标签
+# # plt.title("Test Accuracy by (Alpha, Epsilon) Pair and Dataset (With Linear prob)",fontsize=24)
+# plt.xlabel("(Alpha, Epsilon) Pair",fontsize=24)
+# plt.ylabel("Test Accuracy",fontsize=24)
+# plt.xticks(rotation=90,fontsize=24)
+# plt.yticks(fontsize=24)
+# plt.legend(title="Dataset",fontsize=24)
+# plt.tight_layout()
+# # plt.ylim(50, 100)
+# # plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.0f}'))
+# plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}'.format(y * 100)))
 
-# # 显示图表
-plt.show()
-plt.savefig('test_classifiers_acc.png')
+# # # 显示图表
+# plt.show()
+# plt.savefig('test_classifiers_acc.png')
