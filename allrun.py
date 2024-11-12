@@ -150,14 +150,22 @@ dirty_clean_accuracy = {}
 for stepsize, eps_clusters in selected_runs.items():
     for eps, runs_in_cluster in eps_clusters.items():
         for run in runs_in_cluster:
-            dity_clean_accuracies = [value for key, value in run.summary.items() 
-                          if key.startswith("Test Dirty Classifier on Clean Features") 
-                          or key.startswith("Test Clean Classifier on Dirty Features")]
+            dirty_on_clean_values = [value for key, value in run.summary.items() 
+                                     if key.startswith("Test Dirty Classifier on Clean Features")]
 
-            # 计算得到的值的平均，如果列表不为空
-            if accuracies:
-                dirty_clean_average_accuracy = sum(dity_clean_accuracies) / 2
-                dirty_clean_accuracy[run.id] = dirty_clean_average_accuracy
+            # 收集所有符合条件的 value - clean on dirty
+            clean_on_dirty_values = [value for key, value in run.summary.items() 
+                                     if key.startswith("Test Clean Classifier on Dirty Features")]
+
+            # 计算 dirty on clean 的平均准确率
+            if dirty_on_clean_values:
+                average_dirty_on_clean = sum(dirty_on_clean_values) / len(dirty_on_clean_values)
+                # dirty_on_clean_accuracy[run.id] = average_dirty_on_clean
+            if clean_on_dirty_values:
+                average_clean_on_dirty = sum(clean_on_dirty_values) / len(clean_on_dirty_values)
+                # clean_on_dirty_accuracy[run.id] = average_clean_on_dirty
+            total = average_clean_on_dirty+average_dirty_on_clean
+            dirty_on_clean_accuracy[run.id] = total
 
 # 打印计算出的每个 run 的 dirty_clean_average_accuracy
 for run_id, average_accuracy in dirty_clean_accuracy.items():
