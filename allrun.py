@@ -88,6 +88,8 @@ for stepsize, eps_clusters in selected_runs.items():
             print(f"    Train Step Size: {stepsize:.6f}, Train EPS: {eps:.6f}")
 
 average_accuracies = {}
+max_accuracy = 0
+best_run_info = None
 
 for stepsize, eps_clusters in selected_runs.items():
     for eps, runs_in_cluster in eps_clusters.items():
@@ -96,6 +98,10 @@ for stepsize, eps_clusters in selected_runs.items():
            
             if accuracies:  
                 average_accuracy = sum(accuracies) / len(accuracies)
+                
+                if average_accuracy > max_accuracy:
+                    max_accuracy = average_accuracy
+                    best_run_info = (run.id, run.name, average_accuracy)
     
                 if stepsize not in average_accuracies:
                     average_accuracies[stepsize] = {}
@@ -121,6 +127,8 @@ ax.legend()
 
 plt.show()
 plt.savefig('average_accuracy.png')
+if best_run_info:
+    print(f"Best Run ID: {best_run_info[0]}, Name: {best_run_info[1]}, Average Accuracy: {best_run_info[2]:.6f}")
 
 # ax.set_xlabel('Average Accuracy')
 # ax.set_ylabel('Train Step Size')
