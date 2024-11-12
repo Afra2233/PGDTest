@@ -125,7 +125,9 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 # 生成每个柱子的颜色
 # colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
-colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(avg_accuracies)))
+# colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(avg_accuracies)))
+colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(avg_accuracies)))
+
 
 x_pos = np.arange(1, len(run_ids) + 1)
 # 绘制柱状图
@@ -184,7 +186,9 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 # 生成每个柱子的颜色
 # colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
-colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(dc_avg_accuracies)))
+# colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(dc_avg_accuracies)))
+colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(dc_avg_accuracies)))
+
 x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
 bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
