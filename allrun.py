@@ -104,38 +104,34 @@ for stepsize, eps_clusters in selected_runs.items():
                     best_run_info = (run.id, run.name, average_accuracy)
                 if run.id not in average_accuracies:
                     average_accuracies[run.id] = []
-                average_accuracies[run].append(average_accuracy)
+                average_accuracies[run.id].append(average_accuracy)
 
 
-                # if stepsize not in average_accuracies:
-                #     average_accuracies[stepsize] = {}
-                # if eps not in average_accuracies[stepsize]:
-                #     average_accuracies[stepsize][eps] = []
-                # average_accuracies[stepsize][eps].append(average_accuracy)
+# 现已更新和计算的 average_accuracies 字典
+for run_id, accuracies in average_accuracies.items():
+    print(f"Run ID: {run_id}, Average Accuracies: {accuracies}")
+
+# fig, ax = plt.subplots()
 
 
+# for stepsize, eps_accuracies in average_accuracies.items():
+#     for eps, accuracies in eps_accuracies.items():
 
-fig, ax = plt.subplots()
-
-
-for stepsize, eps_accuracies in average_accuracies.items():
-    for eps, accuracies in eps_accuracies.items():
-
-        ax.plot([stepsize]*len(accuracies), accuracies, label=f'Eps {eps:.6f}', marker='o')
+#         ax.plot([stepsize]*len(accuracies), accuracies, label=f'Eps {eps:.6f}', marker='o')
 
 
-ax.set_xlabel('Train StepSize(alpha)')
-ax.set_ylabel('Average Accuracy')
-ax.set_title('Average Accuracy vs. alpha')
-ax.legend()
+# ax.set_xlabel('Train StepSize(alpha)')
+# ax.set_ylabel('Average Accuracy')
+# ax.set_title('Average Accuracy vs. alpha')
+# ax.legend()
 
-plt.show()
-plt.savefig('average_accuracy.png')
-if best_run_info:
-    print(f"Best Run ID: {best_run_info[0]}, Name: {best_run_info[1]}, Average Accuracy: {best_run_info[2]:.6f}")
+# plt.show()
+# plt.savefig('average_accuracy.png')
+# if best_run_info:
+#     print(f"Best Run ID: {best_run_info[0]}, Name: {best_run_info[1]}, Average Accuracy: {best_run_info[2]:.6f}")
 
-# ax.set_xlabel('Average Accuracy')
-# ax.set_ylabel('Train Step Size')
+# # ax.set_xlabel('Average Accuracy')
+# # ax.set_ylabel('Train Step Size')
 # ax.set_title('Average Accuracy vs. Train Step Size')
 # ax.legend()
 # plt.show()
