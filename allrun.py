@@ -202,7 +202,9 @@ plt.savefig('DC_Classifier.png')
 fig, ax = plt.subplots(figsize=(10, 10))
 
 # 绘制折线图
-ax.plot(avg_accuracies, dc_avg_accuracies, marker='o', linestyle='-', color='blue')
+# ax.plot(avg_accuracies, dc_avg_accuracies, marker='o', linestyle='-', color='blue')
+scatter = ax.scatter(avg_accuracies, dc_avg_accuracies, color='blue', marker='o')
+
 
 # 添加标题和轴标签
 ax.set_title('Comparison of Average Accuracies')
