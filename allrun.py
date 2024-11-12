@@ -35,7 +35,7 @@ eps_colors = {1/255: 'blue', 2/255: 'green', 4/255: 'purple'}
 # learning_rate", default=5e-4, options=[5e-5,5e-4,1e-5]
 lr_colors ={5e-4:'blue',5e-4:'green',1e-5:'purple'}
 # "sgd","adam","adamw"
-optimizer_colors ={"sgd": 'blue', "adam": 'green', "adam": 'purple'}
+optimizer_colors ={"sgd": 'blue', "adam": 'green', "adamw": 'purple'}
 
 accuracies = {key: {subkey: [] for subkey in clusters[key]} for key in clusters}
 # average_accuracies = {}
