@@ -199,7 +199,7 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
-bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
+bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
 
 
 # 添加标题和轴标签
