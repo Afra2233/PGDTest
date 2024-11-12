@@ -166,11 +166,37 @@ for stepsize, eps_clusters in selected_runs.items():
                 # clean_on_dirty_accuracy[run.id] = average_clean_on_dirty
             total = average_clean_on_dirty+average_dirty_on_clean
             dirty_clean_accuracy[run.id] = total/2
+            
+dc_run_ids = []  # 存储所有运行的ID
+dc_avg_accuracies = []
 
 # 打印计算出的每个 run 的 dirty_clean_average_accuracy
 for run_id, average_accuracy in dirty_clean_accuracy.items():
     print(f"Run ID: {run_id}, Dirty-Clean Average Accuracy: {average_accuracy:.3f}")
+    dc_run_ids.append(run_id)
+    dc_avg_accuracies.append(average_accuracy)
 
+# 创建图形和轴对象
+fig, ax = plt.subplots(figsize=(10, 10))
+
+# 生成每个柱子的颜色
+colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
+
+# 绘制柱状图
+bars = ax.bar(run_ids, dc_avg_accuracies, color=colors)
+
+
+# 添加标题和轴标签
+ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
+ax.set_xlabel('Run ID')
+ax.set_ylabel('Average Accuracy')
+
+# 旋转x轴标签以便于阅读
+plt.xticks(rotation=45)
+
+# 显示图表
+plt.show()
+plt.savefig('DC_Classifier.png')
 
 
 
