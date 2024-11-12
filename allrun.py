@@ -110,6 +110,32 @@ for stepsize, eps_clusters in selected_runs.items():
 # 现已更新和计算的 average_accuracies 字典
 for run_id, accuracies in average_accuracies.items():
     print(f"Run ID: {run_id}, Average Accuracies: {accuracies}")
+run_ids = []  # 存储所有运行的ID
+avg_accuracies = []  # 存储对应的平均准确率
+
+# 遍历 average_accuracies 字典收集数据
+for run_id, accuracies in average_accuracies.items():
+    for acc in accuracies:
+        run_ids.append(run_id)
+        avg_accuracies.append(acc)
+
+# 创建图形和轴对象
+fig, ax = plt.subplots()
+
+# 绘制散点图
+ax.scatter(run_ids, avg_accuracies, color='blue')  # 可以调整颜色
+
+# 添加标题和轴标签
+ax.set_title('Test General Classifier on All Features')
+ax.set_xlabel('Run ID')
+ax.set_ylabel('Average Accuracy')
+
+# 旋转x轴标签以便于阅读
+plt.xticks(rotation=45)
+
+# 显示图表
+plt.show()
+plt.savefig('.png')
 
 # fig, ax = plt.subplots()
 
