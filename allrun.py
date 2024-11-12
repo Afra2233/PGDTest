@@ -32,6 +32,8 @@ clusters = {
     4/255: {1/255: [], 2/255: [], 4/255: []}
 }
 eps_colors = {1/255: 'blue', 2/255: 'green', 4/255: 'purple'}
+# learning_rate", default=5e-4, options=[5e-5,5e-4,1e-5]
+lr_colors ={5e-4:'blue',5e-4:'green',1e-5:'purple'}
 
 accuracies = {key: {subkey: [] for subkey in clusters[key]} for key in clusters}
 # average_accuracies = {}
@@ -261,8 +263,8 @@ for run in runs:
         dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
 
         # 提取 train_eps 参数并获取对应颜色
-        train_eps = run.config.get("train_stepsize")
-        color = eps_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
+        train_eps = run.config.get("learning_rate")
+        color = eps_colors.get(lr_colors, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
 
         # 存储数据点
         x_values.append(avg_accuracy)
