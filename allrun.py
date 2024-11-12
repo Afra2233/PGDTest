@@ -94,7 +94,7 @@ best_run_info = None
 for stepsize, eps_clusters in selected_runs.items():
     for eps, runs_in_cluster in eps_clusters.items():
         for run in runs_in_cluster:
-            accuracies = [value for key, value in run.summary.items() if key.startswith("Test General Classifier on Dirty Features")]
+            accuracies = [value for key, value in run.summary.items() if key.startswith("Test General Classifier on All Features")]
            
             if accuracies:  
                 average_accuracy = sum(accuracies) / len(accuracies)
@@ -102,12 +102,16 @@ for stepsize, eps_clusters in selected_runs.items():
                 if average_accuracy > max_accuracy:
                     max_accuracy = average_accuracy
                     best_run_info = (run.id, run.name, average_accuracy)
-    
-                if stepsize not in average_accuracies:
-                    average_accuracies[stepsize] = {}
-                if eps not in average_accuracies[stepsize]:
-                    average_accuracies[stepsize][eps] = []
-                average_accuracies[stepsize][eps].append(average_accuracy)
+                if run.id not in average_accuracies:
+                    average_accuracies[run.id] = []
+                average_accuracies[run].append(average_accuracy)
+
+
+                # if stepsize not in average_accuracies:
+                #     average_accuracies[stepsize] = {}
+                # if eps not in average_accuracies[stepsize]:
+                #     average_accuracies[stepsize][eps] = []
+                # average_accuracies[stepsize][eps].append(average_accuracy)
 
 
 
