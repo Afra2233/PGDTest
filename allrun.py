@@ -264,7 +264,7 @@ for run in runs:
 
         # 提取 train_eps 参数并获取对应颜色
         train_eps = run.config.get("learning_rate")
-        color = eps_colors.get(lr_colors, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
+        color = lr_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
 
         # 存储数据点
         x_values.append(avg_accuracy)
