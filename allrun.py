@@ -126,7 +126,7 @@ fig, ax = plt.subplots()
 ax.scatter(run_ids, avg_accuracies, color='blue')  # 可以调整颜色
 
 # 添加标题和轴标签
-ax.set_title('Test General Classifier on All Features')
+ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
 ax.set_xlabel('Run ID')
 ax.set_ylabel('Average Accuracy')
 
@@ -135,7 +135,7 @@ plt.xticks(rotation=45)
 
 # 显示图表
 plt.show()
-plt.savefig('.png')
+plt.savefig('General_Classifier.png')
 
 # fig, ax = plt.subplots()
 
