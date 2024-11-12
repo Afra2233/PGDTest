@@ -199,8 +199,8 @@ plt.show()
 plt.savefig('DC_Classifier.png')
 
 
-x_values = np.array(list(avg_accuracies.values()))
-y_values = np.array(list(dc_avg_accuracies.values()))
+x_values = np.array(avg_accuracies)
+y_values = np.array(dc_avg_accuracies)
 
 # 创建图形和轴对象
 fig, ax = plt.subplots(figsize=(10, 10))
