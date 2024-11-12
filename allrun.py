@@ -216,7 +216,7 @@ fit_line = intercept + slope * x_values
 
 # 绘制拟合线
 # ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
-ax.plot(x_values, fit_line, label=f'Best Fit Line}', color='red')
+ax.plot(x_values, fit_line, label=f'Best Fit Line', color='red')
 ax.legend()
 
 # 添加标题和轴标签
