@@ -270,8 +270,8 @@ for run in runs:
         colors.append(color)
 
 # 转换为 numpy 数组
-x_values = np.array(x_values)
-y_values = np.array(y_values)
+x_values = np.array(x_values).flatten()
+y_values = np.array(y_values).flatten()
 
 # 创建图形和轴对象
 fig, ax = plt.subplots(figsize=(10, 10))
