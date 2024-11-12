@@ -156,7 +156,7 @@ for stepsize, eps_clusters in selected_runs.items():
 
             # 计算得到的值的平均，如果列表不为空
             if accuracies:
-                dirty_clean_average_accuracy = sum(dity_clean_accuracies) / len(dity_clean_accuracies)
+                dirty_clean_average_accuracy = sum(dity_clean_accuracies) / 2
                 dirty_clean_accuracy[run.id] = dirty_clean_average_accuracy
 
 # 打印计算出的每个 run 的 dirty_clean_average_accuracy
