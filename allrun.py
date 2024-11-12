@@ -87,6 +87,40 @@ for stepsize, eps_clusters in selected_runs.items():
             print(f"  Run ID: {run.id}")
             print(f"    Train Step Size: {stepsize:.6f}, Train EPS: {eps:.6f}")
 
+average_accuracies = {}
+
+for stepsize, eps_clusters in selected_runs.items():
+    for eps, runs_in_cluster in eps_clusters.items():
+        for run in runs_in_cluster:
+            accuracies = [value for key, value in run.summary.items() if key.startswith("Test General Classifier on Dirty Features")]
+           
+            if accuracies:  
+                average_accuracy = sum(accuracies) / len(accuracies)
+    
+                if stepsize not in average_accuracies:
+                    average_accuracies[stepsize] = {}
+                if eps not in average_accuracies[stepsize]:
+                    average_accuracies[stepsize][eps] = []
+                average_accuracies[stepsize][eps].append(average_accuracy)
+
+
+
+fig, ax = plt.subplots()
+
+
+for stepsize, eps_accuracies in average_accuracies.items():
+    for eps, accuracies in eps_accuracies.items():
+
+        ax.plot([stepsize]*len(accuracies), accuracies, label=f'Eps {eps:.6f}', marker='o')
+
+
+ax.set_xlabel('Train StepSize(alpha)')
+ax.set_ylabel('Average Accuracy')
+ax.set_title('Average Accuracy vs. alpha')
+ax.legend()
+
+plt.show()
+plt.savefig('average_accuracy.png')
 
 # ax.set_xlabel('Average Accuracy')
 # ax.set_ylabel('Train Step Size')
