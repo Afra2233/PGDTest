@@ -199,4 +199,28 @@ plt.show()
 plt.savefig('DC_Classifier.png')
 
 
+# 创建图形和轴对象
+fig, ax = plt.subplots(figsize=(12, 12))
+
+# 生成每个柱子的颜色
+colors = plt.cm.viridis(np.linspace(0, len(avg_accuracies), len(dc_avg_accuracies)))
+
+# 绘制柱状图
+bars = ax.bar(avg_accuracies, dc_avg_accuracies, color=colors)
+ax.plot(dc_avg_accuracies, 'o-', color='blue')
+
+# 添加标题和轴标签
+ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
+ax.set_xlabel('Clean Classifier on Dirty and Dirty Classifier on Clean performance')
+ax.set_ylabel('General Classifier performance')
+
+# 旋转x轴标签以便于阅读
+plt.xticks(rotation=90)
+
+# 显示图表
+plt.show()
+plt.savefig('compare.png')
+
+
+
 
