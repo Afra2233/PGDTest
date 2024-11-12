@@ -219,7 +219,7 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 # 绘制散点图
 for i in range(len(x_values)):
-    ax.scatter(x_values[i], y_values[i], color=colors[i], marker=markers[i % len(markers)], s=100, label=run_ids[i])
+    ax.scatter(x_values[i], y_values[i], color=colors[i], marker=markers[i % len(markers)], s=100)
 
 # scatter = ax.scatter(x_values, y_values, color='blue', marker='o')
 
