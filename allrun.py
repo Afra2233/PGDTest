@@ -165,7 +165,7 @@ for stepsize, eps_clusters in selected_runs.items():
                 average_clean_on_dirty = sum(clean_on_dirty_values) / len(clean_on_dirty_values)
                 # clean_on_dirty_accuracy[run.id] = average_clean_on_dirty
             total = average_clean_on_dirty+average_dirty_on_clean
-            dirty_clean_accuracy[run.id] = total/2
+            dirty_clean_accuracy[run.id] = total
             
 dc_run_ids = []  # 存储所有运行的ID
 dc_avg_accuracies = []
