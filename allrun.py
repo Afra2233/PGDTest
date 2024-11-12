@@ -187,8 +187,8 @@ fig, ax = plt.subplots(figsize=(10, 10))
 # 生成每个柱子的颜色
 # colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
 # colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(dc_avg_accuracies)))
-colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(dc_avg_accuracies)))
-np.random.shuffle(colors) 
+# colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(dc_avg_accuracies)))
+# np.random.shuffle(colors) 
 
 x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
@@ -212,14 +212,14 @@ x_values = np.array(avg_accuracies)
 y_values = np.array(dc_avg_accuracies)
 
 markers = ['o', 's', 'D', '^', 'p']  # 圆形、方形、菱形、三角形、五边形
-colors = ['blue', 'green', 'purple', 'orange', 'red']
+# colors = ['blue', 'green', 'purple', 'orange', 'red']
 
 # 创建图形和轴对象
 fig, ax = plt.subplots(figsize=(10, 10))
 
 # 绘制散点图
 for i in range(len(x_values)):
-    ax.scatter(x_values[i], y_values[i], color=colors[i % len(colors)], marker=markers[i % len(markers)], s=100, label=run_ids[i])
+    ax.scatter(x_values[i], y_values[i], color=colors, marker=markers[i % len(markers)], s=100, label=run_ids[i])
 
 # scatter = ax.scatter(x_values, y_values, color='blue', marker='o')
 
