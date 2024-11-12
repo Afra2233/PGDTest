@@ -31,6 +31,8 @@ clusters = {
     2/255: {1/255: [], 2/255: [], 4/255: []},
     4/255: {1/255: [], 2/255: [], 4/255: []}
 }
+eps_colors = {1/255: 'blue', 2/255: 'green', 4/255: 'purple'}
+
 accuracies = {key: {subkey: [] for subkey in clusters[key]} for key in clusters}
 # average_accuracies = {}
 runs = api.runs(f"{ENTITY}/{PROJECT}")
@@ -246,6 +248,53 @@ ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
 # 显示图表
 plt.show()
 plt.savefig('compare.png')
+
+x_values = []
+y_values = []
+colors = []
+
+# 遍历每个 run 并获取 train_eps 值
+for run in runs:
+    run_id = run.id
+    if run_id in average_accuracies and run_id in dirty_clean_accuracy:
+        avg_accuracy = average_accuracies[run_id]
+        dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
+
+        # 提取 train_eps 参数并获取对应颜色
+        train_eps = run.config.get("train_eps")
+        color = eps_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
+
+        # 存储数据点
+        x_values.append(avg_accuracy)
+        y_values.append(dirty_clean_avg_accuracy)
+        colors.append(color)
+
+# 转换为 numpy 数组
+x_values = np.array(x_values)
+y_values = np.array(y_values)
+
+# 创建图形和轴对象
+fig, ax = plt.subplots(figsize=(10, 10))
+
+# 绘制散点图，使用指定颜色
+ax.scatter(x_values, y_values, color=colors, marker='o', s=100)
+
+# 使用 np.polyfit 计算最佳拟合线的斜率和截距
+slope, intercept = np.polyfit(x_values, y_values, 1)
+fit_line = intercept + slope * x_values
+
+# 绘制拟合线
+ax.plot(x_values, fit_line, label='Best Fit Line', color='red')
+ax.legend()
+
+# 添加标题和轴标签
+ax.set_title('Comparison of Average Accuracies')
+ax.set_xlabel('Average General Classifier Accuracies')
+ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
+
+# 显示图表并保存
+plt.show()
+plt.savefig('compare2.png')
 
 
 
