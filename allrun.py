@@ -205,6 +205,14 @@ fig, ax = plt.subplots(figsize=(10, 10))
 # ax.plot(avg_accuracies, dc_avg_accuracies, marker='o', linestyle='-', color='blue')
 scatter = ax.scatter(avg_accuracies, dc_avg_accuracies, color='blue', marker='o')
 
+# 使用 np.polyfit 计算最佳拟合线的斜率和截距
+slope, intercept = np.polyfit(avg_accuracies, dc_avg_accuracies, 1)
+
+# 生成拟合线的y值
+fit_line = intercept + slope * avg_accuracies
+
+# 绘制拟合线
+ax.plot(avg_accuracies, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
 
 # 添加标题和轴标签
 ax.set_title('Comparison of Average Accuracies')
