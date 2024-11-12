@@ -265,8 +265,8 @@ for run in runs:
         dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
 
         # 提取 train_eps 参数并获取对应颜色
-        train_eps = run.config.get("learning_rate")
-        color = lr_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
+        train_eps = run.config.get("optimizer")
+        color = optimizer_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
 
         # 存储数据点
         x_values.append(avg_accuracy)
@@ -282,9 +282,9 @@ fig, ax = plt.subplots(figsize=(10, 10))
 
 # 绘制散点图，使用指定颜色
 # ax.scatter(x_values, y_values, color=colors, marker='o', s=100,)
-for optimizer, color in lr_colors.items():
+for optimizer, color in optimizer_colors.items():
     indices = [i for i in range(len(colors)) if colors[i] == color]
-    ax.scatter(x_values[indices], y_values[indices], color=color, marker='o', s=100, label=f'learning_rate={optimizer}')
+    ax.scatter(x_values[indices], y_values[indices], color=color, marker='o', s=100, label=f'optimizer={optimizer}')
 
 
 # 使用 np.polyfit 计算最佳拟合线的斜率和截距
