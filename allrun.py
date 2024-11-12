@@ -119,11 +119,16 @@ for run_id, accuracies in average_accuracies.items():
         run_ids.append(run_id)
         avg_accuracies.append(acc)
 
+
 # 创建图形和轴对象
 fig, ax = plt.subplots()
 
-# 绘制散点图
-ax.scatter(run_ids, avg_accuracies, color='blue')  # 可以调整颜色
+# 生成每个柱子的颜色
+colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
+
+# 绘制柱状图
+bars = ax.bar(run_ids, avg_accuracies, color=colors)
+
 
 # 添加标题和轴标签
 ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
