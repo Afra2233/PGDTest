@@ -199,20 +199,24 @@ plt.show()
 plt.savefig('DC_Classifier.png')
 
 
+x_values = np.array(list(avg_accuracies.values()))
+y_values = np.array(list(dc_avg_accuracies.values()))
+
+# 创建图形和轴对象
 fig, ax = plt.subplots(figsize=(10, 10))
 
-# 绘制折线图
-# ax.plot(avg_accuracies, dc_avg_accuracies, marker='o', linestyle='-', color='blue')
-scatter = ax.scatter(avg_accuracies, dc_avg_accuracies, color='blue', marker='o')
+# 绘制散点图
+scatter = ax.scatter(x_values, y_values, color='blue', marker='o')
 
 # 使用 np.polyfit 计算最佳拟合线的斜率和截距
-slope, intercept = np.polyfit(avg_accuracies, dc_avg_accuracies, 1)
+slope, intercept = np.polyfit(x_values, y_values, 1)
 
 # 生成拟合线的y值
-fit_line = intercept + slope * avg_accuracies
+fit_line = intercept + slope * x_values
 
 # 绘制拟合线
-ax.plot(avg_accuracies, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
+ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
+ax.legend()
 
 # 添加标题和轴标签
 ax.set_title('Comparison of Average Accuracies')
