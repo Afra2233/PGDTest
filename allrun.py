@@ -215,7 +215,8 @@ slope, intercept = np.polyfit(x_values, y_values, 1)
 fit_line = intercept + slope * x_values
 
 # 绘制拟合线
-ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
+# ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
+ax.plot(x_values, fit_line, label=f'Best Fit Line}', color='red')
 ax.legend()
 
 # 添加标题和轴标签
@@ -224,8 +225,8 @@ ax.set_xlabel('Average General Classifier Accuracies')
 ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
 
 # 添加每个点的标签
-for i, txt in enumerate(run_ids):
-    ax.annotate(txt, (avg_accuracies[i], dc_avg_accuracies[i]))
+# for i, txt in enumerate(run_ids):
+#     ax.annotate(txt, (avg_accuracies[i], dc_avg_accuracies[i]))
 
 # 显示图表
 plt.show()
