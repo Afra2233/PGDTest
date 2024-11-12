@@ -261,7 +261,7 @@ for run in runs:
         dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
 
         # 提取 train_eps 参数并获取对应颜色
-        train_eps = run.config.get("train_eps")
+        train_eps = run.config.get("train_stepsize")
         color = eps_colors.get(train_eps, 'gray')  # 如果 train_eps 不在 eps_colors 中则用灰色
 
         # 存储数据点
