@@ -124,16 +124,18 @@ for run_id, accuracies in average_accuracies.items():
 fig, ax = plt.subplots(figsize=(10, 10))
 
 # 生成每个柱子的颜色
-colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
-
+# colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
+colors = plt.get_cmap('hsv')(np.linspace(0, 1, len(avg_accuracies)))
+x_pos = np.arange(1, len(run_ids) + 1)
 # 绘制柱状图
-bars = ax.bar(run_ids, avg_accuracies, color=colors)
+bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
+
 
 
 # 添加标题和轴标签
-ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
+# ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
 ax.set_xlabel('Run ID')
-ax.set_ylabel('Average Accuracy')
+ax.set_ylabel('Average General Classifier Accuracies')
 
 # 旋转x轴标签以便于阅读
 plt.xticks(rotation=45)
@@ -180,16 +182,17 @@ for run_id, average_accuracy in dirty_clean_accuracy.items():
 fig, ax = plt.subplots(figsize=(10, 10))
 
 # 生成每个柱子的颜色
-colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
-
+# colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
+colors = plt.get_cmap('hsv')(np.linspace(0, 1, len(dc_avg_accuracies)))
+x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
-bars = ax.bar(run_ids, dc_avg_accuracies, color=colors)
+bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
 
 
 # 添加标题和轴标签
-ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
+# ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
 ax.set_xlabel('Run ID')
-ax.set_ylabel('Average Accuracy')
+ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
 
 # 旋转x轴标签以便于阅读
 plt.xticks(rotation=45)
