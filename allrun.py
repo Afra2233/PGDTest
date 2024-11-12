@@ -121,7 +121,7 @@ for run_id, accuracies in average_accuracies.items():
 
 
 # 创建图形和轴对象
-fig, ax = plt.subplots(figsize=(12, 8))
+fig, ax = plt.subplots(figsize=(10, 10))
 
 # 生成每个柱子的颜色
 colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
