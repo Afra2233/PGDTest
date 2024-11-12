@@ -142,36 +142,27 @@ plt.xticks(rotation=45)
 plt.show()
 plt.savefig('General_Classifier.png')
 
-# fig, ax = plt.subplots()
 
 
-# for stepsize, eps_accuracies in average_accuracies.items():
-#     for eps, accuracies in eps_accuracies.items():
 
-#         ax.plot([stepsize]*len(accuracies), accuracies, label=f'Eps {eps:.6f}', marker='o')
+dirty_clean_accuracy = {}
+
+for stepsize, eps_clusters in selected_runs.items():
+    for eps, runs_in_cluster in eps_clusters.items():
+        for run in runs_in_cluster:
+            dity_clean_accuracies = [value for key, value in run.summary.items() 
+                          if key.startswith("Test Dirty Classifier on Clean Features") 
+                          or key.startswith("Test Clean Classifier on Dirty Features")]
+
+            # 计算得到的值的平均，如果列表不为空
+            if accuracies:
+                dirty_clean_average_accuracy = sum(dity_clean_accuracies) / len(dity_clean_accuracies)
+                dirty_clean_accuracy[run.id] = dirty_clean_average_accuracy
+
+# 打印计算出的每个 run 的 dirty_clean_average_accuracy
+for run_id, average_accuracy in dirty_clean_accuracy.items():
+    print(f"Run ID: {run_id}, Dirty-Clean Average Accuracy: {average_accuracy:.3f}")
 
 
-# ax.set_xlabel('Train StepSize(alpha)')
-# ax.set_ylabel('Average Accuracy')
-# ax.set_title('Average Accuracy vs. alpha')
-# ax.legend()
 
-# plt.show()
-# plt.savefig('average_accuracy.png')
-# if best_run_info:
-#     print(f"Best Run ID: {best_run_info[0]}, Name: {best_run_info[1]}, Average Accuracy: {best_run_info[2]:.6f}")
-
-# # ax.set_xlabel('Average Accuracy')
-# # ax.set_ylabel('Train Step Size')
-# ax.set_title('Average Accuracy vs. Train Step Size')
-# ax.legend()
-# plt.show()
-# plt.savefig('average_accuracy.png')
-# # Print the runs organized by train_stepsize and then by train_eps
-# for stepsize, eps_clusters in clusters.items():
-#     print(f"Runs with train_stepsize {stepsize:.6f}:")
-#     for eps, runs_in_cluster in eps_clusters.items():
-#         print(f"  Eps {eps:.6f}: {len(runs_in_cluster)} runs")
-#         for run in runs_in_cluster:
-#             print(f"    Run ID: {run.id}, Name: {run.name}")
 
