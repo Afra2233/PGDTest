@@ -139,6 +139,7 @@ np.random.shuffle(colors)
 x_pos = np.arange(1, len(run_ids) + 1)
 # 绘制柱状图
 bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
+ax.plot(x_pos, avg_accuracies, color='black', marker='o', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
 
 
 
@@ -200,6 +201,8 @@ fig, ax = plt.subplots(figsize=(10, 10))
 x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
 bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
+ax.plot(x_pos, dc_avg_accuracies, color='black', marker='o', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
+
 
 
 # 添加标题和轴标签
