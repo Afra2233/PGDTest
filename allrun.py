@@ -141,7 +141,7 @@ x_pos = np.arange(1, len(run_ids) + 1)
 bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
 # line_offset = 0.5  # Adjust this value to control the distance above the bars
 
-ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=1, label='Trend Line')
+ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
 
 
 
@@ -206,7 +206,7 @@ x_pos = np.arange(1, len(dc_run_ids) + 1)
 bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
 # line_offset = 0.5  # Adjust this value to control the distance above the bars
 
-ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=1, label='Trend Line')
+ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
 
 
 
