@@ -104,9 +104,9 @@ summary_data = run.summary
 
 logs_yy = {key: value for key, value in summary_data.items() if key.startswith("Test General Classifier on")}
 
-# # 打印结果
-for col_name, value in logs_yy.items():
-    print(f"{col_name}: {value}")
+# # # 打印结果
+# for col_name, value in logs_yy.items():
+#     print(f"{col_name}: {value}")
 
 
 
@@ -179,6 +179,8 @@ df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 # else:
 #     print("DataFrame does not contain the required 'alpha_epsilon_pair' column.")
 
+pd.set_option('display.max_rows', None)    # Show all rows
+pd.set_option('display.max_columns', None) # Show all columns
 # 检查数据格式是否正确
 print(df_classifar)
 
