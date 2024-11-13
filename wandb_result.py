@@ -18,6 +18,7 @@ RUN_ID = "f5jq1b65"
 
 api = wandb.Api()
 run = api.run(f"{ENTITY}/{PROJECT}/{RUN_ID}")
+print(run.config)
 
 dataset_mapping = {
     0: "cifar10",
