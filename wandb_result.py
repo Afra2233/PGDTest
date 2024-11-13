@@ -10,7 +10,7 @@ wandb.login()
 
 ENTITY = "st7ma784"  
 PROJECT = "AllDataPGN"  
-RUN_ID = "1h2lllig" 
+RUN_ID = "f5jq1b65" 
 # RUN_ID = "olnxxo2t"
 # f5jq1b65 1h2lllig
 # RUN_ID = "as33xopq"
