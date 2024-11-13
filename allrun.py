@@ -128,7 +128,7 @@ for run_id, accuracies in average_accuracies.items():
 
 
 # 创建图形和轴对象
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(14, 14))
 
 # 生成每个柱子的颜色
 # colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
@@ -139,17 +139,20 @@ np.random.shuffle(colors)
 x_pos = np.arange(1, len(run_ids) + 1)
 # 绘制柱状图
 bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
-ax.plot(x_pos, avg_accuracies, color='black', marker='o', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
+line_offset = 0.5  # Adjust this value to control the distance above the bars
+
+ax.plot(x_pos, avg_accuracies + line_offset, color='black', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
 
 
 
 # 添加标题和轴标签
 # ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
-ax.set_xlabel('Run ID')
-ax.set_ylabel('Average General Classifier Accuracies')
+ax.set_xlabel('Run ID',fontsize=16)
+ax.set_ylabel('Average General Classifier Accuracies',fontsize=16)
 
 # 旋转x轴标签以便于阅读
-plt.xticks(rotation=45)
+plt.yticks(fontsize=16)
+plt.xticks(rotation=45,fontsize=16)
 
 # 显示图表
 plt.show()
@@ -190,7 +193,7 @@ for run_id, average_accuracy in dirty_clean_accuracy.items():
     dc_avg_accuracies.append(average_accuracy)
 
 # 创建图形和轴对象
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(14, 14))
 
 # 生成每个柱子的颜色
 # colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
@@ -201,17 +204,20 @@ fig, ax = plt.subplots(figsize=(10, 10))
 x_pos = np.arange(1, len(dc_run_ids) + 1)
 # 绘制柱状图
 bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
-ax.plot(x_pos, dc_avg_accuracies, color='black', marker='o', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
+line_offset = 0.5  # Adjust this value to control the distance above the bars
+
+ax.plot(x_pos, dc_avg_accuracies + line_offset, color='black', linestyle='-', linewidth=2, markersize=5, label='Trend Line')
 
 
 
 # 添加标题和轴标签
 # ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
-ax.set_xlabel('Run ID')
-ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
+ax.set_xlabel('Run ID',fontsize=16)
+ax.set_ylabel('Average Dirty-Clean Classifier Accuracies',fontsize=16)
 
 # 旋转x轴标签以便于阅读
-plt.xticks(rotation=45)
+plt.yticks(fontsize=16)
+plt.xticks(rotation=45,fontsize=16)
 
 # 显示图表
 plt.show()
