@@ -146,7 +146,7 @@ for col_name, value in logs_yy.items():
         #     col_name
         # )
         match = re.match(
-            r"Test General Classifier on Dirty Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
+            r"Test General Classifier on Clean Features on dataset (\d+) alpha ([\d.]+) epsilon ([\d.]+) step (\d+)", 
             col_name
         )
         if match:
