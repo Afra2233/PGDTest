@@ -19,7 +19,7 @@ import threading
 import time
 import matplotlib.pyplot as plt
 import queue
-
+from scipy.interpolate import make_interp_spline
 api = wandb.Api()
 
 ENTITY = "st7ma784"
