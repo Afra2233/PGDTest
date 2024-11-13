@@ -141,18 +141,23 @@ x_pos = np.arange(1, len(run_ids) + 1)
 bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
 # line_offset = 0.5  # Adjust this value to control the distance above the bars
 
-ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
+# ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
 
+smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
+smooth_y = make_interp_spline(x_pos, avg_accuracies)(smooth_x)  # Interpolated values
+
+# 绘制带平滑曲线的折线图，设置颜色、透明度和粗细
+ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
 
 
 # 添加标题和轴标签
 # ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
-ax.set_xlabel('Run ID',fontsize=16)
-ax.set_ylabel('Average General Classifier Accuracies',fontsize=16)
+ax.set_xlabel('Run ID',fontsize=18)
+ax.set_ylabel('Average General Classifier Accuracies',fontsize=18)
 
 # 旋转x轴标签以便于阅读
-plt.yticks(fontsize=16)
-plt.xticks(rotation=45,fontsize=16)
+plt.yticks(fontsize=18)
+plt.xticks(rotation=45,fontsize=18)
 
 # 显示图表
 plt.show()
@@ -206,7 +211,13 @@ x_pos = np.arange(1, len(dc_run_ids) + 1)
 bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
 # line_offset = 0.5  # Adjust this value to control the distance above the bars
 
-ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
+# ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
+smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
+smooth_y = make_interp_spline(x_pos, dc_avg_accuracies)(smooth_x)  # Interpolated values
+
+# 绘制带平滑曲线的折线图，设置颜色、透明度和粗细
+ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
+
 
 
 
