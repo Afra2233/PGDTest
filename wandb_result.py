@@ -180,7 +180,7 @@ df_classifar['dataset'] = df_classifar['dataloader_idx'].map(dataset_mapping)
 #     print("DataFrame does not contain the required 'alpha_epsilon_pair' column.")
 
 pd.set_option('display.max_rows', None)    # Show all rows
-pd.set_option('display.max_columns', None) # Show all columns
+# pd.set_option('display.max_columns', None) # Show all columns
 # 检查数据格式是否正确
 print(df_classifar)
 
