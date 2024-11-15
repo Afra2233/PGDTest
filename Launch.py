@@ -6,7 +6,6 @@ import datetime
 from pytorch_lightning.plugins.environments import SLURMEnvironment
 from models.trainPGD import myLightningModule
 
-#### This is our launch function, which builds the dataset, and then runs the model on it.
 
 
 def train(config={
@@ -51,22 +50,9 @@ def train(config={
             accelerator="auto",
             max_epochs=config.get("epochs",10),
             inference_mode=False,
-            #profiler="advanced",
-            #plugins=[SLURMEnvironment()],
-            #https://lightning.ai/docs/pytorch/stable/clouds/cluster_advanced.html
-            logger=logtool,
-            # strategy=FSDPStrategy(accelerator="gpu",
-            #                        parallel_devices=6,
-            #                        cluster_environment=SLURMEnvironment(),
-            #                        timeout=datetime.timedelta(seconds=1800),
-            #                        #cpu_offload=True,
-            #                        #mixed_precision=None,
-            #                        #auto_wrap_policy=True,
-            #                        #activation_checkpointing=True,
-            #                        #sharding_strategy='FULL_SHARD',
-            #                        #state_dict_type='full'
-            # ),
            
+            logger=logtool,
+            
 
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
@@ -224,26 +210,22 @@ if __name__ == '__main__':
     defaultConfig=hyperparams.__dict__
 
     NumTrials=hyperparams.num_trials
-    #BEDE has Env var containing hostname  #HOSTNAME=login2.bede.dur.ac.uk check we arent launching on this node
+    
     if NumTrials==-1:
-        #debug mode - We want to just run in debug mode...
-        #pick random config and have at it!
+        
 
         trial=hyperparams.generate_trials(1)[0]
-        #We'll grab a random trial, BUT have to launch it with KWARGS, so that DDP works.
-        #result = call('{} {} --num_trials=0 {}'.format("python",os.path.realpath(sys.argv[0]),__get_hopt_params(trial)), shell=True)
-
+        
         print("Running trial: {}".format(trial))
 
         wandbtrain(trial)
 
     elif NumTrials ==0 and not str(os.getenv("HOSTNAME","localhost")).startswith("login"): #We'll do a trial run...
-        #means we've been launched from a BEDE script, so use config given in args///
+        
         wandbtrain(hyperparams)
 
 
-    #LEts pretend stephen fixed something
-    #OR To run with Default Args
+    
     else:
         trials=myparser.generate_wandb_trials(entity="st7ma784",project="AllDataPGN")
 
