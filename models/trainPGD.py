@@ -79,16 +79,7 @@ class myLightningModule(LightningModule):
         self.version="_".join([str(self.args.get(key,"")) for key in self.versioncriteria])
         print("Version is: ",self.version)
 
-        '''
-        Dear Afra, heres where you put you transformer decoder to build your image! 
-        
-        i.e  self.model_clean_image_generator = TransformerDecoder()
-        
-        You probably also want to add a loss function here, and you can do that by adding it to the forward pass.
-
-        self.YourCriterion = nn.CrossEntropyLoss() ? maybe MSE? but I suspect you actually might want DICE loss/ 
-        
-        '''
+      
         if args.get("norm",'l_inf')=='l_inf':
             self.init_delta=self.init_uniform
             self.clamp=self.clamp_inf
@@ -296,26 +287,7 @@ class myLightningModule(LightningModule):
         self.log("min_attack_loss",min(losses))
         return X+delta,text_tokens
     
-    # @torch.enable_grad()
-    # def attack_pgd_noprompt(self, X, target, text_tokens, alpha, attack_iters, restarts=1, early_stop=True, epsilon=0):
-    #     delta=self.init_delta(X,epsilon)
-    #     for _ in range(attack_iters):
-    #         _images = normalize(X + delta)
-    #         output= multiGPU_CLIP( self.model, _images, text_tokens)
-    #         loss = self.criterion(output,  torch.arange(_images.size(0), device=self.device)) #edited from original paper to remove fixed target classes
-    #         loss.backward()
-    #         #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
-    #         self.log("attack_loss",loss)
-    #         grad = delta.grad.detach()
-    #         d = delta[:, :, :, :]
-    #         g = grad[:, :, :, :]
-    #         x = X[:, :, :, :]
-    #         d=self.clamp(d,alpha,g,epsilon)
-    #         d = clamp(d, self.lower_limit - x, self.upper_limit - x)
-    #         delta.data[:, :, :, :] = d
-    #         delta.grad.zero_()
-
-    #     return delta
+   
 
     @torch.enable_grad()
     def attack_CW(self, X, target, text_tokens, alpha,attack_iters, restarts=1, early_stop=True, epsilon=0):
@@ -331,9 +303,7 @@ class myLightningModule(LightningModule):
             scale_text_embed=self.make_labels(X,text_tokens)
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             output = img_embed_norm @ scale_text_embed.t()
-            '''
-            X.shape[0] 获取这个张量第一个维度的大小。在处理图像数据时，这个维度通常是批次大小（batch size），即批次中包含的图像数量。
-            '''
+            
             label_mask = one_hot_embedding(torch.arange(X.shape(0),device=X.device), output.size(1)) #每个整数标签都被转换为一个全为0且只有一个位置为1的向量
             correct_logit = torch.sum(label_mask * output, dim=1)
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
@@ -341,7 +311,7 @@ class myLightningModule(LightningModule):
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
 
             loss.backward()
-            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
+         
             self.log("attack_loss",loss)
             grad = delta.grad.detach()
             d = delta[:, :, :, :]
@@ -374,7 +344,7 @@ class myLightningModule(LightningModule):
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
             # loss = criterion(output, target)
             loss = - torch.sum(F.relu(correct_logit - wrong_logit + 50))
-            #Dear Afra, here is something you should probably log with self.log("attack_loss",loss)
+            
             self.log("attack_loss",loss)
             loss.backward()
             grad = delta.grad.detach()
@@ -466,13 +436,7 @@ class myLightningModule(LightningModule):
         
         #the final criterion is the loss of the model on the dirty images, towards the target.
 
-        '''
-        Dear Afra, something for you to try here, 
-
-        I wonder whether balancing the losses using a scaling factor might help preserve overall performance
-          (something to try by adding arguments to the demoparse.py file, then setting in the lightning module init.)
         
-        '''
         logits_of_training_model_with_clean_images = output_of_training_model_with_clean_images @ text_embed.T
 
         logits_per_dirty_image = output_of_training_model_with_dirty_images @ text_embed.T
@@ -605,22 +569,7 @@ class myLightningModule(LightningModule):
         scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
         output_prompt_adv = img_embed_norm @ scale_text_embed_norm.t()
 
-       #compare class probabilities between output_prompt and output_prompt_adv
-        # movement= output_prompt_adv - output_prompt
-        # self.log("movement",movement)
-        # self.log("CleanSimilarity",output_prompt)
-        #plot as heatmap using matplot and save as png
-        #plot as scatter plot using matplot and save as png
-        # fig=plt.figure()
-        # plt.imshow(output_prompt.cpu().detach().numpy())
-        # plt.colorbar()
-        # plt.savefig("Cleanoutput_prompt_idx={}{}.png".format(batch_idx,dataloader_idx))
-        # plt.close(fig)
-        # fig=plt.figure()
-        # plt.imshow(movement.cpu().detach().numpy())
-        # plt.colorbar()
-        # plt.savefig("movement_idx={}{}.png".format(batch_idx,dataloader_idx))
-        # plt.close(fig)
+     
 
 
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
@@ -680,9 +629,7 @@ class myLightningModule(LightningModule):
          #You could log here the val_loss, or just print something. 
         
     def configure_optimizers(self):
-        # pretty sure we probably want to use the same optimizer as the original paper: the adamw optimizer
-        # https://pytorch.org/docs/stable/optim.html#torch.optim.AdamW
-        # https://pytorch-lightning.readthedocs.io/en/latest/common/optimizers.html
+       
         args={"lr":self.args.get("learning_rate",1e-5)}
         if self.args.get("optimizer","sgd") == "adamw":
             optimizer_fn=torch.optim.AdamW
