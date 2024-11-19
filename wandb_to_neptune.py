@@ -56,15 +56,15 @@ if default_neptune_workspace := os.getenv("NEPTUNE_PROJECT"):
         ).strip()
         or default_neptune_workspace
     )
-    api_token = (
-        input(
-            f"Enter Neptune api_token. Leave blank to use the default api ({default_api_token}): "
-        ).strip()
-        or default_api_token
-    )
+    # api_token = (
+    #     input(
+    #         f"Enter Neptune api_token. Leave blank to use the default api ({default_api_token}): "
+    #     ).strip()
+    #     or default_api_token
+    # )
 else:
     neptune_workspace = input("Enter Neptune workspace name: ").strip()
-    api_token = input("Enter Neptune api:").strip()
+    # api_token = input("Enter Neptune api:").strip()
 num_workers = input(
     "Enter the number of workers to use (int). Leave empty to use ThreadPoolExecutor's defaults: "
 ).strip()
@@ -160,7 +160,7 @@ def threadsafe_change_directory(new_dir):
 def copy_run(wandb_run: client.run, wandb_project_name: str) -> None:
     with neptune.init_run(
         project=f"{neptune_workspace}/{wandb_project_name}",
-        api_token =api_token,
+        # api_token =api_token,
         name=wandb_run.name,
         custom_run_id=wandb_run.id,
         description=wandb_run.notes,
