@@ -67,10 +67,6 @@ class myLightningModule(LightningModule):
         self.model_text, _= None, None
         self.prompter = NullPrompter()
         self.add_prompter = TokenPrompter(add_prompt_len)
-        '''
-        To be implemented: place into the token prompter the POS embedding takedn straight fom CLIP, might make the training much faster! , or even try initiialising from random noise properly! 
-        (Note, they have several different prompters in the model.prompters.py file, you can use them as a reference)
-        '''
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         self.test_criterion = torch.nn.CrossEntropyLoss(reduction="none")
@@ -264,8 +260,6 @@ class myLightningModule(LightningModule):
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             output = img_embed_norm @ scale_text_embed.t()
             loss = self.criterion(output, torch.arange(prompted_images.size(0), device=self.device))
-            #range这个函数生成一个从0到 N-1 的整数序列，其中 N 是批次中的图像数量。这个序列在这里作为目标标签，假定每个图像的正确类别或标签就是其索引。
-            #交叉熵损失有助于将模型输出（例如，从CLIP等模型获得的相似性得分）解释为概率。通过应用Softmax函数（或Log-Softmax），相似性得分被转换为一个概率分布，这个分布反映了每个类别（或标签）被预测为正确的相对概率。这种概率框架有助于进行更稳健的决策和更细致的性能评估。
             loss.backward()
             losses.append(loss)
             grad = delta.grad.detach()
@@ -273,9 +267,7 @@ class myLightningModule(LightningModule):
             g = grad[:, :, :, :]
             x = X[:, :, :, :]
             
-            '''
-            此函数可能基于梯度g和其他参数（如学习率alpha和允许的最大扰动epsilon）计算新的扰动值。
-            '''
+            
             d=self.clamp(d,alpha,g,epsilon)
             d = clamp(d, self.lower_limit - x, self.upper_limit - x)
             delta.data[:, :, :, :] = d
@@ -304,7 +296,7 @@ class myLightningModule(LightningModule):
             scale_text_embed = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
             output = img_embed_norm @ scale_text_embed.t()
             
-            label_mask = one_hot_embedding(torch.arange(X.shape(0),device=X.device), output.size(1)) #每个整数标签都被转换为一个全为0且只有一个位置为1的向量
+            label_mask = one_hot_embedding(torch.arange(X.shape(0),device=X.device), output.size(1)) 
             correct_logit = torch.sum(label_mask * output, dim=1)
             wrong_logit, _ = torch.max((1 - label_mask) * output - 1e4 * label_mask, axis=1)
             # loss = criterion(output, target)
@@ -392,10 +384,7 @@ class myLightningModule(LightningModule):
             raise ValueError 
     
     def training_step(self, batch, batch_idx):
-        #The batch is collated for you, so just seperate it here and calculate loss. 
-        #By default, PTL handles optimization and scheduling and logging steps. so All you have to focus on is functionality. Here's an example...
-        images, target,text = batch #label shouldnt be used here! 
-        #print(text.shape)
+        
         text=text.squeeze(1) #B,77
         text_embed=self.make_labels(images,text) #B,512
         # text_embed=self.model.encode_text(text) #B,512
@@ -404,14 +393,7 @@ class myLightningModule(LightningModule):
         # ori_text_embed= ori_text_embed/ ori_text_embed.norm(dim=-1, keepdim=True)
         # images = self.prompter(images) #does nothing - its a null prompter
         Dirtyimages,_=self.attack(images, target, text, self.args.get("alpha",1), self.args.get("attack_iters",5), epsilon=self.args.get("train_eps",1)) #B,3,224,224
-        '''
-        Here's where you run the dirty image through your model... first through an encoder, then through a decoder.
-
-        output = model(normalize(images))
-        rebuilt_images = model_clean_image_generator(output)
-        loss2 = self.YourCriterion(rebuilt_images, images)
-        #and add your loss into the total loss. 
-        '''
+       
         Dirtyimages = torch.div(torch.sub(Dirtyimages, self.mu_img), self.std_img) #normalize(Dirtyimages) but preserves grad
         # prompted_Dirtyimages = self.prompter(normalize(Dirtyimages)) #does nothing - its a null prompter
         output_of_training_model_with_dirty_images= self.model.encode_image(Dirtyimages) #B,512
@@ -457,37 +439,11 @@ class myLightningModule(LightningModule):
         return loss
    
     def on_train_epoch_end(self):
-        '''
-        imfeatures=torch.nan_to_num(torch.cat([val["imfeatures"] for val in self.results],dim=0)).cpu().numpy()
-        #repeat for each output. 
-        
-        #you can then run a linear regression probe to see how well the model is doing.
-        
-        #What this tells you is not just "whether the attack works" - we know the attack works!
-        #  It tells you instead that the attack is fooling the entire image encoder, not just the relation to the text prompts. the text prompts rely on a template. the template looks like "a photo of ...". you could attack it by making it think its "a cartoon of...".
-        #
-        
-        #draw lots of graphs and stuff.
-        
-        labels=torch.cat([val["classes"] for val in self.results],dim=0).cpu().numpy()
-        if not hasattr(self,"Iclassifier"):
-            self.Iclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=1000, verbose=1, n_jobs=-1)
-        self.Iclassifier.fit(imfeatures, labels)
-        self.log( "ImProbe",self.Iclassifier.score(imfeatures, labels))
-        
-        .parameters() 方法非常适合进行模型参数的遍历、优化器的配置或进行参数的统计分析
-        p.norm(2) 计算每个参数的 L2 范数（即欧几里得范数），并将这些范数求和。这提供了一个量化模型权重总体大小的指标。
-         '''
+       
         l2_norm_obj = sum(p.norm(2) for p in self.model.visual.parameters())
         l2_norm_ori = sum(p.norm(2) for p in self.model_ori.visual.parameters())
         ratio = abs(l2_norm_ori - l2_norm_obj) / float(l2_norm_ori)
 
-        '''
-        这行代码计算两个模型的 L2 范数之差的绝对值，然后除以原始模型的 L2 范数，得到一个相对差异比率。这个比率显示了训练模型相对于原始模型参数变化的程度。
-        '''
-        '''
-        这行简单计算两个模型的 L2 范数之差的绝对值，提供了另一种衡量参数变化的方式。
-        '''
         abs_l2 = abs(l2_norm_ori - l2_norm_obj)
         self.log('l2_norm_obj', l2_norm_obj, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('l2_norm_ori', l2_norm_ori, on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -544,22 +500,7 @@ class myLightningModule(LightningModule):
         self.log('val_clean_batch_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
-        # if self.args.get("CW",False):
-        #     delta_prompt = self.attack_CW(
-        #                             images, target, text,
-        #                             self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
-        # elif self.args.get("autoattack",False):#autoattack:
-        #     def model_fn(x):
-        #         output_a = multiGPU_CLIP(self.model, self.prompter(clip_img_preprocessing(x)),text)
-        #         return output_a.to(torch.float32)
-
-        #     adversary = AutoAttack(model_fn, norm='Linf', eps=self.args.get("test_eps",1), version='standard')
-        #     adv_samples = adversary.run_standard_evaluation(images, target, bs=100)   ##is this correct? 
-        #     delta_prompt = adv_samples - images
-        #     delta_prompt = clamp(delta_prompt, self.lower_limit - images, self.upper_limit - images)
-        # else:
-        #     delta_prompt = self.attack_pgd(images, target, text,self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
-
+        
         # output_prompt_adv, _ = model(prompter(clip_img_preprocessing(images + delta_prompt)), text_tokens, prompt_token)
         dirtyImages,dirtyText=self.testattack(images, target, text, self.args.get("test_stepsize",2), self.args.get("test_numsteps",20), epsilon=self.args.get("test_eps",1))
 
@@ -575,7 +516,7 @@ class myLightningModule(LightningModule):
         loss = self.criterion(output_prompt_adv, torch.arange(images.size(0),device=images.device)) #shoudl be torch arange(images.size(0), device=self.device)
         self.attackedresults[dataloader_idx].append({"logits":img_embed, "textlabels":target})
         
-        #TODO: add logging for text loss here when we trial the attack
+      
 
         acc1 = accuracy(output_prompt_adv, torch.arange(images.size(0),device=images.device), topk=(1,))
         self.log('val_dirty_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -620,13 +561,13 @@ class myLightningModule(LightningModule):
             self.log( "General Classifier on Clean Features on dataset {}".format(dataset_idx),self.generalclassifier.score(GoodLogits, GoodLabels))
             self.log( "General Classifier on All Features on dataset {}".format(dataset_idx),self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels])))
 
-        #this should give us PLENTY of data to write about! 
+        
         
         #delete the results to save memory
         del self.cleanresults
         del self.attackedresults
 
-         #You could log here the val_loss, or just print something. 
+         
         
     def configure_optimizers(self):
        
@@ -816,7 +757,7 @@ class myLightningModule(LightningModule):
             #step 7: now do attack as normal
             d = delta
 
-            #I want to find a way to maximize the loss while minimizing text loss
+            
 
             img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
             scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
@@ -841,7 +782,7 @@ class myLightningModule(LightningModule):
     def on_test_epoch_start(self):
         self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
         self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
-        #to be thread safe we should create queues insead of lists.#
+        
         self.test_epoch_end_called=False
         self.test_cleanresults=defaultdict(queue.Queue)
         self.test_attackedresults=defaultdict(queue.Queue)
@@ -866,8 +807,7 @@ class myLightningModule(LightningModule):
         self.test_alphas = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
         self.test_epsilons = torch.tensor([1/255, 2/255, 4/255,8/255],device=self.device)
         self.test_numsteps = torch.tensor([5, 10],device=self.device)
-        #instead of saving the results to memory, were going to save them to disk.
-        #note : if using multiple nodes, this will need to be a shared file system, or a database... or revert to saving to memory, and praying you have enough!!
+       
         self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
         self.save_result_worker_thread.start()
        
