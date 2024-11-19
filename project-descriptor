@@ -1,10 +1,2 @@
-- title: 'This is Afra's first time using someone else's code'
-  image: /assets/img/blocks/code-med.jpg
-  description:
-    - Investigating how to use wnd b nd deploy to HEC and other work stations.
-    - The goals here are to replicate a paper, testing how PGN noise can affect training of CLIP in attack environments
-    - when this has been shown, we'll improve the code to enclude a decoder, which will attempt to rebuild images from the CLIP embeddings
+title:
 
-  author:
-    - Stephen Mander
-    - Afra's name here...
