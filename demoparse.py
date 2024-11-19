@@ -185,7 +185,7 @@ class parser(baseparser):
 # Testing to check param outputs
 if __name__== "__main__":
     
-    #If you call this file directly, you'll see the default ARGS AND the trials that might be generated. 
+   
     myparser=parser()
     hyperparams = myparser.parse_args()
     print(hyperparams.__dict__)
