@@ -160,7 +160,7 @@ def threadsafe_change_directory(new_dir):
 def copy_run(wandb_run: client.run, wandb_project_name: str) -> None:
     with neptune.init_run(
         project=f"{neptune_workspace}/{wandb_project_name}",
-        api_token =f"{api_token}",
+        api_token =api_token,
         name=wandb_run.name,
         custom_run_id=wandb_run.id,
         description=wandb_run.notes,
