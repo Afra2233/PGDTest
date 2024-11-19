@@ -241,13 +241,7 @@ class MyDataModule(pl.LightningDataModule):
                 class_names =self.refine_classname(self.train_dataset_dict['Caltech101'].classes)
                 self.train_text_names_dict.update({'Caltech101':class_names})
 
-            # if 'PCAM' in self.train_dataset_names:
-            #     self.train_dataset_dict.update({'PCAM': PCAM(root=self.imagenet_root, split='train', transform=self.preprocess, download=download)})
-            #     print("PCAM")
-            #     print(self.train_dataset_dict['PCAM'].__dir__())
-            #     #get the classes from PCAM dataset. we can not use classes but it does have the attribute 
-
-            #     self.train_text_names_dict.update({'PCAM':[self.template.format(label) for label in class_names]})
+            
             if 'STL10' in self.train_dataset_names:
                 self.train_dataset_dict.update({'STL10': STL10(root=self.imagenet_root, split='train', transform=self.preprocess, download=download)})
                 self.plainnames_dict.update({'STL10':self.train_dataset_dict['STL10'].classes})
@@ -408,10 +402,7 @@ class MyDataModule(pl.LightningDataModule):
                 val_dataset_dict.update({'cifar100': CIFAR100(root=self.imagenet_root, transform=self.preprocess, download=download, train=False)})
             if 'Caltech101'in self.val_dataset_names:
                 val_dataset_dict.update({'Caltech101': Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
-            # if 'PCAM' in self.val_dataset_names:
-            #     val_dataset_dict.update({'PCAM': PCAM(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
-            #         # val_dataset_list.append(PCAM(root=self.imagenet_root, split='test', transform=preprocess224,
-            #         #                                 download=True))
+         
             if 'STL10' in self.val_dataset_names:
                 val_dataset_dict.update({'STL10': STL10(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                    
@@ -419,9 +410,7 @@ class MyDataModule(pl.LightningDataModule):
                 val_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(SUN397(root=self.imagenet_root,
                     #                                 transform=preprocess224, download=True))
-            # if 'StanfordCars' in self.val_dataset_names:                                                   #no longer available for download
-            #         val_dataset_list.append(StanfordCars(root=self.imagenet_root, split='test',
-                                                            # transform=preprocess224, download=True))
+           
             if 'Food101' in self.val_dataset_names: 
                 val_dataset_dict.update({'Food101': Food101(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})  ##is it this one that makes it crash> 
                     # val_dataset_list.append(Food101(root=self.imagenet_root, split='test',
@@ -434,14 +423,7 @@ class MyDataModule(pl.LightningDataModule):
                 val_dataset_dict.update({'EuroSAT': EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
                                                     # transform=preprocess224, download=True))
-            # if 'Caltech256' in self.val_dataset_names:  <==========================This is the wry bastard causing errors! 
-            #     val_dataset_dict.update({'Caltech256': Caltech256(root=self.imagenet_root, transform=self.preprocess, download=True)})
-            #         # val_dataset_list.append(Caltech256(root=self.imagenet_root, transform=preprocess224,
-                                                        # download=True))
-            # if 'flowers102' in self.val_dataset_names:
-            #     val_dataset_dict.update({'flowers102': Flowers102(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
-            #         # val_dataset_list.append(Flowers102(root=self.imagenet_root, split='test',
-            #                                             # transform=preprocess224, download=True))
+           
             if 'Country211' in self.val_dataset_names:
                 val_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
@@ -581,7 +563,7 @@ class MyDataModule(pl.LightningDataModule):
             
       
             
-            #self.test_datasets, self.val_datasets=[torch.utils.data.random_split(v,[int(0.95*len(v)),len(v)-int(0.95*len(v))]) for v in self.val_datasets]
+            
             split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
             self.test_datasets = [split[0] for split in split_datasets]
             print(len(self.test_datasets))  
