@@ -102,7 +102,7 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
 
             run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
 
-        #os.environ["WANDB_API_KEY"]="9cf7e97e2460c18a89429deed624ec1cbfb537bc"  
+         
         logtool= pytorch_lightning.loggers.WandbLogger(project=PROJECT,entity=USER,experiment=run, save_dir=os.getenv("WANDB_CACHE_DIR","."))                 #<-----CHANGE ME
         config=run.config.as_dict()
 
@@ -151,21 +151,18 @@ def SlurmRun(trialconfig):
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
         'export wandb=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
         'export WANDB_API_KEY=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
-        #'export ISHEC=True',                                                                                                                       
+                                                                                                                            
         'source /etc/profile',
         'module add opence',
         'conda activate $CONDADIR',
-        #'pip install -r requirements.txt',                                                  
+                                                        
     ])
     script_name= os.path.realpath(sys.argv[0]) #Find this scripts name...
     trialArgs=__get_hopt_params(trialconfig)
-    #If you're deploying prototyping code and often changing your pip env,
-    # consider adding in a 'scopy requirements.txt
-    # and then append command 'pip install -r requirements.txt...
-    # This should add your pip file from the launch dir to the run location, then install on each node.
+    
 
     sub_commands.append('srun {} {} {}'.format(comm, script_name,trialArgs))
-    #when launched, this script will be called with no trials, and so drop into the wandbtrain section,
+    
     sub_commands = [x.lstrip() for x in sub_commands]
 
     full_command = '\n'.join(sub_commands)
