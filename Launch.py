@@ -86,11 +86,11 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
         print(config)
 
     else:
-        #We've got no config, so we'll just use the default, and hopefully a trainAgent has been passed
+        
         print("Would recommend changing projectname according to config flags if major version swithching happens")
         try:
             run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                          
-            #check if api key exists in os.environ
+            
         except:
             if "WANDB_API_KEY" not in os.environ:
                 if "wandb" in os.environ:
