@@ -215,11 +215,11 @@
         const action = "POST";
         // get endpoint from the server host environment
         const endpoint = "http://"+window.location.hostname+":5000/2d/data";
-        //const endpoint = "http://scc-lanfotech.lancs.ac.uk:80/demo/data";
+  
         
         //get endpoint from the server
         // this may vary depending on the server
-        //const endpoint = "http://"+window.location.hostname+":5000/data";
+       
         request.open(action, endpoint);
         request.setRequestHeader("Content-Type", "application/json");
         request.send(dataJSON);
