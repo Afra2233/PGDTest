@@ -19,6 +19,8 @@ import threading
 import time
 import matplotlib.pyplot as plt
 import queue
+from sklearn.ensemble import RandomForestRegressor
+from scipy.stats import spearmanr
 from scipy.interpolate import make_interp_spline
 api = wandb.Api()
 
@@ -110,6 +112,55 @@ for run_id, accuracies in average_accuracies.items():
     print(f"Run ID: {run_id}, Average Accuracies: {accuracies}")
 run_ids = []  
 avg_accuracies = []  
+
+data_ic = []
+for run, avg_accuracies in average_accuracies.items():
+    # avg_accuracy = np.mean(avg_accuracies)  # 平均accuracy
+    config = run.config
+    data_ic.append({
+        "learning_rate": config.get("learning_rate", None),
+        "train_eps": config.get("train_eps", None),
+        "train_numsteps": config.get("train_numsteps", None),
+        "train_stepsize": config.get("train_stepsize", None),
+        "test_numsteps": config.get("test_numsteps", None),
+        "test_stepsize": config.get("test_stepsize", None),
+        "test_eps": config.get("test_eps", None),
+        "optimizer": config.get("optimizer", None),
+        # "train_numsteps": config.get("train_number", None),
+        "precision": config.get("precision", None),
+        "accuracy": avg_accuracies
+    })
+
+
+df_ic = pd.DataFrame(data_ic)
+
+df_ic["optimizer"] = df_ic["optimizer"].astype("category").cat.codes
+
+
+X = df_ic[["learning_rate", "train_eps", "train_numsteps", "train_stepsize", "test_numsteps", "test_stepsize", "test_eps", "optimizer","precision"]]
+Y = df_ic["accuracy"]
+
+
+rf = RandomForestRegressor(random_state=5)
+rf.fit(X, Y)
+
+feature_importances = rf.feature_importances_
+
+correlations = []
+for col in X.columns:
+    rho, _ = spearmanr(df[col], Y)
+    correlations.append(rho)
+
+
+results = pd.DataFrame({
+    "Parameter": X.columns,
+    "Importance": feature_importances,
+    "Correlation": correlations
+})
+print(results)
+
+# import ace_tools as tools
+# tools.display_dataframe_to_user("Parameter Importance and Correlation Table", results)
 
 
 # for run_id, accuracies in average_accuracies.items():
