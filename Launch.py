@@ -81,7 +81,7 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
     if config is not None:
         config=config.__dict__
         dir=config.get("dir",dir)
-        wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc")) 
+       
         logtool= pytorch_lightning.loggers.WandbLogger(project=PROJECT,entity=USER, save_dir=os.getenv("WANDB_CACHE_DIR","."))                               #<-----CHANGE ME
         print(config)
 
