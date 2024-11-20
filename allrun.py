@@ -150,7 +150,7 @@ feature_importances = rf.feature_importances_
 
 correlations = []
 for col in X.columns:
-    rho, _ = spearmanr(df[col], Y)
+    rho, _ = spearmanr(df_ic[col], Y)
     correlations.append(rho)
 
 
