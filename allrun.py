@@ -159,6 +159,8 @@ results = pd.DataFrame({
     "Importance": feature_importances,
     "Correlation": correlations
 })
+results = results.sort_values(by="Importance", ascending=False).reset_index(drop=True)
+
 print(results)
 
 # import ace_tools as tools
