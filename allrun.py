@@ -20,6 +20,7 @@ import threading
 import time
 import matplotlib.pyplot as plt
 import queue
+from scipy.stats import pearsonr
 from sklearn.ensemble import RandomForestRegressor
 from scipy.stats import spearmanr
 from scipy.interpolate import make_interp_spline
@@ -148,9 +149,14 @@ rf.fit(X, Y)
 
 feature_importances = rf.feature_importances_
 
+# correlations = []
+# for col in X.columns:
+#     rho, _ = spearmanr(df_ic[col], Y)
+#     correlations.append(rho)
 correlations = []
 for col in X.columns:
-    rho, _ = spearmanr(df_ic[col], Y)
+    # Pearson correlation
+    rho, _ = pearsonr(df_ic[col], Y)  
     correlations.append(rho)
 
 
