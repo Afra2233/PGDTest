@@ -103,9 +103,10 @@ for stepsize, eps_clusters in selected_runs.items():
                 # if average_accuracy > max_accuracy:
                 #     max_accuracy = average_accuracy
                 #     best_run_info = (run.id, run.name, average_accuracy)
-                if run.id not in average_accuracies:
-                    average_accuracies[run] = []
-                average_accuracies[run].append(average_accuracy)
+                # if run.id not in average_accuracies:
+                #     average_accuracies[run] = []
+                # average_accuracies[run].append(average_accuracy)
+                average_accuracies[run] = average_accuracy
 
 
 
