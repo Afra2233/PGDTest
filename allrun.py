@@ -143,7 +143,7 @@ X = df_ic[["learning_rate", "train_eps", "train_numsteps", "train_stepsize", "te
 Y = df_ic["accuracy"]
 
 
-rf = RandomForestRegressor(random_state=5)
+rf = RandomForestRegressor(random_state=10)
 rf.fit(X, Y)
 
 feature_importances = rf.feature_importances_
