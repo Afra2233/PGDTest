@@ -91,17 +91,18 @@ best_run_info = None
 for stepsize, eps_clusters in selected_runs.items():
     for eps, runs_in_cluster in eps_clusters.items():
         for run in runs_in_cluster:
-            accuracies = [value for key, value in run.summary.items() if key.startswith("Test General Classifier on All Features")]
+            # accuracies = [value for key, value in run.summary.items() if key.startswith("Test General Classifier on All Features")]
+            accuracies = [value for key, value in run.summary.items() if key.startswith("Test")]
            
             if accuracies:  
                 average_accuracy = sum(accuracies) / len(accuracies)
                 
-                if average_accuracy > max_accuracy:
-                    max_accuracy = average_accuracy
-                    best_run_info = (run.id, run.name, average_accuracy)
+                # if average_accuracy > max_accuracy:
+                #     max_accuracy = average_accuracy
+                #     best_run_info = (run.id, run.name, average_accuracy)
                 if run.id not in average_accuracies:
-                    average_accuracies[run.id] = []
-                average_accuracies[run.id].append(average_accuracy)
+                    average_accuracies[run] = []
+                average_accuracies[run].append(average_accuracy)
 
 
 
@@ -111,207 +112,207 @@ run_ids = []
 avg_accuracies = []  
 
 
-for run_id, accuracies in average_accuracies.items():
-    for acc in accuracies:
-        run_ids.append(run_id)
-        avg_accuracies.append(acc)
+# for run_id, accuracies in average_accuracies.items():
+#     for acc in accuracies:
+#         run_ids.append(run_id)
+#         avg_accuracies.append(acc)
 
 
 
-fig, ax = plt.subplots(figsize=(14, 14))
+# fig, ax = plt.subplots(figsize=(14, 14))
 
 
-# colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
-# colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(avg_accuracies)))
-colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(avg_accuracies)))
-np.random.shuffle(colors) 
-
-x_pos = np.arange(1, len(run_ids) + 1)
-
-bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
-# line_offset = 0.5  # Adjust this value to control the distance above the bars
-
-# ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
-
-# smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
-# smooth_y = make_interp_spline(x_pos, avg_accuracies)(smooth_x)  # Interpolated values
-
-
-# ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
-
-
-
-# ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
-ax.set_xlabel('Run ID',fontsize=18)
-ax.set_ylabel('Average General Classifier Accuracies',fontsize=18)
-
-
-plt.yticks(fontsize=18)
-plt.xticks(rotation=45,fontsize=18)
-
-
-plt.show()
-plt.savefig('General_Classifier.png')
-
-
-
-
-dirty_clean_accuracy = {}
-
-for stepsize, eps_clusters in selected_runs.items():
-    for eps, runs_in_cluster in eps_clusters.items():
-        for run in runs_in_cluster:
-            dirty_on_clean_values = [value for key, value in run.summary.items() 
-                                     if key.startswith("Test Dirty Classifier on Clean Features")]
-
-           
-            clean_on_dirty_values = [value for key, value in run.summary.items() 
-                                     if key.startswith("Test Clean Classifier on Dirty Features")]
-
-       
-            if dirty_on_clean_values:
-                average_dirty_on_clean = sum(dirty_on_clean_values) / len(dirty_on_clean_values)
-                # dirty_on_clean_accuracy[run.id] = average_dirty_on_clean
-            if clean_on_dirty_values:
-                average_clean_on_dirty = sum(clean_on_dirty_values) / len(clean_on_dirty_values)
-                # clean_on_dirty_accuracy[run.id] = average_clean_on_dirty
-            total = average_clean_on_dirty+average_dirty_on_clean
-            dirty_clean_accuracy[run.id] = total/2
-            
-dc_run_ids = []  
-dc_avg_accuracies = []
-
-
-for run_id, average_accuracy in dirty_clean_accuracy.items():
-    print(f"Run ID: {run_id}, Dirty-Clean Average Accuracy: {average_accuracy:.3f}")
-    dc_run_ids.append(run_id)
-    dc_avg_accuracies.append(average_accuracy)
-
-
-fig, ax = plt.subplots(figsize=(14, 14))
-
-
-# colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
-# colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(dc_avg_accuracies)))
-# colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(dc_avg_accuracies)))
+# # colors = plt.cm.viridis(np.linspace(0, 1, len(avg_accuracies)))
+# # colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(avg_accuracies)))
+# colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(avg_accuracies)))
 # np.random.shuffle(colors) 
 
-x_pos = np.arange(1, len(dc_run_ids) + 1)
+# x_pos = np.arange(1, len(run_ids) + 1)
 
-bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
-# line_offset = 0.5  # Adjust this value to control the distance above the bars
+# bars = ax.bar(x_pos, avg_accuracies, color=colors,tick_label=x_pos)
+# # line_offset = 0.5  # Adjust this value to control the distance above the bars
 
-# ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
-# smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
-# smooth_y = make_interp_spline(x_pos, dc_avg_accuracies)(smooth_x)  # Interpolated values
+# # ax.plot(x_pos, avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
 
-
-# ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
+# # smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
+# # smooth_y = make_interp_spline(x_pos, avg_accuracies)(smooth_x)  # Interpolated values
 
 
+# # ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
 
 
 
-# ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
-ax.set_xlabel('Run ID',fontsize=16)
-ax.set_ylabel('Average Dirty-Clean Classifier Accuracies',fontsize=16)
+# # ax.set_title('The Average Accuracy of General Classifier on All Features Per Run')
+# ax.set_xlabel('Run ID',fontsize=18)
+# ax.set_ylabel('Average General Classifier Accuracies',fontsize=18)
 
 
-plt.yticks(fontsize=16)
-plt.xticks(rotation=45,fontsize=16)
+# plt.yticks(fontsize=18)
+# plt.xticks(rotation=45,fontsize=18)
 
 
-plt.show()
-plt.savefig('DC_Classifier.png')
+# plt.show()
+# plt.savefig('General_Classifier.png')
 
 
-x_values = np.array(avg_accuracies)
-y_values = np.array(dc_avg_accuracies)
-
-markers = ['o', 's', 'D', '^', 'p']  
-# colors = ['blue', 'green', 'purple', 'orange', 'red']
 
 
-fig, ax = plt.subplots(figsize=(10, 10))
+# dirty_clean_accuracy = {}
 
+# for stepsize, eps_clusters in selected_runs.items():
+#     for eps, runs_in_cluster in eps_clusters.items():
+#         for run in runs_in_cluster:
+#             dirty_on_clean_values = [value for key, value in run.summary.items() 
+#                                      if key.startswith("Test Dirty Classifier on Clean Features")]
 
-for i in range(len(x_values)):
-    ax.scatter(x_values[i], y_values[i], color=colors[i], marker=markers[i % len(markers)], s=100)
-
-# scatter = ax.scatter(x_values, y_values, color='blue', marker='o')
-
-slope, intercept = np.polyfit(x_values, y_values, 1)
-
-
-fit_line = intercept + slope * x_values
-
-# ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
-ax.plot(x_values, fit_line, label=f'Best Fit Line', color='red')
-ax.legend()
-
-
-ax.set_title('Comparison of Average Accuracies')
-ax.set_xlabel('Average General Classifier Accuracies')
-ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
-
-
-# for i, txt in enumerate(run_ids):
-#     ax.annotate(txt, (avg_accuracies[i], dc_avg_accuracies[i]))
-
-
-plt.show()
-plt.savefig('compare.png')
-
-x_values = []
-y_values = []
-colors = []
-
-
-for run in runs:
-    run_id = run.id
-    if run_id in average_accuracies and run_id in dirty_clean_accuracy:
-        avg_accuracy = average_accuracies[run_id]
-        dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
+           
+#             clean_on_dirty_values = [value for key, value in run.summary.items() 
+#                                      if key.startswith("Test Clean Classifier on Dirty Features")]
 
        
-        train_eps = run.config.get("optimizer")
-        color = optimizer_colors.get(train_eps, 'gray')  
+#             if dirty_on_clean_values:
+#                 average_dirty_on_clean = sum(dirty_on_clean_values) / len(dirty_on_clean_values)
+#                 # dirty_on_clean_accuracy[run.id] = average_dirty_on_clean
+#             if clean_on_dirty_values:
+#                 average_clean_on_dirty = sum(clean_on_dirty_values) / len(clean_on_dirty_values)
+#                 # clean_on_dirty_accuracy[run.id] = average_clean_on_dirty
+#             total = average_clean_on_dirty+average_dirty_on_clean
+#             dirty_clean_accuracy[run.id] = total/2
+            
+# dc_run_ids = []  
+# dc_avg_accuracies = []
+
+
+# for run_id, average_accuracy in dirty_clean_accuracy.items():
+#     print(f"Run ID: {run_id}, Dirty-Clean Average Accuracy: {average_accuracy:.3f}")
+#     dc_run_ids.append(run_id)
+#     dc_avg_accuracies.append(average_accuracy)
+
+
+# fig, ax = plt.subplots(figsize=(14, 14))
+
+
+# # colors = plt.cm.viridis(np.linspace(0, 1, len(dc_avg_accuracies)))
+# # colors = plt.get_cmap('Spectral')(np.linspace(0, 1, len(dc_avg_accuracies)))
+# # colors = plt.get_cmap('tab20b')(np.linspace(0, 1, len(dc_avg_accuracies)))
+# # np.random.shuffle(colors) 
+
+# x_pos = np.arange(1, len(dc_run_ids) + 1)
+
+# bars = ax.bar(x_pos, dc_avg_accuracies, color=colors,tick_label=x_pos)
+# # line_offset = 0.5  # Adjust this value to control the distance above the bars
+
+# # ax.plot(x_pos, dc_avg_accuracies, color='green', linestyle='-', linewidth=2, label='Trend Line')
+# # smooth_x = np.linspace(x_pos.min(), x_pos.max(), 300)  # More points for smoother line
+# # smooth_y = make_interp_spline(x_pos, dc_avg_accuracies)(smooth_x)  # Interpolated values
+
+
+# # ax.plot(smooth_x, smooth_y, color='purple', linestyle='-', linewidth=3, alpha=0.7, label='Trend Line')
+
+
+
+
+
+# # ax.set_title('The Average Accuracy of Dirty Classifier on Clean Features and Clean Classifier on Drity Features Per Run')
+# ax.set_xlabel('Run ID',fontsize=16)
+# ax.set_ylabel('Average Dirty-Clean Classifier Accuracies',fontsize=16)
+
+
+# plt.yticks(fontsize=16)
+# plt.xticks(rotation=45,fontsize=16)
+
+
+# plt.show()
+# plt.savefig('DC_Classifier.png')
+
+
+# x_values = np.array(avg_accuracies)
+# y_values = np.array(dc_avg_accuracies)
+
+# markers = ['o', 's', 'D', '^', 'p']  
+# # colors = ['blue', 'green', 'purple', 'orange', 'red']
+
+
+# fig, ax = plt.subplots(figsize=(10, 10))
+
+
+# for i in range(len(x_values)):
+#     ax.scatter(x_values[i], y_values[i], color=colors[i], marker=markers[i % len(markers)], s=100)
+
+# # scatter = ax.scatter(x_values, y_values, color='blue', marker='o')
+
+# slope, intercept = np.polyfit(x_values, y_values, 1)
+
+
+# fit_line = intercept + slope * x_values
+
+# # ax.plot(x_values, fit_line, label=f'Best Fit Line: y = {slope:.2f}x + {intercept:.2f}', color='red')
+# ax.plot(x_values, fit_line, label=f'Best Fit Line', color='red')
+# ax.legend()
+
+
+# ax.set_title('Comparison of Average Accuracies')
+# ax.set_xlabel('Average General Classifier Accuracies')
+# ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
+
+
+# # for i, txt in enumerate(run_ids):
+# #     ax.annotate(txt, (avg_accuracies[i], dc_avg_accuracies[i]))
+
+
+# plt.show()
+# plt.savefig('compare.png')
+
+# x_values = []
+# y_values = []
+# colors = []
+
+
+# for run in runs:
+#     run_id = run.id
+#     if run_id in average_accuracies and run_id in dirty_clean_accuracy:
+#         avg_accuracy = average_accuracies[run_id]
+#         dirty_clean_avg_accuracy = dirty_clean_accuracy[run_id]
+
+       
+#         train_eps = run.config.get("optimizer")
+#         color = optimizer_colors.get(train_eps, 'gray')  
 
  
-        x_values.append(avg_accuracy)
-        y_values.append(dirty_clean_avg_accuracy)
-        colors.append(color)
+#         x_values.append(avg_accuracy)
+#         y_values.append(dirty_clean_avg_accuracy)
+#         colors.append(color)
 
 
-x_values = np.array(x_values).flatten()
-y_values = np.array(y_values).flatten()
+# x_values = np.array(x_values).flatten()
+# y_values = np.array(y_values).flatten()
 
 
-fig, ax = plt.subplots(figsize=(10, 10))
+# fig, ax = plt.subplots(figsize=(10, 10))
 
 
-# ax.scatter(x_values, y_values, color=colors, marker='o', s=100,)
-for optimizer, color in optimizer_colors.items():
-    indices = [i for i in range(len(colors)) if colors[i] == color]
-    ax.scatter(x_values[indices], y_values[indices], color=color, marker='o', s=100, label=f'optimizer={optimizer}')
+# # ax.scatter(x_values, y_values, color=colors, marker='o', s=100,)
+# for optimizer, color in optimizer_colors.items():
+#     indices = [i for i in range(len(colors)) if colors[i] == color]
+#     ax.scatter(x_values[indices], y_values[indices], color=color, marker='o', s=100, label=f'optimizer={optimizer}')
 
 
 
-slope, intercept = np.polyfit(x_values, y_values, 1)
-fit_line = intercept + slope * x_values
+# slope, intercept = np.polyfit(x_values, y_values, 1)
+# fit_line = intercept + slope * x_values
 
 
-ax.plot(x_values, fit_line, label='Best Fit Line', color='red')
-ax.legend()
+# ax.plot(x_values, fit_line, label='Best Fit Line', color='red')
+# ax.legend()
 
 
-ax.set_title('Comparison of Average Accuracies')
-ax.set_xlabel('Average General Classifier Accuracies')
-ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
+# ax.set_title('Comparison of Average Accuracies')
+# ax.set_xlabel('Average General Classifier Accuracies')
+# ax.set_ylabel('Average Dirty-Clean Classifier Accuracies')
 
 
-plt.show()
-plt.savefig('compare2.png')
+# plt.show()
+# plt.savefig('compare2.png')
 
 
 
