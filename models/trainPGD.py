@@ -384,7 +384,7 @@ class myLightningModule(LightningModule):
             raise ValueError 
     
     def training_step(self, batch, batch_idx):
-        
+        images, target,text = batch
         text=text.squeeze(1) #B,77
         text_embed=self.make_labels(images,text) #B,512
         # text_embed=self.model.encode_text(text) #B,512
