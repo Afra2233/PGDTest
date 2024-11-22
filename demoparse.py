@@ -108,7 +108,7 @@ class baseparser(HyperOptArgumentParser):
         # dataset
         
         self.opt_list("--root", default=os.getenv("PWD","./data"), options=[os.getenv("PWD","./data")], type=str, tunable=False)
-        self.opt_list("--dataset", default='cifar10', options=["coco","tinyImageNet"],type=str, tunable=True)
+        self.opt_list("--dataset", default='cifar10', options=["coco","tinyImageNet"],type=str, tunable=False)
         self.opt_list("--image_size", default=224, type=int, tunable=False)
         self.opt_list("--model_dir", default=os.path.join(self.MODELDIR,"modelckpts"), type=str, tunable=False)
         # other
