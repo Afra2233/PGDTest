@@ -90,6 +90,7 @@ class baseparser(HyperOptArgumentParser):
         self.opt_list("--train_eps", default=1/255, options=[1/255,2/255,4/255], type=float, tunable=True)
         self.opt_list("--train_numsteps", default=10, options=[5,10], type=int, tunable=True)
         self.opt_list("--train_stepsize", default=1/255, type=float,options=[1/255,2/255,4/255], tunable=True)
+        self.opt_list("--attack_iters", default=10, options=[5,10,100], type=int, tunable=True)
         self.opt_list("--test_eps", default=1/255, options=[1/255,2/255,4/255,8/255], type=float, tunable=False)
         self.opt_list("--test_numsteps", default=5, type=int, tunable=False)
         self.opt_list("--test_stepsize", default=1/255, options=[1/255,2/255,4/255,8/255], type=float , tunable=False)
