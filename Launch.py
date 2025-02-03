@@ -95,10 +95,10 @@ def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
             if "WANDB_API_KEY" not in os.environ:
                 if "wandb" in os.environ:
                     os.environ["WANDB_API_KEY"]=os.environ["wandb"]
-                    wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc")) 
+                    wandb.login(key=os.getenv("WANDB_API_KEY","7fd2ef8f59893930df0fcc80074265e20ea978a3")) 
                 else:
                     print("No API key found, please set WANDB_API_KEY in environment variables")
-            wandb.login(key=os.getenv("WANDB_API_KEY","9cf7e97e2460c18a89429deed624ec1cbfb537bc"))
+            wandb.login(key=os.getenv("WANDB_API_KEY","7fd2ef8f59893930df0fcc80074265e20ea978a3"))
 
             run=wandb.init(project=PROJECT,entity=USER,name=NAME,config=config)                                           #<-----CHANGE ME      
 
@@ -149,8 +149,8 @@ def SlurmRun(trialconfig):
     sub_commands.extend([ '#SBATCH --{}={}\n'.format(cmd, value) for  (cmd, value) in slurm_commands.items()])
     sub_commands.extend([
         'export SLURM_NNODES=$SLURM_JOB_NUM_NODES',
-        'export wandb=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
-        'export WANDB_API_KEY=9cf7e97e2460c18a89429deed624ec1cbfb537bc',
+        'export wandb=7fd2ef8f59893930df0fcc80074265e20ea978a3',
+        'export WANDB_API_KEY=7fd2ef8f59893930df0fcc80074265e20ea978a3',
                                                                                                                             
         'source /etc/profile',
         'module add opence',
