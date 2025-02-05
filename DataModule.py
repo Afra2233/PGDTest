@@ -31,16 +31,7 @@ from utils import to_rgb,load_imagenet_label2folder,refine_classname
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
 
-# def ourCollate_fn(batch):
-#     print(batch)
-#     try:
-#         output=default_collate(batch)
-#     except Exception as e:
-        
-#         print(batch)
-#         print("Error in collate")
-#         output=ourCollate_fn(batch[:-1])
-#     return output
+
 
 ImageNet_MEAN = (0.485, 0.456, 0.406)
 ImageNet_STD = (0.229, 0.224, 0.225)
