@@ -191,6 +191,7 @@ class MyDataModule(pl.LightningDataModule):
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
                                 'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet', #'ImageNet',
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
+        self.test_dataset_names = []
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
         if kwargs.get("debug",False):
