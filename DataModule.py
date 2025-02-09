@@ -182,7 +182,10 @@ class MyDataModule(pl.LightningDataModule):
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
                                 'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet', #'ImageNet',
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
-        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars']
+        
+        # self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars','ImageNet']
+        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211', 'hateful_memes','ImageNet','Caltech101']
+
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
         if kwargs.get("debug",False):
@@ -216,6 +219,8 @@ class MyDataModule(pl.LightningDataModule):
             self.train_dataset_dict={}
             self.train_text_names_dict={}
             self.plainnames_dict={}
+
+              #test part 
 
             if 'cifar100' in self.train_dataset_names:
                 self.train_dataset_dict.update({'cifar100': CIFAR100(root=self.imagenet_root, transform=self.preprocess, download=download, train=True)})
@@ -519,9 +524,7 @@ class MyDataModule(pl.LightningDataModule):
                     #     os.path.join(self.tinyimagenet_root, 'val'),
                     #     transform=preprocess224))
             
-            #concat datasets...
-                        
-
+            #concat datasets..                    
             texts_list = []
             for name, each in val_dataset_dict.items():
                 if hasattr(each, 'clip_prompts'):
@@ -552,12 +555,108 @@ class MyDataModule(pl.LightningDataModule):
             print(["{}, {}".format(idx,each) for idx,each in enumerate(val_dataset_dict.keys())])
             self.val_texts = texts_list
             self.val_datasets= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.val_datasets, self.val_texts)]
+ 
+ ##################test datasets##################
+     #self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211', 'hateful_memes','ImageNet','Caltech101']
+            test_dataset_dict = {}  
+            if 'SUN397' in self.test_dataset_names:
+                test_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(SUN397(root=self.imagenet_root,
+                    #                                 transform=preprocess224, download=True))
+           
             
+            if 'oxfordpet' in self.test_dataset_names:
+                test_dataset_dict.update({'oxfordpet': OxfordIIITPet(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(OxfordIIITPet(root=self.imagenet_root, split='test',
+                    #                                         transform=preprocess224, download=True))
+            if 'EuroSAT' in self.test_dataset_namess:
+                test_dataset_dict.update({'EuroSAT': EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
+                                                    # transform=preprocess224, download=True))
+           
+            if 'Country211' in self.test_dataset_names:
+                test_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
+                                                        # transform=preprocess224, download=True))
+                                            # transform=preprocess224, download=True))
+           #ft(root=self.imagenet_root, split='test',
+                                                            # transform=preprocess224, download=True))
+            if 'hateful_memes' in self.test_dataset_names:
+                test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
+                                                            transform=self.preprocess,download=download)})
+            if 'Caltech101'in self.test_dataset_names:
+                test_dataset_dict.update({'Caltech101': Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
+                     
+            if 'ImageNet' in self.test_dataset_names:
+                    #download imagenet
+                    #get imagenet files and download them
+                if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet")):
+                    URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
+                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    for url in URLS:
+                        print("Downloading",url)
+                        #use pysmartdl to download the files
+                        from pySmartDL import SmartDL
+                        obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=False)
+                        obj.start()
+                        if obj.isSuccessful():
+                            print("Downloaded: %s" % obj.get_dest())
+                        else:
+                            print("There were errors")
+                            print(obj.get_errors())
+                        #extract the files
+                        if url.endswith(".tar"):
+                            import tarfile
+                            with tarfile.open(obj.get_dest(), 'r') as tar_ref:
+                                tar_ref.extractall(self.imagenet_root)
+                        elif url.endswith(".tar.gz"):
+                            import tarfile
+                            with tarfile.open(obj.get_dest(), 'r:gz') as tar_ref:
+                                tar_ref.extractall(self.imagenet_root)
+                        else:
+                            print("Unknown file type")
+                        #load the dataset
+                    test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
+                      
+
       
-            
+            texts_list_test = []
+            for name, each in test_dataset_dict.items():
+                if hasattr(each, 'clip_prompts'):
+                    test_texts_tmp = each.clip_prompts
+                elif hasattr(each, 'classes'):
+
+                    test_class_names = each.classes
+                    if name == 'ImageNet' or name == 'tinyImageNet':
+                        test_folder2name = load_imagenet_folder2name('imagenet_classes_names.txt')
+                        test_new_class_names = []
+                        for class_name in test_class_names:
+                            if test_folder2name.get("class_name", None) is None:
+                                print(f"Class name {class_name} not found in imagenet_classes_names.txt")
+                            test_new_class_names.append(folder2name.get("class_name", class_name))
+                        test_class_names = new_class_names
+
+                    test_texts_tmp = self.refine_classname(test_class_names)
+                   
+                else:
+                     #print the names of the datasets that don't have classes
+                    print(f"Dataset {name} does not have classes")
+                    #and print it's attributes
+                    print(dir(each))
+                texts_list_test.append(test_texts_tmp)
+            self.test_datasets_1 = [each for each in test_dataset_dict.values()]
+            #print names for each dataset
+            print("Names for each dataset")
+            print(["{}, {}".format(idx,each) for idx,each in enumerate(test_dataset_dict.keys())])
+            self.test_texts = texts_list
+            self.test_datasets_1= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.test_datasets_1, self.test_texts)]
+ 
             
             split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
-            self.test_datasets = [split[0] for split in split_datasets]
+            self.test_datasets_2 = [split[0] for split in split_datasets]
+            self.test_dataset = self.test_datasets_2 + self.test_datasets_1
             print(len(self.test_datasets))  
             self.val_datasets = [split[1] for split in split_datasets]   
             print(len(self.val_datasets))

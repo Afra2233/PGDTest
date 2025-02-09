@@ -71,7 +71,7 @@ class myLightningModule(LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         self.test_criterion = torch.nn.CrossEntropyLoss(reduction="none")
         self.criterion_kl = nn.KLDivLoss(reduction="sum")
-        self.versioncriteria=self.args.get("keys_of_interest","learning_rate batch_size train_eps train_numsteps train_eps train_stepsize attack_type prompt_size add_prompt_size optimizer freeze_text".split())
+        self.versioncriteria=self.args.get("keys_of_interest","learning_rate batch_size train_eps train_numsteps train_eps attack_iters attack_type prompt_size add_prompt_size optimizer freeze_text".split())
         self.version="_".join([str(self.args.get(key,"")) for key in self.versioncriteria])
         print("Version is: ",self.version)
 
