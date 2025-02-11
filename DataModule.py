@@ -30,6 +30,8 @@ from typing import List
 from utils import to_rgb,load_imagenet_label2folder,refine_classname
 import torchvision.transforms as transforms
 import pytorch_lightning as pl
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
 
