@@ -648,7 +648,7 @@ class MyDataModule(pl.LightningDataModule):
                 texts_list_test.append(test_texts_tmp)
             self.test_datasets_1 = [each for each in test_dataset_dict.values()]
             #print names for each dataset
-            print("Names for each dataset")
+            print("Names for test each dataset")
             print(["{}, {}".format(idx,each) for idx,each in enumerate(test_dataset_dict.keys())])
             self.test_texts = texts_list
             self.test_datasets_1= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.test_datasets_1, self.test_texts)]
@@ -658,6 +658,7 @@ class MyDataModule(pl.LightningDataModule):
             self.test_datasets_2 = [split[0] for split in split_datasets]
             self.test_dataset = self.test_datasets_2 + self.test_datasets_1
             print(len(self.test_datasets))  
+          
             self.val_datasets = [split[1] for split in split_datasets]   
             print(len(self.val_datasets))
 
