@@ -186,7 +186,7 @@ class MyDataModule(pl.LightningDataModule):
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         
         # self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars','ImageNet']
-        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211', 'hateful_memes','ImageNet','Caltech101']
+        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211','ImageNet','Caltech101']
 
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
@@ -583,9 +583,9 @@ class MyDataModule(pl.LightningDataModule):
                                             # transform=preprocess224, download=True))
            #ft(root=self.imagenet_root, split='test',
                                                             # transform=preprocess224, download=True))
-            if 'hateful_memes' in self.test_dataset_names:
-                test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
-                                                            transform=self.preprocess,download=download)})
+            # if 'hateful_memes' in self.test_dataset_names:
+            #     test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
+            #                                                 transform=self.preprocess,download=download)})
             if 'Caltech101'in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech101': Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
                      
