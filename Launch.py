@@ -59,15 +59,15 @@ def train(config={
             precision=p,
             fast_dev_run=config.get("debug",False),
     )
-    # if not os.path.exists(os.path.join(modelSavedir,filename+".ckpt")):
+    if not os.path.exists(os.path.join(modelSavedir,filename+".ckpt")):
     
 
-    #         trainer.fit(model,Dataset)
-    # else:
+            trainer.fit(model,Dataset)
+    else:
             
-    #         model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
-    #         trainer.test(model,Dataset)
-    trainer.fit(model,Dataset)
+            model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
+            trainer.test(model,Dataset)
+    # trainer.fit(model,Dataset)
     # trainer.test(model,Dataset)
 
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
