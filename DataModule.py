@@ -19,7 +19,8 @@ from torch.utils.data import Dataset, DataLoader,default_collate
 #import the collate function from pytorch 
 # from torch.utils.data.dataloader import default_collate
 from utils import load_imagenet_folder2name
-from datasets import caltech, country211,eurosat,fgvc_aircraft,food101,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
+from datasets import country211,eurosat,fgvc_aircraft,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
+
 
 import os
 import torch
