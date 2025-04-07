@@ -16,10 +16,11 @@ from torchvision.datasets import *
 from typing import Any, Callable, Optional, Tuple
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader,default_collate
-#import the collate function from pytorch 
+#import the collate function from pytorch wfw
 # from torch.utils.data.dataloader import default_collate
 from utils import load_imagenet_folder2name
 from datasets import country211,eurosat,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
+#import the collate function from pytorch wfw
 
 
 import os
