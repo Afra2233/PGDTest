@@ -19,7 +19,7 @@ from torch.utils.data import Dataset, DataLoader,default_collate
 #import the collate function from pytorch wfw
 # from torch.utils.data.dataloader import default_collate
 from utils import load_imagenet_folder2name
-from datasets import country211,eurosat,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
+from datasets import caltech,country211,eurosat,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
 
 #import the collate function from pytorch wfw
 
@@ -573,16 +573,16 @@ class MyDataModule(pl.LightningDataModule):
            
             
             if 'oxfordpet' in self.test_dataset_names:
-                test_dataset_dict.update({'oxfordpet': OxfordIIITPet(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'oxfordpet': oxford_iiit_pet.OxfordIIITPet('./datasets/', split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(OxfordIIITPet(root=self.imagenet_root, split='test',
                     #                                         transform=preprocess224, download=True))
             if 'EuroSAT' in self.test_dataset_names:
-                test_dataset_dict.update({'EuroSAT': EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'EuroSAT': eurosat.EuroSAT('./datasets/', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
                                                     # transform=preprocess224, download=True))
            
             if 'Country211' in self.test_dataset_names:
-                test_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'Country211': country211.Country211('./datasets/', split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
                                                         # transform=preprocess224, download=True))
                                             # transform=preprocess224, download=True))
@@ -592,7 +592,7 @@ class MyDataModule(pl.LightningDataModule):
             #     test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
             #                                                 transform=self.preprocess,download=download)})
             if 'Caltech101'in self.test_dataset_names:
-                test_dataset_dict.update({'Caltech101': Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'Caltech101': caltech.Caltech101('./datasets/', target_type='category', transform=self.preprocess, download=download)})
                      
             if 'ImageNet' in self.test_dataset_names:
                     #download imagenet
