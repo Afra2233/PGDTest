@@ -190,7 +190,8 @@ class MyDataModule(pl.LightningDataModule):
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         
         # self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars','ImageNet']
-        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211','ImageNet','Caltech101']
+        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211','ImageNet']
+        # ,'Caltech101'
 
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
