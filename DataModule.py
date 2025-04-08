@@ -19,7 +19,7 @@ from torch.utils.data import Dataset, DataLoader,default_collate
 #import the collate function from pytorch wfw
 # from torch.utils.data.dataloader import default_collate
 from utils import load_imagenet_folder2name
-from datasets import country211,eurosat,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397,sgwgfw
+from datasets import country211,eurosat,flowers102,oxford_iiit_pet,pcam,stanford_cars,sun397
 
 #import the collate function from pytorch wfw
 
@@ -566,9 +566,10 @@ class MyDataModule(pl.LightningDataModule):
      #self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211', 'hateful_memes','ImageNet','Caltech101']
             test_dataset_dict = {}  
             if 'SUN397' in self.test_dataset_names:
-                test_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
+                # test_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(SUN397(root=self.imagenet_root,
                     #                                 transform=preprocess224, download=True))
+                test_dataset_dict.update({'SUN397':sun397.SUN397('./datasets/',transform=self.preprocess, download=download)})
            
             
             if 'oxfordpet' in self.test_dataset_names:
