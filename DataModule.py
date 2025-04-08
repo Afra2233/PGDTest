@@ -569,20 +569,20 @@ class MyDataModule(pl.LightningDataModule):
                 # test_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(SUN397(root=self.imagenet_root,
                     #                                 transform=preprocess224, download=True))
-                test_dataset_dict.update({'SUN397':sun397.SUN397('./datasets/',transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'SUN397':sun397.SUN397(root=self.imagenet_root,transform=self.preprocess, download=download)})
            
             
             if 'oxfordpet' in self.test_dataset_names:
-                test_dataset_dict.update({'oxfordpet': oxford_iiit_pet.OxfordIIITPet('./datasets/', split='test', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'oxfordpet': oxford_iiit_pet.OxfordIIITPet(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(OxfordIIITPet(root=self.imagenet_root, split='test',
                     #                                         transform=preprocess224, download=True))
             if 'EuroSAT' in self.test_dataset_names:
-                test_dataset_dict.update({'EuroSAT': eurosat.EuroSAT('./datasets/', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'EuroSAT': eurosat.EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
                                                     # transform=preprocess224, download=True))
            
             if 'Country211' in self.test_dataset_names:
-                test_dataset_dict.update({'Country211': country211.Country211('./datasets/', split='test', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'Country211': country211.Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
                                                         # transform=preprocess224, download=True))
                                             # transform=preprocess224, download=True))
@@ -592,7 +592,7 @@ class MyDataModule(pl.LightningDataModule):
             #     test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
             #                                                 transform=self.preprocess,download=download)})
             if 'Caltech101'in self.test_dataset_names:
-                test_dataset_dict.update({'Caltech101': caltech.Caltech101('./datasets/', target_type='category', transform=self.preprocess, download=download)})
+                test_dataset_dict.update({'Caltech101': caltech.Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
                      
             if 'ImageNet' in self.test_dataset_names:
                     #download imagenet
