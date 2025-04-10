@@ -190,7 +190,7 @@ class MyDataModule(pl.LightningDataModule):
                                  'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
         
         # self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars','ImageNet']
-        self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211']
+        self.test_dataset_names = ['ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
         # ,'Caltech101'，ImageNet
 
         self.batch_size = batch_size
@@ -600,10 +600,11 @@ class MyDataModule(pl.LightningDataModule):
                     #download imagenet
                     #get imagenet files and download them
                 if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet")):
-                    URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    # URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
                     for url in URLS:
                         print("Downloading",url)
                         #use pysmartdl to download the files
