@@ -309,15 +309,16 @@ class MyDataModule(pl.LightningDataModule):
                 #
                 if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet")):
                     os.makedirs(os.path.join(self.imagenet_root,"ImageNet"),exist_ok=True)
-                    URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
-                    'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    # URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
+                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
+                    URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
                     for url in URLS:
                         print("Downloading",url)
                         #use pysmartdl to download the files
                         from pySmartDL import SmartDL
-                        obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=False)
+                        obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=True)
                         obj.start()
                         if obj.isSuccessful():
                             print("Downloaded: %s" % obj.get_dest())
