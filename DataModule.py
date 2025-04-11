@@ -600,11 +600,11 @@ class MyDataModule(pl.LightningDataModule):
                     #download imagenet
                     #get imagenet files and download them
                 if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet")):
-                    # URLS=['http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_train.tar',
-                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_val.tar',
-                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_img_test.tar',
-                    # 'http://www.image-net.org/challenges/LSVRC/2012/nnoupb/ILSVRC2012_devkit_t12.tar.gz']
-                    URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
+                    URLS=['https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train.tar',
+                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train_t3.tar',
+                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar',
+                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_test_v10102019.tar']
+                    # URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
                     for url in URLS:
                         print("Downloading",url)
                         #use pysmartdl to download the files
