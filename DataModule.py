@@ -599,7 +599,7 @@ class MyDataModule(pl.LightningDataModule):
             if 'ImageNet' in self.test_dataset_names:
                     #download imagenet
                     #get imagenet files and download them
-                if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet")):
+                if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet1K")):
                     URLS=['https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train.tar',
                     'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train_t3.tar',
                     'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar',
