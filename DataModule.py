@@ -629,7 +629,7 @@ class MyDataModule(pl.LightningDataModule):
                             print("Unknown file type")
                         #load the dataset
                     test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
-                      
+                      test
 
       
             texts_list_test = []
