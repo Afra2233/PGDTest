@@ -599,37 +599,37 @@ class MyDataModule(pl.LightningDataModule):
             if 'ImageNet' in self.test_dataset_names:
                     #download imagenet
                     #get imagenet files and download them
-                if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet1K")):
-                    URLS=['https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train.tar',
-                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train_t3.tar',
-                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar',
-                    'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_test_v10102019.tar']
-                    # URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
-                    for url in URLS:
-                        print("Downloading",url)
-                        #use pysmartdl to download the files
-                        from pySmartDL import SmartDL
-                        obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=False)
-                        obj.start()
-                        if obj.isSuccessful():
-                            print("Downloaded: %s" % obj.get_dest())
-                        else:
-                            print("There were errors")
-                            print(obj.get_errors())
-                        #extract the files
-                        if url.endswith(".tar"):
-                            import tarfile
-                            with tarfile.open(obj.get_dest(), 'r') as tar_ref:
-                                tar_ref.extractall(self.imagenet_root)
-                        elif url.endswith(".tar.gz"):
-                            import tarfile
-                            with tarfile.open(obj.get_dest(), 'r:gz') as tar_ref:
-                                tar_ref.extractall(self.imagenet_root)
-                        else:
-                            print("Unknown file type")
-                        #load the dataset
-                    test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
-                      test
+                # if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet1K")):
+                #     URLS=['https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train.tar',
+                #     'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train_t3.tar',
+                #     'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar',
+                #     'https://www.image-net.org/data/ILSVRC/2012/ILSVRC2012_img_test_v10102019.tar']
+                #     # URLS = ['https://www.image-net.org/data/imagenet10k_eccv2010.tar']
+                #     for url in URLS:
+                #         print("Downloading",url)
+                #         #use pysmartdl to download the files
+                #         from pySmartDL import SmartDL
+                #         obj=SmartDL(url,os.path.join(self.imagenet_root,url.split('/')[-1]),progress_bar=False)
+                #         obj.start()
+                #         if obj.isSuccessful():
+                #             print("Downloaded: %s" % obj.get_dest())
+                #         else:
+                #             print("There were errors")
+                #             print(obj.get_errors())
+                #         #extract the files
+                #         if url.endswith(".tar"):
+                #             import tarfile
+                #             with tarfile.open(obj.get_dest(), 'r') as tar_ref:
+                #                 tar_ref.extractall(self.imagenet_root)
+                #         elif url.endswith(".tar.gz"):
+                #             import tarfile
+                #             with tarfile.open(obj.get_dest(), 'r:gz') as tar_ref:
+                #                 tar_ref.extractall(self.imagenet_root)
+                #         else:
+                #             print("Unknown file type")
+                #         #load the dataset
+                test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
+                    
 
       
             texts_list_test = []
