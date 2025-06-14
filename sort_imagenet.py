@@ -12,7 +12,8 @@ output_dir ="/nobackup/projects/bdlan08/jzhang89/PGDTest/data/imagenet1k/val/sor
 with open(ground_truth_dir,'r') as f:
     ground_truth = [int(x.strip()) for x in  f.readlines()]
 
-with open(jason_dir,'r') as f :
+with open(json_dir,'r') as f :
+
     class_index = json.load(f)
 
 index_id ={int(k):v[0] for k,v in class_index.items()}
@@ -23,8 +24,7 @@ os.makedirs(output_dir, exist_ok=True)
 
 for idx, (img_file,label) in enumerate (zip(img_files,ground_truth)):
     synset =index_id[label]
-    # synset_dir = os.path.join(output_dir, synset)
-    # os.makedirs(output_dir, exist_ok=True)
+   
     synset_dir = os.path.join(output_dir, synset)
     os.makedirs(synset_dir, exist_ok=True)
 
@@ -36,8 +36,6 @@ for idx, (img_file,label) in enumerate (zip(img_files,ground_truth)):
         print(f"Processed {idx + 1} images...")
 
 print("Done!")
-
-# index_id = [class_index[str(i)[0]] for i in range(len(class_index))]
 
 
 
