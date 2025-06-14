@@ -10,7 +10,7 @@ output_dir ="/nobackup/projects/bdlan08/jzhang89/PGDTest/data/imagenet1k/val/sor
 
 ## mapping load ##
 with open(ground_truth_dir,'r') as f:
-    ground_truth = [int(x.strip()) -1 for x in  f.readlines()]
+    ground_truth = [int(x.strip()) for x in  f.readlines()]
 
 with open(json_dir,'r') as f :
 
