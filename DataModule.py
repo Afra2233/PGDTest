@@ -597,6 +597,15 @@ class MyDataModule(pl.LightningDataModule):
                 test_dataset_dict.update({'Caltech101': caltech.Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
                      
             if 'ImageNet' in self.test_dataset_names:
+                root_imagenet = os.path.join(self.imagenet_root, 'imagenet1k', 'val', 'sorted_images')
+
+                test_dataset_dict.update({
+                    'ImageNet': datasets.ImageFolder(
+                        root= root_imagenet,
+                        transform=self.preprocess
+                    )
+                })
+
                     #download imagenet
                     #get imagenet files and download them
                 # if not os.path.exists(os.path.join(self.imagenet_root,"ImageNet1K")):
@@ -628,7 +637,7 @@ class MyDataModule(pl.LightningDataModule):
                 #         else:
                 #             print("Unknown file type")
                 #         #load the dataset
-                test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
+                # test_dataset_dict.update({'ImageNet': ImageFolder(os.path.join(self.imagenet_root, 'val'), transform=preprocess224)})
                     
 
       
