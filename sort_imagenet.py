@@ -30,8 +30,9 @@ for idx, (img_file,label) in enumerate (zip(img_files,ground_truth)):
 
     
     src_path = os.path.join(val_dir, img_file)
-    dst_path = os.path.join(output_dir, img_file)
-    shutil.move(val_dir, dst_path) 
+    dst_path = os.path.join(synset_dir, img_file)
+    
+    shutil.move(src_path, dst_path) 
     if (idx + 1) % 1000 == 0:
         print(f"Processed {idx + 1} images...")
 
