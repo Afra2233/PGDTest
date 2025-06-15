@@ -599,12 +599,8 @@ class MyDataModule(pl.LightningDataModule):
             if 'ImageNet' in self.test_dataset_names:
                 root_imagenet = os.path.join(self.imagenet_root, 'imagenet1k', 'val', 'sorted_images')
 
-                test_dataset_dict.update({
-                    'ImageNet': datasets.ImageFolder(
-                        root= root_imagenet,
-                        transform=self.preprocess
-                    )
-                })
+                
+                test_dataset_dict.update({'ImageNet': ImageFolder(root= root_imagenet, transform=preprocess224)})
 
                     #download imagenet
                     #get imagenet files and download them
