@@ -10,7 +10,7 @@ from models.trainPGD import myLightningModule
 
 def train(config={
         "batch_size":64, # ADD MODEL ARGS HERE
-         "codeversion":"-1",
+        "codeversion":"-1",
     },dire=None,devices=None,accelerator=None,Dataset=None,logtool=None):
 
 
@@ -59,16 +59,17 @@ def train(config={
             precision=p,
             fast_dev_run=config.get("debug",False),
     )
-    if not os.path.exists(os.path.join(modelSavedir,filename+".ckpt")):
+    # if not os.path.exists(os.path.join(modelSavedir,filename+".ckpt")):
     
 
-            trainer.fit(model,Dataset)
-    else:
+    #         trainer.fit(model,Dataset)
+    # else:
             
-            model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
-            trainer.test(model,Dataset)
+    #         model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
+    #         trainer.test(model,Dataset)
+
     # trainer.fit(model,Dataset)
-    # trainer.test(model,Dataset)
+    trainer.test(model,Dataset)
 
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
