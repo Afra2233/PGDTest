@@ -559,7 +559,7 @@ class MyDataModule(pl.LightningDataModule):
                 texts_list.append(texts_tmp)
             self.val_datasets = [each for each in val_dataset_dict.values()]
             #print names for each dataset
-            print("Names for each dataset")
+            print("Names for each val dataset")
             print(["{}, {}".format(idx,each) for idx,each in enumerate(val_dataset_dict.keys())])
             self.val_texts = texts_list
             self.val_datasets= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.val_datasets, self.val_texts)]
@@ -670,8 +670,8 @@ class MyDataModule(pl.LightningDataModule):
             
             split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
             self.test_datasets_2 = [split[0] for split in split_datasets]
-            self.test_dataset = self.test_datasets_2 + self.test_datasets_1
-            print(len(self.test_dataset)) 
+            self.test_datasets = self.test_datasets_2 + self.test_datasets_1
+            print(len(self.test_datases)) 
             print("Names for test each dataset")
             print(["{}, {}".format(idx,each) for idx,each in enumerate(test_dataset_dict.keys())]) 
           
