@@ -671,7 +671,7 @@ class MyDataModule(pl.LightningDataModule):
             split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
             self.test_datasets_2 = [split[0] for split in split_datasets]
             self.test_datasets = self.test_datasets_2 + self.test_datasets_1
-            print(len(self.test_datases)) 
+            print(len(self.test_datasets)) 
             print("Names for test each dataset")
             print(["{}, {}".format(idx,each) for idx,each in enumerate(test_dataset_dict.keys())]) 
           
