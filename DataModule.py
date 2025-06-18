@@ -182,15 +182,23 @@ class MyDataModule(pl.LightningDataModule):
         self.imagenet_root = imagenet_root
         self.tinyimagenet_root = tinyimagenet_root if tinyimagenet_root is not None else self.imagenet_root
         self.datasetname = dataset    #not used any more! 
-        self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
-                                 'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
-                                'Caltech256', 'PCAM'] #StanfordCars --url; no longer valid. 'EuroSAT' --ssl error 'Caltech101'- md5? 'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
-        self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
-                                'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet', #'ImageNet',
-                                 'PCAM']   #'tinyImageNet', 'ImageNet', oxfordpet' --labels not indexable
-        
-        # self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech101', 'StanfordCars','ImageNet']
-        self.test_dataset_names = ['ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
+        #####################################################################################################################
+        # self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
+        #                          'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
+        #                         'Caltech256', 'PCAM'] 
+        # self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['cifar10', 'cifar100', 'STL10', 'Food101',
+        #                         'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet', 
+        #                          'PCAM']   
+       #####################################################################################################################
+
+        self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet'] 
+        self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet']
+                                 
+                                 
+       
+        self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
+                               'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
+                                'Caltech256', 'PCAM''ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211','hateful_memes']
         # ,'Caltech101'，ImageNet
 
         self.batch_size = batch_size
@@ -428,7 +436,7 @@ class MyDataModule(pl.LightningDataModule):
                 val_dataset_dict.update({'EuroSAT': EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
                                                     # transform=preprocess224, download=True))
-           
+            
             if 'Country211' in self.val_dataset_names:
                 val_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
@@ -567,6 +575,37 @@ class MyDataModule(pl.LightningDataModule):
  ##################test datasets##################
      #self.test_dataset_names = ['SUN397','oxfordpet', 'EuroSAT','Caltech211', 'hateful_memes','ImageNet','Caltech101']
             test_dataset_dict = {}  
+            # if 'Caltech256' in self.train_dataset_names:
+            #     self.train_dataset_dict.update({'Caltech256': Caltech256(root=self.imagenet_root, split=["test"],transform=self.preprocess, download=download)})
+            #     class_names =self.refine_classname(self.test_dataset_dict['Caltech256'].categories)
+            #     self.plainnames_dict.update({'Caltech256':self.test_dataset_dict['Caltech256'].categories})
+            #     self.train_text_names_dict.update({'Caltech256':class_names})
+            if 'cifar10' in self.test_dataset_names:
+                test_dataset_dict.update({'cifar10': CIFAR10(root=self.imagenet_root, transform=self.preprocess, download=download, train=True)})
+            if 'cifar100' in self.test_dataset_names:
+                test_dataset_dict.update({'cifar100': CIFAR100(root=self.imagenet_root, transform=self.preprocess, download=download, train=False)})
+          
+            if 'STL10' in self.test_dataset_names:
+                test_dataset_dict.update({'STL10': STL10(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                   
+            #                                 transform=preprocess224, download=True))
+           
+            if 'Food101' in self.test_dataset_names: 
+                test_dataset_dict.update({'Food101': Food101(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})  ##is it this one that makes it crash> 
+                    # val_dataset_list.append(Food101(root=self.imagenet_root, split='test',
+                    #                                 transform=preprocess224, download=True))
+            
+            if 'dtd' in self.test_dataset_names:
+                test_dataset_dict.update({'dtd': DTD(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(DTD(root=self.imagenet_root, split='test',
+                                                # transform=preprocess224, download=True))
+            if 'fgvc_aircraft' in self.test_dataset_names:
+                test_dataset_dict.update({'fgvc_aircraft': FGVCAircraft(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
+                    # val_dataset_list.append(FGVCAircraft(root=self.imagenet_root, split='test',
+                                                            # transform=preprocess224, download=True))
+            if 'hateful_memes' in self.test_dataset_names:
+                test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
+                                                            transform=self.preprocess,download=download)})
             if 'SUN397' in self.test_dataset_names:
                 # test_dataset_dict.update({'SUN397': SUN397(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(SUN397(root=self.imagenet_root,
