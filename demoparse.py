@@ -155,7 +155,7 @@ class parser(baseparser):
         api = wandb.Api()
 
         try:
-            user = api.viewer().username
+            user = api.viewer.username
             print(f"[INFO] Current W&B API logged-in user: {user}")
 
             print(f"[INFO] Listing projects under entity/team '{entity}':")
@@ -170,7 +170,8 @@ class parser(baseparser):
 
     def generate_wandb_trials(self,entity,project):
         api = wandb.Api()
-        runs = api.runs(entity + "/" + project)
+        # runs = api.runs(entity + "/" + project)
+        runs = api.runs(entity=entity, project=project)
         print("checking prior runs")
         for run in tqdm(runs):
             config=run.config
