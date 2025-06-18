@@ -170,8 +170,8 @@ class parser(baseparser):
 
     def generate_wandb_trials(self,entity,project):
         api = wandb.Api()
-        # runs = api.runs(entity + "/" + project)
-        runs = api.runs(entity=entity, project=project)
+        runs = api.runs(entity + "/" + project)
+        
         print("checking prior runs")
         for run in tqdm(runs):
             config=run.config
