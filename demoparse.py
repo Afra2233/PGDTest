@@ -149,9 +149,27 @@ class parser(baseparser):
         super().__init__( *args,strategy=strategy, add_help=False,**kwargs) # or random search
         self.run_configs=set()
         self.keys=set()
-    def generate_wandb_trials(self,entity,project):
+ 
+
+    def check_wandb_connection(entity):
         api = wandb.Api()
 
+        try:
+            user = api.viewer().username
+            print(f"[INFO] Current W&B API logged-in user: {user}")
+
+            print(f"[INFO] Listing projects under entity/team '{entity}':")
+            projects = api.projects(entity=entity)
+            for p in projects:
+                print(f"  - {p.name}")
+
+            print(f"[INFO] Finished listing projects.")
+        except Exception as e:
+            print("[ERROR] W&B connection or permission failed!")
+            print(e)
+
+    def generate_wandb_trials(self,entity,project):
+        api = wandb.Api()
         runs = api.runs(entity + "/" + project)
         print("checking prior runs")
         for run in tqdm(runs):

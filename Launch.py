@@ -203,6 +203,9 @@ if __name__ == '__main__':
     from subprocess import call
 
     myparser=parser()
+
+    check_wandb_connection(entity="LinearProbs")
+    
     hyperparams = myparser.parse_args()
 
     defaultConfig=hyperparams.__dict__
@@ -225,7 +228,7 @@ if __name__ == '__main__':
 
     
     else:
-        trials=myparser.generate_wandb_trials(entity="Jieyu-zhang2025",project="TestPlay")
+        trials=myparser.generate_wandb_trials(entity="LinearProbs",project="TestPlay")
 
         for i,trial in enumerate(trials):
             command=SlurmRun(trial)
