@@ -150,7 +150,7 @@ class parser(baseparser):
         self.run_configs=set()
         self.keys=set()
  
-
+    @staticmethod
     def check_wandb_connection(entity):
         api = wandb.Api()
 
