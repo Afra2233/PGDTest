@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     
     else:
-        trials=myparser.generate_wandb_trials(entity="LinearProbs",project="TestPlay")
+        trials=myparser.generate_wandb_trials(entity="jieyu-zhang2025/LinearProbs",project="TestPlay")
 
         for i,trial in enumerate(trials):
             command=SlurmRun(trial)
