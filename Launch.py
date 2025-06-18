@@ -68,8 +68,8 @@ def train(config={
     #         model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
     #         trainer.test(model,Dataset)
 
-    # trainer.fit(model,Dataset)
-    trainer.test(model,Dataset)
+    trainer.fit(model,Dataset)
+    # trainer.test(model,Dataset)
 
 #### This is a wrapper to make sure we log with Weights and Biases, You'll need your own user for this.
 def wandbtrain(config=None,dir=None,devices=None,accelerator=None,Dataset=None):
