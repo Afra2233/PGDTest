@@ -204,8 +204,8 @@ if __name__ == '__main__':
 
     myparser=parser()
 
-    check_wandb_connection(entity="LinearProbs")
-    
+    myparser.check_wandb_connection(entity="LinearProbs")
+
     hyperparams = myparser.parse_args()
 
     defaultConfig=hyperparams.__dict__
