@@ -35,7 +35,7 @@ def train(config={
     callbacks=[
         TQDMProgressBar(),
         # EarlyStopping(monitor="train_loss", mode="min",patience=10,check_finite=True,stopping_threshold=0.001),
-        ModelCheckpoint(monitor="train_loss", mode="min",dirpath=modelSavedir,filename=filename,save_top_k=1,save_last=True,save_weights_only=True),
+        ModelCheckpoint(monitor="train_loss", mode="min",dirpath=modelSavedir,filename=filename,save_top_k=1,save_last=True,save_weights_only=False),
     ]
     p=config['precision']
     if isinstance(p,str):
