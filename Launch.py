@@ -66,7 +66,7 @@ def train(config={
     else:
             
             model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
-            trainer.test(model,Dataset)
+            trainer.test(model,dataloaders=Dataset.test_dataloader())
 
     # trainer.fit(model,Dataset)
     # trainer.test(model,Dataset)
@@ -159,7 +159,7 @@ def SlurmRun(trialconfig):
                                                         
     ])
     script_name= os.path.realpath(sys.argv[0]) #Find this scripts name...
-    trialArgs=__get_hopt_params(trialconfig)
+    trialArgs=__get_hopt_params(trialconfig) 
     
 
     sub_commands.append('srun {} {} {}'.format(comm, script_name,trialArgs))
@@ -197,7 +197,7 @@ def __get_hopt_params(trial):
 
 def __should_escape(v):
     v = str(v)
-    return '[' in v or ';' in v or ' ' in v
+    return '[' in v or ';' in v or ' ' in v 
 if __name__ == '__main__':
     from demoparse import parser
     from subprocess import call

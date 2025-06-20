@@ -626,11 +626,42 @@ class MyDataModule(pl.LightningDataModule):
                 test_dataset_dict.update({'Country211': country211.Country211(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(Country211(root=self.imagenet_root, split='test',
                                                         # transform=preprocess224, download=True))
-                                            # transform=preprocess224, download=True))
-            #ft(root=self.imagenet_root, split='test',
-                                                            # transform=preprocess224, download=True))
-            # if 'hateful_memes' in self.test_dataset_names:
-            #     test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
+            if 'tinyImageNet' in self.test_dataset_names:
+                test_dataset_dict.update({'tinyImageNet': ImageFolder(
+                    os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'val'), 
+                    transform=preprocess224)})
+
+            if 'Caltech256' in self.test_dataset_names:
+                test_dataset_dict.update({'Caltech256': Caltech256(
+                    root=self.imagenet_root, 
+                    split=["test"], 
+                    transform=self.preprocess, 
+                    download=download)})
+
+            if 'PCAM' in self.test_dataset_names:
+                test_dataset_dict.update({'PCAM': pcam.PCAM(
+                    root=self.imagenet_root, 
+                    split='test', 
+                    transform=self.preprocess, 
+                    download=download)})
+
+            if 'Caltech211' in self.test_dataset_names:
+                test_dataset_dict.update({'Caltech211': country211.Country211(
+                    root=self.imagenet_root, 
+                    split='test', 
+                    transform=self.preprocess, 
+                    download=download)})
+
+            if 'flowers102' in self.test_dataset_names:
+                test_dataset_dict.update({'flowers102': flowers102.Flowers102(
+                    root=self.imagenet_root, 
+                    split='test', 
+                    transform=self.preprocess, 
+                    download=download)})                # transform=preprocess224, download=True))
+                        #ft(root=self.imagenet_root, split='test',
+                                                                        # transform=preprocess224, download=True))
+                        # if 'hateful_memes' in self.test_dataset_names:
+                        #     test_dataset_dict.update({'hateful_memes': HatefulMemes(root=self.imagenet_root, splits=['test_seen', 'test_unseen'],
             #                                                 transform=self.preprocess,download=download)})
             if 'Caltech101'in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech101': caltech.Caltech101(root=self.imagenet_root, target_type='category', transform=self.preprocess, download=download)})
