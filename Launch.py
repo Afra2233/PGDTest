@@ -66,6 +66,7 @@ def train(config={
     else:
             
             model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
+            Dataset.setup(stage='test')
             trainer.test(model,dataloaders=Dataset.test_dataloader())
 
     # trainer.fit(model,Dataset)
