@@ -631,12 +631,12 @@ class MyDataModule(pl.LightningDataModule):
                     os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'test'), 
                     transform=preprocess224)})
 
-            if 'Caltech256' in self.test_dataset_names:
-                test_dataset_dict.update({'Caltech256': Caltech256(
-                    root=self.imagenet_root,  
-                    transform=self.preprocess, 
+            # if 'Caltech256' in self.test_dataset_names:
+            #     test_dataset_dict.update({'Caltech256': Caltech256(
+            #         root=self.imagenet_root,  
+            #         transform=self.preprocess, 
                    
-                    download=True)})
+            #         download=True)})
 
             if 'PCAM' in self.test_dataset_names:
                 test_dataset_dict.update({'PCAM': pcam.PCAM(
