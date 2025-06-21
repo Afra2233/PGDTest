@@ -628,35 +628,36 @@ class MyDataModule(pl.LightningDataModule):
                                                         # transform=preprocess224, download=True))
             if 'tinyImageNet' in self.test_dataset_names:
                 test_dataset_dict.update({'tinyImageNet': ImageFolder(
-                    os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'val'), 
+                    os.path.join(self.tinyimagenet_root,'tiny-imagenet-200', 'test'), 
                     transform=preprocess224)})
 
             if 'Caltech256' in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech256': Caltech256(
                     root=self.imagenet_root,  
                     transform=self.preprocess, 
-                    download=download)})
+                   
+                    download=True)})
 
             if 'PCAM' in self.test_dataset_names:
                 test_dataset_dict.update({'PCAM': pcam.PCAM(
                     root=self.imagenet_root, 
                     split='test', 
                     transform=self.preprocess, 
-                    download=download)})
+                    download=True)})
 
             if 'Caltech211' in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech211': country211.Country211(
                     root=self.imagenet_root, 
                     split='test', 
                     transform=self.preprocess, 
-                    download=download)})
+                    download=True)})
 
             if 'flowers102' in self.test_dataset_names:
                 test_dataset_dict.update({'flowers102': flowers102.Flowers102(
                     root=self.imagenet_root, 
                     split='test', 
                     transform=self.preprocess, 
-                    download=download)})                # transform=preprocess224, download=True))
+                    download=True)})                # transform=preprocess224, download=True))
                         #ft(root=self.imagenet_root, split='test',
                                                                         # transform=preprocess224, download=True))
                         # if 'hateful_memes' in self.test_dataset_names:
