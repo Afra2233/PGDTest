@@ -291,10 +291,13 @@ class MyDataModule(pl.LightningDataModule):
             #     class_names =self.refine_classname(self.train_dataset_dict['flowers102'].)
             #     self.train_text_names_dict.update({'flowers102':[self.template.format(label) for label in class_names]})
             if 'Country211' in self.train_dataset_names:
-                self.train_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='train', transform=self.preprocess, download=download)})
-                class_names =self.refine_classname(self.train_dataset_dict['Country211'].classes)
-                self.plainnames_dict.update({'Country211':self.train_dataset_dict['Country211'].classes})
-                self.train_text_names_dict.update({'Country211':class_names})
+                try:
+                    self.train_dataset_dict.update({'Country211': Country211(root=self.imagenet_root, split='train', transform=self.preprocess, download=download)})
+                    class_names =self.refine_classname(self.train_dataset_dict['Country211'].classes)
+                    self.plainnames_dict.update({'Country211':self.train_dataset_dict['Country211'].classes})
+                    self.train_text_names_dict.update({'Country211':class_names})
+                except Exception as e:
+                    print(f"[WARNING] Could not load Caltech211: {e}")
             if 'dtd' in self.train_dataset_names:
                 self.train_dataset_dict.update({'dtd': DTD(root=self.imagenet_root, split='train', transform=self.preprocess, download=download)})
                 class_names =self.refine_classname(self.train_dataset_dict['dtd'].classes)
