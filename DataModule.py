@@ -633,8 +633,7 @@ class MyDataModule(pl.LightningDataModule):
 
             if 'Caltech256' in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech256': Caltech256(
-                    root=self.imagenet_root, 
-                    split=["test"], 
+                    root=self.imagenet_root,  
                     transform=self.preprocess, 
                     download=download)})
 
