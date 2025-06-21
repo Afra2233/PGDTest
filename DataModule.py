@@ -721,7 +721,7 @@ class MyDataModule(pl.LightningDataModule):
                             if test_folder2name.get("class_name", None) is None:
                                 print(f"Class name {class_name} not found in imagenet_classes_names.txt")
                             test_new_class_names.append(folder2name.get("class_name", class_name))
-                        test_class_names = new_class_names
+                        test_class_names =test_new_class_names
 
                     test_texts_tmp = self.refine_classname(test_class_names)
                    
@@ -734,7 +734,7 @@ class MyDataModule(pl.LightningDataModule):
             self.test_datasets_1 = [each for each in test_dataset_dict.values()]
             #print names for each dataset
         
-            self.test_texts = texts_list
+            self.test_texts = texts_list_test
             self.test_datasets_1= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.test_datasets_1, self.test_texts)]
  
             
