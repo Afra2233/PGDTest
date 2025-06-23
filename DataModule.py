@@ -620,8 +620,8 @@ class MyDataModule(pl.LightningDataModule):
                 test_dataset_dict.update({'oxfordpet': oxford_iiit_pet.OxfordIIITPet(root=self.imagenet_root, split='test', transform=self.preprocess, download=download)})
                     # val_dataset_list.append(OxfordIIITPet(root=self.imagenet_root, split='test',
                     #                                         transform=preprocess224, download=True))
-            if 'EuroSAT' in self.test_dataset_names:
-                test_dataset_dict.update({'EuroSAT': eurosat.EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
+            #if 'EuroSAT' in self.test_dataset_names:
+                #test_dataset_dict.update({'EuroSAT': eurosat.EuroSAT(root=self.imagenet_root, transform=self.preprocess, download=download)})
                     # val_dataset_list.append(EuroSAT(root=self.imagenet_root,
                                                     # transform=preprocess224, download=True))
            
