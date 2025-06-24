@@ -825,7 +825,13 @@ class myLightningModule(LightningModule):
         images, target,text = batch
        
         images = images.clone().detach().requires_grad_(True)
-        text=text.squeeze(1).clone().detach()
+
+        if isinstance(text, list):
+            text = torch.stack(text, dim=0)
+        if text.dim() == 2:
+            text = text.unsqueeze(1)
+        text = text.squeeze(1).clone().detach()
+        # text=text.squeeze(1).clone().detach()
         target=target.clone().detach()
         # print(images.requires_grad)  
         # self.model.train()
