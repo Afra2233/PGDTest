@@ -194,11 +194,11 @@ class MyDataModule(pl.LightningDataModule):
         self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet'] 
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet']
                                  
-        # self.test_dataset_names = ['tinyImageNet']                     
+        self.test_dataset_names = ['tinyImageNet']                     
        
-        self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
-                               'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
-                                'Caltech256', 'PCAM''ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
+        # self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
+        #                        'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
+        #                         'Caltech256', 'PCAM''ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
         # ,'Caltech101'，ImageNet
 
         self.batch_size = batch_size
@@ -739,16 +739,24 @@ class MyDataModule(pl.LightningDataModule):
         
             self.test_texts = texts_list_test
             self.test_datasets_1= [CustomtorchVisionDataset2(dataset, texts,self.default) for dataset, texts in zip(self.test_datasets_1, self.test_texts)]
- 
-            
-            split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
-            self.test_datasets_2 = [split[0] for split in split_datasets]
-            self.test_datasets = self.test_datasets_2 + self.test_datasets_1
+
+            if stage == 'test':
+                self.test_datasets = self.test_datasets_1
+            else:
+                split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
+                self.test_datasets_2 = [split[0] for split in split_datasets]
+                self.test_datasets = self.test_datasets_2 + self.test_datasets_1
+                self.val_datasets = [split[1] for split in split_datasets]
+
+                        
+            # split_datasets = [torch.utils.data.random_split(v, [int(0.95 * len(v)), len(v) - int(0.95 * len(v))]) for v in self.val_datasets]
+            # self.test_datasets_2 = [split[0] for split in split_datasets]
+            # self.test_datasets = self.test_datasets_2 + self.test_datasets_1
             print(len(self.test_datasets)) 
             print("Names for test each dataset")
             print(["{}, {}".format(idx,each) for idx,each in enumerate(test_dataset_dict.keys())]) 
           
-            self.val_datasets = [split[1] for split in split_datasets]   
+            # self.val_datasets = [split[1] for split in split_datasets]   
             print(len(self.val_datasets))
 
 
