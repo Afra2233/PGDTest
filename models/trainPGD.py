@@ -782,399 +782,222 @@ class myLightningModule(LightningModule):
             delta.grad.zero_()
         return X,text_tokens+delta
     
-    def on_test_epoch_start(self):
-        self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
-        self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
+    # def on_test_epoch_start(self):
+    #     self.mu_img = torch.tensor((0.485, 0.456, 0.406)).view(3,1,1).to(self.device)
+    #     self.std_img = torch.tensor((0.229, 0.224, 0.225)).view(3,1,1).to(self.device)
         
-        self.test_epoch_end_called=False
-        self.test_cleanresults=defaultdict(queue.Queue)
-        self.test_attackedresults=defaultdict(queue.Queue)
-        self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
-        if self.args.get("test_attack_type","pgd")=="pgd":
-            self.testattack=self.attack_batch_pgd
-        elif self.args.get("test_attack_type","pgd")=="CW":
-            self.testattack= self.attack_CW
-        elif self.args.get("test_attack_type","pgd")=="text":
-            self.testattack= self.attack_text_pgd
-        elif self.args.get("test_attack_type","pgd")=="autoattack":
-            self.testattack=self.autoattack
-        elif self.args.get("test_attack_type","pgd")=="Noattack":
-            self.testattack=self.no_attack
-        else:
-            raise ValueError 
-        #enable grad through our model to allow the attacks to work.
-        # with torch.set_grad_enabled(True):
-        #    self.model.eval() 
+    #     self.test_epoch_end_called=False
+    #     self.test_cleanresults=defaultdict(queue.Queue)
+    #     self.test_attackedresults=defaultdict(queue.Queue)
+    #     self.test_data_loader_count = len(self.trainer.datamodule.test_dataloader())
+    #     if self.args.get("test_attack_type","pgd")=="pgd":
+    #         self.testattack=self.attack_batch_pgd
+    #     elif self.args.get("test_attack_type","pgd")=="CW":
+    #         self.testattack= self.attack_CW
+    #     elif self.args.get("test_attack_type","pgd")=="text":
+    #         self.testattack= self.attack_text_pgd
+    #     elif self.args.get("test_attack_type","pgd")=="autoattack":
+    #         self.testattack=self.autoattack
+    #     elif self.args.get("test_attack_type","pgd")=="Noattack":
+    #         self.testattack=self.no_attack
+    #     else:
+    #         raise ValueError 
+    #     #enable grad through our model to allow the attacks to work.
+    #     # with torch.set_grad_enabled(True):
+    #     #    self.model.eval() 
 
-        #    self.model_ori.eval()
-        self.test_alphas = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
-        self.test_epsilons = torch.tensor([1/255, 2/255, 4/255,8/255],device=self.device)
-        self.test_numsteps = torch.tensor([5, 10],device=self.device)
+    #     #    self.model_ori.eval()
+    #     self.test_alphas = torch.tensor([1/255, 2/255, 4/255, 8/255],device=self.device)
+    #     self.test_epsilons = torch.tensor([1/255, 2/255, 4/255,8/255],device=self.device)
+    #     self.test_numsteps = torch.tensor([5, 10],device=self.device)
        
-        self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
-        self.save_result_worker_thread.start()
+    #     self.save_result_worker_thread=threading.Thread(target=self.save_result_worker)
+    #     self.save_result_worker_thread.start()
        
        
-    # @torch.enable_grad()
-    # @torch.inference_mode(False)
-    def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
-        print("test step start")
+    # # @torch.enable_grad()
+    # # @torch.inference_mode(False)
+    # def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
+    #     print("test step start")
         
-        # if not torch.is_grad_enabled():
-        #    print("Currently in inference mode (no gradients).")
-        # else:
-        #    print("Currently NOT in inference mode (gradients enabled).")
+    #     # if not torch.is_grad_enabled():
+    #     #    print("Currently in inference mode (no gradients).")
+    #     # else:
+    #     #    print("Currently NOT in inference mode (gradients enabled).")
            
-        images, target,text = batch
+    #     images, target,text = batch
        
-        images = images.clone().detach().requires_grad_(True)
+    #     images = images.clone().detach().requires_grad_(True)
 
-        if isinstance(text, list):
-            if isinstance(text[0], torch.Tensor):
-                text = torch.stack(text, dim=0)
-            else:
-                # Assume it's list of str
-                text = clip.tokenize(text).to(self.device)
-        if text.dim() == 2:
-            text = text.unsqueeze(1)
-        text = text.squeeze(1).clone().detach()
+    #     if isinstance(text, list):
+    #         if isinstance(text[0], torch.Tensor):
+    #             text = torch.stack(text, dim=0)
+    #         else:
+    #             # Assume it's list of str
+    #             text = clip.tokenize(text).to(self.device)
+    #     if text.dim() == 2:
+    #         text = text.unsqueeze(1)
+    #     text = text.squeeze(1).clone().detach()
 
-        # text=text.squeeze(1).clone().detach()
-        target=target.clone().detach()
-        # print(images.requires_grad)  
-        # self.model.train()
-        # with torch.inference_mode(False):
-        #    with torch.enable_grad(): 
-        img_embed=self.model.encode_image(images).detach()
-        scale_text_embed=self.make_labels(images,text).detach()
-        img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
-        scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
-        output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
+    #     # text=text.squeeze(1).clone().detach()
+    #     target=target.clone().detach()
+    #     # print(images.requires_grad)  
+    #     # self.model.train()
+    #     # with torch.inference_mode(False):
+    #     #    with torch.enable_grad(): 
+    #     img_embed=self.model.encode_image(images).detach()
+    #     scale_text_embed=self.make_labels(images,text).detach()
+    #     img_embed_norm = img_embed / img_embed.norm(dim=-1, keepdim=True)
+    #     scale_text_embed_norm = scale_text_embed / scale_text_embed.norm(dim=-1, keepdim=True)
+    #     output_prompt = img_embed_norm @ scale_text_embed_norm.t()        
 
-        self.test_cleanresults[dataloader_idx].put({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
+    #     self.test_cleanresults[dataloader_idx].put({"logits":img_embed.detach(), "textlabels":target}) #using target like this is fine because each dataloader is tested and logged independently.
        
 
-        loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device)).detach()
+    #     loss = self.criterion(output_prompt, torch.arange(images.size(0), device=self.device)).detach()
 
-        # measure accuracy and record loss
-        acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
-        # self.log('test_clean_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log('test_clean_batch_loss', loss, on_epoch=True, prog_bar=False, logger=True)
-        self.log('test_clean_batch_acc', acc1[0].item(), on_epoch=True, prog_bar=False, logger=True)
+    #     # measure accuracy and record loss
+    #     acc1 = accuracy(output_prompt, torch.arange(images.shape[0],device=images.device), topk=(1,))
+    #     # self.log('test_clean_batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+    #     # self.log('test_clean_batch_acc', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+    #     self.log('test_clean_batch_loss', loss, on_epoch=True, prog_bar=False, logger=True)
+    #     self.log('test_clean_batch_acc', acc1[0].item(), on_epoch=True, prog_bar=False, logger=True)
 
 
-        return_dict = self.testattack(images, target, text, self.test_alphas, self.test_numsteps, self.test_epsilons)
-        #this returns a dict of "steps" entris, each entry has a tensor of shape Alphas, Epsilons, B, 3, 224, 224
-        for Attack_step, result_data in return_dict.items():
+    #     return_dict = self.testattack(images, target, text, self.test_alphas, self.test_numsteps, self.test_epsilons)
+    #     #this returns a dict of "steps" entris, each entry has a tensor of shape Alphas, Epsilons, B, 3, 224, 224
+    #     for Attack_step, result_data in return_dict.items():
             
-            attacked_images, attacked_text = result_data
-            img_embed_dirty = self.model.encode_image(attacked_images.flatten(0,-4)).detach()
-            scale_text_embed_dirty = self.make_labels(attacked_images.flatten(0,-4),attacked_text.flatten(0,-2)).detach()
-            # scale_text_embed_dirty = self.model.encode_text(attacked_text.flatten(0,-2))
-            img_embed_norm_dirty = img_embed_dirty / img_embed_dirty.norm(dim=-1, keepdim=True)
-            scale_text_embed_norm_dirty = scale_text_embed_dirty / scale_text_embed_dirty.norm(dim=-1, keepdim=True)
-            output_prompt_adv = img_embed_norm_dirty @ scale_text_embed_norm_dirty.t()
-            #at this point we have an array thats [alpha x epsilon x B, B]
-            #we should reshape it to [alpha, epsilon, B, B]
-            output_prompt_adv = output_prompt_adv.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
-            img_embed_dirty = img_embed_dirty.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
+    #         attacked_images, attacked_text = result_data
+    #         img_embed_dirty = self.model.encode_image(attacked_images.flatten(0,-4)).detach()
+    #         scale_text_embed_dirty = self.make_labels(attacked_images.flatten(0,-4),attacked_text.flatten(0,-2)).detach()
+    #         # scale_text_embed_dirty = self.model.encode_text(attacked_text.flatten(0,-2))
+    #         img_embed_norm_dirty = img_embed_dirty / img_embed_dirty.norm(dim=-1, keepdim=True)
+    #         scale_text_embed_norm_dirty = scale_text_embed_dirty / scale_text_embed_dirty.norm(dim=-1, keepdim=True)
+    #         output_prompt_adv = img_embed_norm_dirty @ scale_text_embed_norm_dirty.t()
+    #         #at this point we have an array thats [alpha x epsilon x B, B]
+    #         #we should reshape it to [alpha, epsilon, B, B]
+    #         output_prompt_adv = output_prompt_adv.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
+    #         img_embed_dirty = img_embed_dirty.view(self.test_alphas.size(0),self.test_epsilons.size(0),images.size(0),-1)
               
-            loss = self.test_criterion(output_prompt_adv.permute(-2,-1,0,1), torch.arange(images.size(0),device=images.device).unsqueeze(-1).unsqueeze(-1).repeat(1,self.test_alphas.size(0),self.test_epsilons.size(0))) #shoudl be torch arange(images.size(0), device=self.device)
-            # print(loss.shape)
-            loss=loss.permute(1,2,0).view(self.test_epsilons.size(0),self.test_alphas.size(0),images.size(0))
-            for alpha in range(self.test_alphas.size(0)):
-                for epsilon in range(self.test_epsilons.size(0)):
+    #         loss = self.test_criterion(output_prompt_adv.permute(-2,-1,0,1), torch.arange(images.size(0),device=images.device).unsqueeze(-1).unsqueeze(-1).repeat(1,self.test_alphas.size(0),self.test_epsilons.size(0))) #shoudl be torch arange(images.size(0), device=self.device)
+    #         # print(loss.shape)
+    #         loss=loss.permute(1,2,0).view(self.test_epsilons.size(0),self.test_alphas.size(0),images.size(0))
+    #         for alpha in range(self.test_alphas.size(0)):
+    #             for epsilon in range(self.test_epsilons.size(0)):
                         
-                        self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_epoch=True, logger=True)
-                        #self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-                        acc1 = accuracy(output_prompt_adv[alpha,epsilon], torch.arange(images.size(0),device=images.device), topk=(1,))
-                        self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_epoch=True, logger=True)     
-                        #self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-                        self.test_attackedresults[dataloader_idx].put({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha].repeat(target.shape[0]), "epsilon": self.test_epsilons[epsilon].repeat(target.shape[0]), "step": torch.tensor(Attack_step).repeat(target.shape[0])})  
+    #                     self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_epoch=True, logger=True)
+    #                     #self.log(f'test_dirty_batch_loss_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', loss[epsilon,alpha].mean(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+    #                     acc1 = accuracy(output_prompt_adv[alpha,epsilon], torch.arange(images.size(0),device=images.device), topk=(1,))
+    #                     self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_epoch=True, logger=True)     
+    #                     #self.log(f'test_dirty_batch_acc_alpha_{self.test_alphas[alpha]}_epsilon_{self.test_epsilons[epsilon]}_numsteps_{Attack_step}', acc1[0].item(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+    #                     self.test_attackedresults[dataloader_idx].put({"logits": img_embed_dirty[alpha,epsilon], "textlabels": target, "alpha": self.test_alphas[alpha].repeat(target.shape[0]), "epsilon": self.test_epsilons[epsilon].repeat(target.shape[0]), "step": torch.tensor(Attack_step).repeat(target.shape[0])})  
                
-        return loss
+    #     return loss
                     
-    def on_test_end(self):
-        print("===== [on_test_end_v2] Start =====")
-        
-        logreg_params = {
-            'solver': 'lbfgs',
-            'max_iter': 1000,
-            'C': 0.316,
-            'random_state': 0,
-            'verbose': 1,
-            'n_jobs': -1
-        }
-
-        # init classifiers
-        if not hasattr(self, "Cleanclassifier"):
-            self.Cleanclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
-        if not hasattr(self, "Dirtyclassifier"):
-            self.Dirtyclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
-        if not hasattr(self, "generalclassifier"):
-            self.generalclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
-
-        path = self.args.get("output_dir", "./results")
-        os.makedirs(path, exist_ok=True)
-        filenames = os.listdir(path)
-        version = self.version
-
-        for DataLoader_idx in range(self.test_data_loader_count):
-            print(f"[Dataset {DataLoader_idx}] Start")
-
-            dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
-            
-            cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
-
-            clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
-            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
-
-            if len(clean_files) == 0 or len(dirty_files) == 0:
-                print(f"[Dataset {DataLoader_idx}] No clean/dirty files!")
-                continue
-
-            # Load clean features
-            GoodLabels, GoodLogits = [], []
-            for file in clean_files:
-                if not os.path.exists(os.path.join(path,file)):
-                    print("File {} does not exist".format(file))
-                    continue
-                with open(os.path.join(path, file), 'rb') as f:
-                    data = np.load(f, allow_pickle=True)
-                    GoodLabels.append(data["labels"])
-                    GoodLogits.append(data["logits"])
-
-            GoodLabels = np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
-            GoodLogits = np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
-
-            print(f"[Dataset {DataLoader_idx}] Clean samples = {GoodLabels.shape[0]}")
-            # skip if not enough classes
-            if len(np.unique(GoodLabels)) < 2:
-                print(f"[Dataset {DataLoader_idx}] Only 1 class in clean, skip.")
-                continue
-
-            self.Cleanclassifier.fit(GoodLogits, GoodLabels)
-            cleanscore = self.Cleanclassifier.score(GoodLogits, GoodLabels)
-
-            # Save clean classifier
-            np.savez(os.path.join(path, f"CleanClassifierWeights{version}_{DataLoader_idx}.npz"),
-                    weights=self.Cleanclassifier.named_steps['logisticregression'].coef_,
-                    bias=self.Cleanclassifier.named_steps['logisticregression'].intercept_)
-
-            # build dirty dict by key (alpha, eps, step)
-            alpha_eps_step_dict = defaultdict(list)
-            for file in dirty_files:
-                with open(os.path.join(path, file), 'rb') as f:
-                    data = np.load(f, allow_pickle=True)
-                    keys = np.stack([data["alphas"], data["epsilons"], data["numsteps"]], axis=1)
-                    unique_keys = np.unique(keys, axis=0)
-                    for key in unique_keys:
-                        alpha_eps_step_dict[tuple(key)].append(file)
-
-            # process each key group
-            for key, files in alpha_eps_step_dict.items():
-                a, e, s = key
-                BadLabels, BadLogits = [], []
-
-                for file in files:
-                    with open(os.path.join(path, file), 'rb') as f:
-                        data = np.load(f, allow_pickle=True)
-                        mask = (data["alphas"] == a) & (data["epsilons"] == e) & (data["numsteps"] == s)
-                        BadLabels.append(data["labels"][mask])
-                        BadLogits.append(data["logits"][mask])
-
-                BadLabels = np.concatenate(BadLabels) if len(BadLabels) > 1 else BadLabels[0]
-                BadLogits = np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
-
-                print(f"[Dataset {DataLoader_idx}] alpha={a}, eps={e}, step={s}, dirty samples={BadLabels.shape[0]}")
-
-                # skip if not enough classes
-                if len(np.unique(BadLabels)) < 2:
-                    print(f"[Dataset {DataLoader_idx}] Only 1 class in dirty, skip.")
-                    continue
-
-                self.Dirtyclassifier.fit(BadLogits, BadLabels)
-                self.generalclassifier.fit(np.concatenate([GoodLogits, BadLogits]), np.concatenate([GoodLabels, BadLabels]))
-
-                # Save classifiers
-                np.savez(os.path.join(path,"DirtyClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.Dirtyclassifier.coef_,bias=self.Dirtyclassifier.intercept_)
-                np.savez(os.path.join(path,"GeneralClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.generalclassifier.coef_,bias=self.generalclassifier.intercept_)
-                
-                self.logger.experiment.log({ "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Cleanclassifier.score(BadLogits, BadLabels)})
-                self.logger.experiment.log({ "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(GoodLogits, GoodLabels)})
-                self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore})
-                self.logger.experiment.log({ "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(BadLogits, BadLabels)})
-                self.logger.experiment.log({ "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(BadLogits, BadLabels)})
-                self.logger.experiment.log({ "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(GoodLogits, GoodLabels)})
-                self.logger.experiment.log({ "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))})
-
-            # delete files after finish
-            for file in clean_files + dirty_files:
-                os.remove(os.path.join(path, file))
-                print(f"[Dataset {DataLoader_idx}] Deleted {file}")
-
-        print("===== [on_test_end_v2] Done =====")
-
-    
     # def on_test_end(self):
+    #     print("===== [on_test_end_v2] Start =====")
         
-    #     # time.sleep(270)
-    #     # print("Test epoch end called")
-    #     # self.test_epoch_end_called=True
     #     logreg_params = {
-    #         'solver': 'saga',          # saga 对高维 + 大数据很快
-    #         'max_iter': 1000,          # 提高迭代次数
-    #         'C': 0.316,                # 你原本用的 C
+    #         'solver': 'lbfgs',
+    #         'max_iter': 1000,
+    #         'C': 0.316,
     #         'random_state': 0,
-    #         'verbose': 1,              # 训练时看进度
+    #         'verbose': 1,
     #         'n_jobs': -1
     #     }
 
-    #     #We need to modify the following code to sort by alpha, epsilon, step and then run the linear probes.
-    #     #make a new dict with id as key as compound key of alpha, epsilon, step and then logits:labels as value
-    #     # print("Test epoch end called")
-    #     # self.test_epoch_end_called=True
-    #     # if hasattr(self,"save_result_worker_thread"):
-    #     #     self.save_result_worker_thread.join()
-
-    #     # if not hasattr(self,"Cleanclassifier"):
-    #     #     self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-
-    #     # if not hasattr(self,"Dirtyclassifier"):
-    #     #     self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-    #     # if not hasattr(self,"generalclassifier"):
-    #     #     self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-       
+    #     # init classifiers
     #     if not hasattr(self, "Cleanclassifier"):
-    #         self.Cleanclassifier = make_pipeline(
-    #             StandardScaler(),
-    #             LogisticRegression(**logreg_params)
-    #         )
-
+    #         self.Cleanclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
     #     if not hasattr(self, "Dirtyclassifier"):
-    #         self.Dirtyclassifier = make_pipeline(
-    #             StandardScaler(),
-    #             LogisticRegression(**logreg_params)
-    #         )
-
+    #         self.Dirtyclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
     #     if not hasattr(self, "generalclassifier"):
-    #         self.generalclassifier = make_pipeline(
-    #             StandardScaler(),
-    #             LogisticRegression(**logreg_params)
-    #         )
-       
-    #     path=self.args.get("output_dir","./results")
-    #     filenames=os.listdir(path)
-    #     version=self.version
-    #     print("test 1")
-    #         #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
-    #         #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+    #         self.generalclassifier = make_pipeline(StandardScaler(), LogisticRegression(**logreg_params))
+
+    #     path = self.args.get("output_dir", "./results")
+    #     os.makedirs(path, exist_ok=True)
+    #     filenames = os.listdir(path)
+    #     version = self.version
 
     #     for DataLoader_idx in range(self.test_data_loader_count):
-    #         print("test 2")
-    #         print(self.test_data_loader_count)
+    #         print(f"[Dataset {DataLoader_idx}] Start")
+
     #         dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
             
     #         cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
-            
-    #         #split each name by _ and get the dataset index
-    #         clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
-    #         print("Clean files: ",clean_files)
-    #         dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
-    #     #                dirty_files=list(filter(lambda x: str(dataset_idx)+"_pt" in x,list(dirtyfilenames)))
-    #         if len(clean_files) == 0 or len(dirty_files) == 0:
-    #             print("No results for dataset {}".format(DataLoader_idx))
-    #             print("Clean files: ",clean_files)
-    #             print("Dirty files: ",dirty_files)
-    #             print("Clean files: ",list(cleanfilenames))
 
+    #         clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
+    #         dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
+
+    #         if len(clean_files) == 0 or len(dirty_files) == 0:
+    #             print(f"[Dataset {DataLoader_idx}] No clean/dirty files!")
     #             continue
-    #         print("1023")
-            
-    #         GoodLabels=[]
-    #         GoodLogits=[]
-    #         for file in clean_files:#
-             
+
+    #         # Load clean features
+    #         GoodLabels, GoodLogits = [], []
+    #         for file in clean_files:
     #             if not os.path.exists(os.path.join(path,file)):
     #                 print("File {} does not exist".format(file))
     #                 continue
-
-    #             with open(os.path.join(path,file), 'rb') as f:
+    #             with open(os.path.join(path, file), 'rb') as f:
     #                 data = np.load(f, allow_pickle=True)
     #                 GoodLabels.append(data["labels"])
     #                 GoodLogits.append(data["logits"])
-    #             #delete the file
 
-    #         GoodLabels=np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
-    #         GoodLogits=np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
+    #         GoodLabels = np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
+    #         GoodLogits = np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
+
+    #         print(f"[Dataset {DataLoader_idx}] Clean samples = {GoodLabels.shape[0]}")
+    #         # skip if not enough classes
+    #         if len(np.unique(GoodLabels)) < 2:
+    #             print(f"[Dataset {DataLoader_idx}] Only 1 class in clean, skip.")
+    #             continue
+
     #         self.Cleanclassifier.fit(GoodLogits, GoodLabels)
-    #         #Log classifier weights and bias
-    #         # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
-    #         # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
-            
-    #         # log_data = {
-    #         #     "Clean Classifier Weights Dataset {}".format(DataLoader_idx): self.Cleanclassifier.coef_.tolist()
-    #         # }
-    #         # self.logger.experiment.log(log_data)
-            
-    #         # self.logger.experiment.log({"Clean Classifier Weights Dataset {}".format(DataLoader_idx):self.Cleanclassifier.coef_.tolist()})
-    #         # self.logger.experiment.log({"Clean Classifier Bias Dataset {}".format(DataLoader_idx):self.Cleanclassifier.intercept_.tolist()})
-    #         np.savez(os.path.join(path,"CleanClassifierWeights{}_{}.npz".format(self.version,DataLoader_idx)),weights=self.Cleanclassifier.coef_,bias=self.Cleanclassifier.intercept_)
-    #         cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
-    #         BadLabels=[]
-    #         BadLogits=[]
-    #         alpha_eps_step_dict = defaultdict(list)
-    #         for file in list(dirty_files):
-    #             if not os.path.exists(os.path.join(path,file)):
-    #                 print("File {} does not exist".format(file))
-    #                 continue
-                
-    #             with open(os.path.join(path,file), 'rb') as f:
-    #                 data = np.load(f, allow_pickle=True)
-    #                 alphas=data["alphas"]
-    #                 epsilons=data["epsilons"]
-    #                 steps=data["numsteps"]
-    #                 #stack the data
-    #                 keys=np.stack([alphas,epsilons,steps],axis=1)
-    #                 #shape is B,3
-                    
-    #                 unique_keys=np.unique(keys,axis=0)
-    #                 for key in unique_keys:
-    #                     key=tuple(key)
-    #                     if file not in alpha_eps_step_dict[key]:
-    #                         alpha_eps_step_dict[key].append(file)
-    #                     #we do this so we can run one test at a time and not store all the data in memory
-    #             #delete the file
+    #         cleanscore = self.Cleanclassifier.score(GoodLogits, GoodLabels)
 
-    #         for key, val in alpha_eps_step_dict.items():
-    #             BadLabels=[]
-    #             BadLogits=[]
-    #             a,e,s=key
-    #             for file in val:
-    #                 with open(os.path.join(path,file), 'rb') as f:
+    #         # Save clean classifier
+    #         np.savez(os.path.join(path, f"CleanClassifierWeights{version}_{DataLoader_idx}.npz"),
+    #                 weights=self.Cleanclassifier.named_steps['logisticregression'].coef_,
+    #                 bias=self.Cleanclassifier.named_steps['logisticregression'].intercept_)
+
+    #         # build dirty dict by key (alpha, eps, step)
+    #         alpha_eps_step_dict = defaultdict(list)
+    #         for file in dirty_files:
+    #             with open(os.path.join(path, file), 'rb') as f:
+    #                 data = np.load(f, allow_pickle=True)
+    #                 keys = np.stack([data["alphas"], data["epsilons"], data["numsteps"]], axis=1)
+    #                 unique_keys = np.unique(keys, axis=0)
+    #                 for key in unique_keys:
+    #                     alpha_eps_step_dict[tuple(key)].append(file)
+
+    #         # process each key group
+    #         for key, files in alpha_eps_step_dict.items():
+    #             a, e, s = key
+    #             BadLabels, BadLogits = [], []
+
+    #             for file in files:
+    #                 with open(os.path.join(path, file), 'rb') as f:
     #                     data = np.load(f, allow_pickle=True)
-    #                     logits,labels=data["logits"],data["labels"]
-    #                     alphas= data["alphas"]
-    #                     epsilons= data["epsilons"]
-    #                     steps= data["numsteps"]                       
-    #                     mask= (alphas==a) & (epsilons==e) & (steps==s)
-    #                     BadLabels.append(labels[mask])
-    #                     BadLogits.append(logits[mask])
-                        
-    #             BadLabels=np.concatenate(BadLabels) if len(BadLabels) > 1 else BadLabels[0]
-    #             BadLogits=np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
+    #                     mask = (data["alphas"] == a) & (data["epsilons"] == e) & (data["numsteps"] == s)
+    #                     BadLabels.append(data["labels"][mask])
+    #                     BadLogits.append(data["logits"][mask])
+
+    #             BadLabels = np.concatenate(BadLabels) if len(BadLabels) > 1 else BadLabels[0]
+    #             BadLogits = np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
+
+    #             print(f"[Dataset {DataLoader_idx}] alpha={a}, eps={e}, step={s}, dirty samples={BadLabels.shape[0]}")
+
+    #             # skip if not enough classes
+    #             if len(np.unique(BadLabels)) < 2:
+    #                 print(f"[Dataset {DataLoader_idx}] Only 1 class in dirty, skip.")
+    #                 continue
+
     #             self.Dirtyclassifier.fit(BadLogits, BadLabels)
-    #             #Log classifier weights and bias
-    #             # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
-    #             # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
-              
-    #             # self.logger.experiment.log({"Dirty Classifier Weights Dataset {}".format(DataLoader_idx):self.Dirtyclassifier.coef_.tolist()})
-    #             # self.logger.experiment.log({"Dirty Classifier Bias Dataset {}".format(DataLoader_idx): self.Dirtyclassifier.intercept_.tolist()})
-    #             self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
-             
-    #             # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
-    #             # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
+    #             self.generalclassifier.fit(np.concatenate([GoodLogits, BadLogits]), np.concatenate([GoodLabels, BadLabels]))
+
+    #             # Save classifiers
     #             np.savez(os.path.join(path,"DirtyClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.Dirtyclassifier.coef_,bias=self.Dirtyclassifier.intercept_)
     #             np.savez(os.path.join(path,"GeneralClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.generalclassifier.coef_,bias=self.generalclassifier.intercept_)
                 
@@ -1186,13 +1009,190 @@ class myLightningModule(LightningModule):
     #             self.logger.experiment.log({ "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(GoodLogits, GoodLabels)})
     #             self.logger.experiment.log({ "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))})
 
-    #         #delete the files
-    #         for file in list(dirty_files):
-    #             print("Deleting file: ",os.path.join(path,file))
-    #             os.remove(os.path.join(path,file))
-    #         for file in list(clean_files):
-    #             print("Deleting file: ",os.path.join(path,file))
-    #             os.remove(os.path.join(path,file))    
+    #         # delete files after finish
+    #         for file in clean_files + dirty_files:
+    #             os.remove(os.path.join(path, file))
+    #             print(f"[Dataset {DataLoader_idx}] Deleted {file}")
+
+    #     print("===== [on_test_end_v2] Done =====")
+
+    
+    def on_test_end(self):
+        
+        # time.sleep(270)
+        # print("Test epoch end called")
+        # self.test_epoch_end_called=True
+        logreg_params = {
+            'solver': 'lbfgs',        
+            'max_iter': 1000,          
+            'C': 0.316,                
+            'random_state': 0,
+            'verbose': 1,              
+            'n_jobs': -1
+        }
+
+        #We need to modify the following code to sort by alpha, epsilon, step and then run the linear probes.
+        #make a new dict with id as key as compound key of alpha, epsilon, step and then logits:labels as value
+        # print("Test epoch end called")
+        # self.test_epoch_end_called=True
+        # if hasattr(self,"save_result_worker_thread"):
+        #     self.save_result_worker_thread.join()
+
+        # if not hasattr(self,"Cleanclassifier"):
+        #     self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+
+        # if not hasattr(self,"Dirtyclassifier"):
+        #     self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        # if not hasattr(self,"generalclassifier"):
+        #     self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+       
+        if not hasattr(self, "Cleanclassifier"):
+            self.Cleanclassifier = make_pipeline(
+                StandardScaler(),
+                LogisticRegression(**logreg_params)
+            )
+
+        if not hasattr(self, "Dirtyclassifier"):
+            self.Dirtyclassifier = make_pipeline(
+                StandardScaler(),
+                LogisticRegression(**logreg_params)
+            )
+
+        if not hasattr(self, "generalclassifier"):
+            self.generalclassifier = make_pipeline(
+                StandardScaler(),
+                LogisticRegression(**logreg_params)
+            )
+       
+        path=self.args.get("output_dir","./results")
+        filenames=os.listdir(path)
+        version=self.version
+        print("test 1")
+            #dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
+            #cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+
+        for DataLoader_idx in range(self.test_data_loader_count):
+            print("test 2")
+            print(self.test_data_loader_count)
+            dirtyfilenames=filter(lambda x: x.startswith("dirtyresults_{}".format(version)),filenames)
+            
+            cleanfilenames=filter(lambda x: x.startswith("cleanresults_{}".format(version)),filenames)
+            
+            #split each name by _ and get the dataset index
+            clean_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,cleanfilenames))
+            print("Clean files: ",clean_files)
+            dirty_files=list(filter(lambda x: int(list(x.split("_"))[-2]) == DataLoader_idx,dirtyfilenames))
+        #                dirty_files=list(filter(lambda x: str(dataset_idx)+"_pt" in x,list(dirtyfilenames)))
+            if len(clean_files) == 0 or len(dirty_files) == 0:
+                print("No results for dataset {}".format(DataLoader_idx))
+                print("Clean files: ",clean_files)
+                print("Dirty files: ",dirty_files)
+                print("Clean files: ",list(cleanfilenames))
+
+                continue
+            print("1023")
+            
+            GoodLabels=[]
+            GoodLogits=[]
+            for file in clean_files:#
+             
+                if not os.path.exists(os.path.join(path,file)):
+                    print("File {} does not exist".format(file))
+                    continue
+
+                with open(os.path.join(path,file), 'rb') as f:
+                    data = np.load(f, allow_pickle=True)
+                    GoodLabels.append(data["labels"])
+                    GoodLogits.append(data["logits"])
+                #delete the file
+
+            GoodLabels=np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
+            GoodLogits=np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
+            self.Cleanclassifier.fit(GoodLogits, GoodLabels)
+            #Log classifier weights and bias
+            # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
+            # self.log("Clean Classifier Bias Dataset {}".format(DataLoader_idx),self.Cleanclassifier.intercept_)
+            
+            # log_data = {
+            #     "Clean Classifier Weights Dataset {}".format(DataLoader_idx): self.Cleanclassifier.coef_.tolist()
+            # }
+            # self.logger.experiment.log(log_data)
+            
+            # self.logger.experiment.log({"Clean Classifier Weights Dataset {}".format(DataLoader_idx):self.Cleanclassifier.coef_.tolist()})
+            # self.logger.experiment.log({"Clean Classifier Bias Dataset {}".format(DataLoader_idx):self.Cleanclassifier.intercept_.tolist()})
+            np.savez(os.path.join(path,"CleanClassifierWeights{}_{}.npz".format(self.version,DataLoader_idx)),weights=self.Cleanclassifier.coef_,bias=self.Cleanclassifier.intercept_)
+            cleanscore=self.Cleanclassifier.score(GoodLogits, GoodLabels)
+            BadLabels=[]
+            BadLogits=[]
+            alpha_eps_step_dict = defaultdict(list)
+            for file in list(dirty_files):
+                if not os.path.exists(os.path.join(path,file)):
+                    print("File {} does not exist".format(file))
+                    continue
+                
+                with open(os.path.join(path,file), 'rb') as f:
+                    data = np.load(f, allow_pickle=True)
+                    alphas=data["alphas"]
+                    epsilons=data["epsilons"]
+                    steps=data["numsteps"]
+                    #stack the data
+                    keys=np.stack([alphas,epsilons,steps],axis=1)
+                    #shape is B,3
+                    
+                    unique_keys=np.unique(keys,axis=0)
+                    for key in unique_keys:
+                        key=tuple(key)
+                        if file not in alpha_eps_step_dict[key]:
+                            alpha_eps_step_dict[key].append(file)
+                        #we do this so we can run one test at a time and not store all the data in memory
+                #delete the file
+
+            for key, val in alpha_eps_step_dict.items():
+                BadLabels=[]
+                BadLogits=[]
+                a,e,s=key
+                for file in val:
+                    with open(os.path.join(path,file), 'rb') as f:
+                        data = np.load(f, allow_pickle=True)
+                        logits,labels=data["logits"],data["labels"]
+                        alphas= data["alphas"]
+                        epsilons= data["epsilons"]
+                        steps= data["numsteps"]                       
+                        mask= (alphas==a) & (epsilons==e) & (steps==s)
+                        BadLabels.append(labels[mask])
+                        BadLogits.append(logits[mask])
+                        
+                BadLabels=np.concatenate(BadLabels) if len(BadLabels) > 1 else BadLabels[0]
+                BadLogits=np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
+                self.Dirtyclassifier.fit(BadLogits, BadLabels)
+                #Log classifier weights and bias
+                # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
+                # self.log("Dirty Classifier Bias Dataset {}".format(DataLoader_idx), self.Dirtyclassifier.intercept_)
+              
+                # self.logger.experiment.log({"Dirty Classifier Weights Dataset {}".format(DataLoader_idx):self.Dirtyclassifier.coef_.tolist()})
+                # self.logger.experiment.log({"Dirty Classifier Bias Dataset {}".format(DataLoader_idx): self.Dirtyclassifier.intercept_.tolist()})
+                self.generalclassifier.fit(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))
+             
+                # self.log("General Classifier Weights Dataset {}".format(DataLoader_idx),self.generalclassifier.coef_)
+                # self.log("General Classifier Bias Dataset {}".format(DataLoader_idx), self.generalclassifier.intercept_)
+                np.savez(os.path.join(path,"DirtyClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.Dirtyclassifier.coef_,bias=self.Dirtyclassifier.intercept_)
+                np.savez(os.path.join(path,"GeneralClassifierWeights{}_{}_{}_{}_{}.npz".format(self.version,DataLoader_idx,a,e,s)),weights=self.generalclassifier.coef_,bias=self.generalclassifier.intercept_)
+                
+                self.logger.experiment.log({ "Test Clean Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Cleanclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test Dirty Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(GoodLogits, GoodLabels)})
+                self.logger.experiment.log({ "Test Clean Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):cleanscore})
+                self.logger.experiment.log({ "Test Dirty Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.Dirtyclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test General Classifier on Dirty Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(BadLogits, BadLabels)})
+                self.logger.experiment.log({ "Test General Classifier on Clean Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(GoodLogits, GoodLabels)})
+                self.logger.experiment.log({ "Test General Classifier on All Features on dataset {} alpha {} epsilon {} step {}".format(DataLoader_idx,key[0],key[1],key[2]):self.generalclassifier.score(np.concatenate([GoodLogits,BadLogits]), np.concatenate([GoodLabels,BadLabels]))})
+
+            #delete the files
+            for file in list(dirty_files):
+                print("Deleting file: ",os.path.join(path,file))
+                os.remove(os.path.join(path,file))
+            for file in list(clean_files):
+                print("Deleting file: ",os.path.join(path,file))
+                os.remove(os.path.join(path,file))    
 
 
     #     # del self.test_cleanresults
