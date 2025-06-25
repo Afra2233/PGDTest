@@ -194,12 +194,12 @@ class MyDataModule(pl.LightningDataModule):
         self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet'] 
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet']
                                  
-        # self.test_dataset_names = ['tinyImageNet']                     
+        self.test_dataset_names = ['tinyImageNet']                     
        
-        self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
-                               'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
-                                'Caltech256', 'PCAM''ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
-        # ,'Caltech101'，ImageNet
+        # self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
+        #                        'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
+        #                         'Caltech256', 'PCAM''ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
+        # # ,'Caltech101'，ImageNet
 
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
