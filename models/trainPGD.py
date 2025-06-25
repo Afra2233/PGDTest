@@ -827,10 +827,15 @@ class myLightningModule(LightningModule):
         images = images.clone().detach().requires_grad_(True)
 
         if isinstance(text, list):
-            text = torch.stack(text, dim=0)
+            if isinstance(text[0], torch.Tensor):
+                text = torch.stack(text, dim=0)
+            else:
+                # Assume it's list of str
+                text = clip.tokenize(text).to(self.device)
         if text.dim() == 2:
             text = text.unsqueeze(1)
         text = text.squeeze(1).clone().detach()
+
         # text=text.squeeze(1).clone().detach()
         target=target.clone().detach()
         # print(images.requires_grad)  
