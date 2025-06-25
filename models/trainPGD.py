@@ -899,7 +899,7 @@ class myLightningModule(LightningModule):
         print("===== [on_test_end_v2] Start =====")
         
         logreg_params = {
-            'solver': 'saga',
+            'solver': 'lbfgs',
             'max_iter': 1000,
             'C': 0.316,
             'random_state': 0,
