@@ -913,36 +913,36 @@ class myLightningModule(LightningModule):
 
         #We need to modify the following code to sort by alpha, epsilon, step and then run the linear probes.
         #make a new dict with id as key as compound key of alpha, epsilon, step and then logits:labels as value
-        # print("Test epoch end called")
-        # self.test_epoch_end_called=True
-        # if hasattr(self,"save_result_worker_thread"):
-        #     self.save_result_worker_thread.join()
+        print("Test epoch end called")
+        self.test_epoch_end_called=True
+        if hasattr(self,"save_result_worker_thread"):
+            self.save_result_worker_thread.join()
 
-        # if not hasattr(self,"Cleanclassifier"):
-        #     self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        if not hasattr(self,"Cleanclassifier"):
+            self.Cleanclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
 
-        # if not hasattr(self,"Dirtyclassifier"):
-        #     self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
-        # if not hasattr(self,"generalclassifier"):
-        #     self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        if not hasattr(self,"Dirtyclassifier"):
+            self.Dirtyclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
+        if not hasattr(self,"generalclassifier"):
+            self.generalclassifier = LogisticRegression(random_state=0, C=0.316, max_iter=100, verbose=0, n_jobs=-1)
        
-        if not hasattr(self, "Cleanclassifier"):
-            self.Cleanclassifier = make_pipeline(
-                StandardScaler(),
-                LogisticRegression(**logreg_params)
-            )
+        # if not hasattr(self, "Cleanclassifier"):
+        #     self.Cleanclassifier = make_pipeline(
+        #         StandardScaler(),
+        #         LogisticRegression(**logreg_params)
+        #     )
 
-        if not hasattr(self, "Dirtyclassifier"):
-            self.Dirtyclassifier = make_pipeline(
-                StandardScaler(),
-                LogisticRegression(**logreg_params)
-            )
+        # if not hasattr(self, "Dirtyclassifier"):
+        #     self.Dirtyclassifier = make_pipeline(
+        #         StandardScaler(),
+        #         LogisticRegression(**logreg_params)
+        #     )
 
-        if not hasattr(self, "generalclassifier"):
-            self.generalclassifier = make_pipeline(
-                StandardScaler(),
-                LogisticRegression(**logreg_params)
-            )
+        # if not hasattr(self, "generalclassifier"):
+        #     self.generalclassifier = make_pipeline(
+        #         StandardScaler(),
+        #         LogisticRegression(**logreg_params)
+        #     )
        
         path=self.args.get("output_dir","./results")
         filenames=os.listdir(path)
