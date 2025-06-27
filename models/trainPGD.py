@@ -904,11 +904,11 @@ class myLightningModule(LightningModule):
         # self.test_epoch_end_called=True
         logreg_params = {
             'solver': 'lbfgs',          # saga 对高维 + 大数据很快
-            'max_iter': 1000,          # 提高迭代次数
+            'max_iter': 5000,          # 提高迭代次数
             'C': 0.316,                # 你原本用的 C
             'random_state': 0,
             'verbose': 1,              # 训练时看进度
-            'n_jobs': -1
+            'n_jobs': 1
         }
 
         #We need to modify the following code to sort by alpha, epsilon, step and then run the linear probes.
