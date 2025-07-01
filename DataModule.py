@@ -641,12 +641,12 @@ class MyDataModule(pl.LightningDataModule):
                    
             #         download=True)})
 
-            if 'PCAM' in self.test_dataset_names:
-                test_dataset_dict.update({'PCAM': pcam.PCAM(
-                    root=self.imagenet_root, 
-                    split='test', 
-                    transform=self.preprocess, 
-                    download=True)})
+            # if 'PCAM' in self.test_dataset_names:
+            #     test_dataset_dict.update({'PCAM': pcam.PCAM(
+            #         root=self.imagenet_root, 
+            #         split='test', 
+            #         transform=self.preprocess, 
+            #         download=True)})
 
             if 'Caltech211' in self.test_dataset_names:
                 test_dataset_dict.update({'Caltech211': country211.Country211(
