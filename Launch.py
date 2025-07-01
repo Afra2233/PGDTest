@@ -67,6 +67,9 @@ def train(config={
             
             model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
             # Dataset.setup(stage='test')
+            print("测试集名字：", Dataset.test_dataset_names)
+            model.test_dataset_names = Dataset.test_dataset_names
+
             
             trainer.test(model,Dataset)
 

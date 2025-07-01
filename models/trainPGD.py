@@ -818,7 +818,10 @@ class myLightningModule(LightningModule):
     # @torch.enable_grad()
     # @torch.inference_mode(False)
     def test_step(self, batch, batch_idx,  dataloader_idx=0, *args, **kwargs):
-        print("test step start")
+        
+        self.print(f"[DEBUG] Running test on dataloader {dataloader_idx}")
+        dataset_name = self.test_dataset_names[dataloader_idx]
+        print(f"testing ：{dataset_name}")
         
         # if not torch.is_grad_enabled():
         #    print("Currently in inference mode (no gradients).")
