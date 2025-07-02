@@ -194,7 +194,7 @@ class MyDataModule(pl.LightningDataModule):
         self.val_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet'] 
         self.train_dataset_names = val_dataset_names if val_dataset_names is not None else ['tinyImageNet']
                                  
-        self.test_dataset_names = ['flowers102', 'dtd', 'fgvc_aircraft','oxfordpet', 'EuroSAT','Caltech211']                     
+        self.test_dataset_names = ['flowers102', 'dtd', 'fgvc_aircraft','Caltech211']                     
        
         # self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
         #                        'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
