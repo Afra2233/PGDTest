@@ -968,6 +968,9 @@ class myLightningModule(LightningModule):
 
             GoodLabels=np.concatenate(GoodLabels) if len(GoodLabels) > 1 else GoodLabels[0]
             GoodLogits=np.concatenate(GoodLogits) if len(GoodLogits) > 1 else GoodLogits[0]
+            if len(np.unique(GoodLabels)) < 2:
+                print(f"Skipping Cleanclassifier fit for dataset {DataLoader_idx} due to only one class in labels: {np.unique(GoodLabels)}")
+                continue
             self.Cleanclassifier.fit(GoodLogits, GoodLabels)
             #Log classifier weights and bias
             # self.log("Clean Classifier Weights Dataset {}".format(DataLoader_idx),self.Cleanclassifier.coef_)
@@ -1024,6 +1027,9 @@ class myLightningModule(LightningModule):
                         
                 BadLabels=np.concatenate(BadLabels) if len(BadLabels) > 1 else BadLabels[0]
                 BadLogits=np.concatenate(BadLogits) if len(BadLogits) > 1 else BadLogits[0]
+                if len(np.unique(BadLabels)) < 2:
+                    print(f"Skipping Dirtyclassifier fit for dataset {DataLoader_idx}, key {key} due to only one class in labels: {np.unique(BadLabels)}")
+                    continue
                 self.Dirtyclassifier.fit(BadLogits, BadLabels)
                 #Log classifier weights and bias
                 # self.log("Dirty Classifier Weights Dataset {}".format(DataLoader_idx),self.Dirtyclassifier.coef_)
