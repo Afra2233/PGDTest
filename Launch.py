@@ -63,15 +63,15 @@ def train(config={
     
 
             trainer.fit(model,Dataset)
-    else:
+    # else:
             
-            model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
-            # Dataset.setup(stage='test')
-            print("测试集名字：", Dataset.test_dataset_names)
-            model.test_dataset_names = Dataset.test_dataset_names
+    #         model=myLightningModule.load_from_checkpoint(os.path.join(modelSavedir,filename+".ckpt"))
+    #         # Dataset.setup(stage='test')
+    #         print("测试集名字：", Dataset.test_dataset_names)
+    #         model.test_dataset_names = Dataset.test_dataset_names
 
             
-            trainer.test(model,Dataset)
+    #         trainer.test(model,Dataset)
 
     # trainer.fit(model,Dataset)
     # trainer.test(model,Dataset)
