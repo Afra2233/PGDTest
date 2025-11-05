@@ -198,8 +198,8 @@ class MyDataModule(pl.LightningDataModule):
        
         self.test_dataset_names = ['cifar10', 'cifar100', 'STL10', 'Food101',
                                'flowers102', 'dtd', 'fgvc_aircraft','tinyImageNet',# 'ImageNet','SUN397'
-                                'Caltech256', 'PCAM','ImageNet','SUN397','oxfordpet', 'EuroSAT','Caltech211']
-        # # ,'Caltech101'，ImageNet
+                                'Caltech256', 'PCAM','ImageNet','oxfordpet', 'EuroSAT','Caltech211']
+        # # ,'Caltech101'，ImageNet,SUN397
 
         self.batch_size = batch_size
         self.test_batch_size = test_batch_size if test_batch_size>0 else batch_size
