@@ -57,7 +57,9 @@ def train(config={
             callbacks=callbacks,
             gradient_clip_val=0.25,# Not supported for manual optimization
             precision=p,
-            fast_dev_run=config.get("debug",False),
+            fast_dev_run=config.get("debug",True),
+
+            
     )
     # if not os.path.exists(os.path.join(modelSavedir,filename+".ckpt")):
     
